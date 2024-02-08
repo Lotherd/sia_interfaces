@@ -1,0 +1,241 @@
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://singaporeair.com/mro/TRAX" targetNamespace="http://singaporeair.com/mro/TRAX">
+   <xsd:element name="MT_TRAX_I37_I38_ACK_4069" type="DT_TRAX_I37_I38_ACK_4069" />
+   <xsd:complexType name="DT_TRAX_I37_I38_ACK_4069">
+      <xsd:sequence>
+         <xsd:element name="Orders">
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="OrderNumber" minOccurs="0">
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="12" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="RFONumber" minOccurs="0">
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="12" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="TRAXWO" minOccurs="0">
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="8" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="TRAXNonRoutineNumber" minOccurs="0">
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="35" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="OrderHeader" minOccurs="0" maxOccurs="unbounded">
+                     <xsd:complexType>
+                        <xsd:sequence>
+                           <xsd:element name="OrderNumber" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="12" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="MaterialNumber" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="40" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="SerialNumber" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="18" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="FunctionaLocation" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="30" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="OrderType" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="4" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="WorkCenter" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="8" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="WorkCenterPlant" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="4" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="Operation" minOccurs="0" maxOccurs="unbounded">
+                              <xsd:complexType>
+                                 <xsd:sequence>
+                                    <xsd:element name="Operation_ActivityNumber" minOccurs="0">
+                                       <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                             <xsd:maxLength value="4" />
+                                          </xsd:restriction>
+                                       </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="WorkCenter" minOccurs="0">
+                                       <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                             <xsd:maxLength value="8" />
+                                          </xsd:restriction>
+                                       </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="Plant" minOccurs="0">
+                                       <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                             <xsd:maxLength value="4" />
+                                          </xsd:restriction>
+                                       </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="ControlKey" minOccurs="0">
+                                       <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                             <xsd:maxLength value="4" />
+                                          </xsd:restriction>
+                                       </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="OperationShortText" minOccurs="0">
+                                       <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                             <xsd:maxLength value="40" />
+                                          </xsd:restriction>
+                                       </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="WorkInvolvedInTheActivity" minOccurs="0">
+                                       <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                             <xsd:maxLength value="9" />
+                                          </xsd:restriction>
+                                       </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="UnitForWork" minOccurs="0">
+                                       <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                             <xsd:maxLength value="3" />
+                                          </xsd:restriction>
+                                       </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="Component" minOccurs="0" maxOccurs="unbounded">
+                                       <xsd:complexType>
+                                          <xsd:sequence>
+                                             <xsd:element name="MaterialNumber">
+                                                <xsd:simpleType>
+                                                   <xsd:restriction base="xsd:string">
+                                                      <xsd:maxLength value="40" />
+                                                   </xsd:restriction>
+                                                </xsd:simpleType>
+                                             </xsd:element>
+                                             <xsd:element name="StorageLocation" minOccurs="0">
+                                                <xsd:simpleType>
+                                                   <xsd:restriction base="xsd:string">
+                                                      <xsd:maxLength value="4" />
+                                                   </xsd:restriction>
+                                                </xsd:simpleType>
+                                             </xsd:element>
+                                             <xsd:element name="Plant" minOccurs="0">
+                                                <xsd:simpleType>
+                                                   <xsd:restriction base="xsd:string">
+                                                      <xsd:maxLength value="4" />
+                                                   </xsd:restriction>
+                                                </xsd:simpleType>
+                                             </xsd:element>
+                                             <xsd:element name="Quantity">
+                                                <xsd:simpleType>
+                                                   <xsd:restriction base="xsd:string">
+                                                      <xsd:maxLength value="13" />
+                                                   </xsd:restriction>
+                                                </xsd:simpleType>
+                                             </xsd:element>
+                                             <xsd:element name="Batch" minOccurs="0">
+                                                <xsd:simpleType>
+                                                   <xsd:restriction base="xsd:string">
+                                                      <xsd:maxLength value="10" />
+                                                   </xsd:restriction>
+                                                </xsd:simpleType>
+                                             </xsd:element>
+                                             <xsd:element name="ReservationNumber" minOccurs="0">
+                                                <xsd:simpleType>
+                                                   <xsd:restriction base="xsd:string">
+                                                      <xsd:maxLength value="10" />
+                                                   </xsd:restriction>
+                                                </xsd:simpleType>
+                                             </xsd:element>
+                                             <xsd:element name="ReservationItem" minOccurs="0">
+                                                <xsd:simpleType>
+                                                   <xsd:restriction base="xsd:string">
+                                                      <xsd:maxLength value="4" />
+                                                   </xsd:restriction>
+                                                </xsd:simpleType>
+                                             </xsd:element>
+                                          </xsd:sequence>
+                                       </xsd:complexType>
+                                    </xsd:element>
+                                 </xsd:sequence>
+                              </xsd:complexType>
+                           </xsd:element>
+                        </xsd:sequence>
+                     </xsd:complexType>
+                  </xsd:element>
+                  <xsd:element name="Success_Errorlog">
+                     <xsd:complexType>
+                        <xsd:sequence>
+                           <xsd:element name="IDOCNumber">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="16" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="Status_ErrorCode" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="8" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="IDOCStatus" minOccurs="0">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="10" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                           <xsd:element name="StatusMessage">
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="255" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                        </xsd:sequence>
+                     </xsd:complexType>
+                  </xsd:element>
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+      </xsd:sequence>
+   </xsd:complexType>
+</xsd:schema>

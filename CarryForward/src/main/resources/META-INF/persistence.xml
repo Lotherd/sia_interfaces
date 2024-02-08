@@ -1,0 +1,22 @@
+<persistence version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="TraxStandaloneDS"
+		transaction-type="JTA">
+		<jta-data-source>TraxStandaloneDS</jta-data-source>
+		<class>trax.aero.model.WoTaskCard</class>
+		<class>trax.aero.model.WoTaskCardPK</class>
+		<class>trax.aero.model.BlobTable</class>
+		<class>trax.aero.model.FormResponseHeader</class>
+		<class>trax.aero.model.FormResponseHeaderPK</class>		
+		<class>trax.aero.model.InterfaceLockMaster</class>
+		<class>trax.aero.model.FormMaster</class>
+		<class>trax.aero.model.BlobTablePK</class>
+		<shared-cache-mode>NONE</shared-cache-mode>
+		<properties>
+			<property name="hibernate.dialect"
+				value="org.hibernate.dialect.Oracle10gDialect" />
+		</properties>
+	</persistence-unit>
+</persistence>

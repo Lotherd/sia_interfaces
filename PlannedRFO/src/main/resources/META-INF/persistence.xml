@@ -1,0 +1,47 @@
+<persistence version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="TraxStandaloneDS"
+		transaction-type="JTA">
+		<jta-data-source>TraxStandaloneDS</jta-data-source>
+		<class>trax.aero.model.AcMaster</class>
+		<class>trax.aero.model.LocationMaster</class>
+		<class>trax.aero.model.LocationSite</class>
+		<class>trax.aero.model.LocationSitePK</class>
+		<class>trax.aero.model.PicklistDistribution</class>
+		<class>trax.aero.model.PicklistDistributionPK</class>
+		<class>trax.aero.model.PicklistHeader</class>
+		<class>trax.aero.model.PnInventoryControl</class>
+		<class>trax.aero.model.PnInventoryControlPK</class>
+		<class>trax.aero.model.PnInventoryDetail</class>
+		<class>trax.aero.model.InterfaceLockMaster</class>
+		<class>trax.aero.model.PnInventoryHistory</class>
+		<class>trax.aero.model.PnInventoryHistoryPK</class>
+		<class>trax.aero.model.PnMaster</class>
+		<class>trax.aero.model.RelationMaster</class>
+		<class>trax.aero.model.RelationMasterPK</class>
+		<class>trax.aero.model.TaskCard</class>
+		<class>trax.aero.model.TaskCardItem</class>
+		<class>trax.aero.model.TaskCardItemPK</class>
+		<class>trax.aero.model.Wo</class>
+		<class>trax.aero.model.WoTaskCard</class>
+		<class>trax.aero.model.WoTaskCardPK</class>
+		<class>trax.aero.model.WoTaskCardItem</class>
+		<class>trax.aero.model.WoTaskCardItemPK</class>
+		<class>trax.aero.model.WoTaskCardPn</class>
+		<class>trax.aero.model.WoTaskCardPnPK</class>
+		<class>trax.aero.model.ProfileMaster</class>
+		<class>trax.aero.model.JournalEntriesExpenditure</class>
+		<class>trax.aero.model.JournalEntriesExpenditurePK</class>
+		<class>trax.aero.model.WoShopDetail</class>
+		<class>trax.aero.model.WoShopDetailPK</class>
+		<class>trax.aero.model.WoAudit</class>
+		<class>trax.aero.model.WoAuditPK</class>
+		<shared-cache-mode>NONE</shared-cache-mode>
+		<properties>
+			<property name="hibernate.dialect"
+				value="org.hibernate.dialect.Oracle10gDialect" />
+		</properties>
+	</persistence-unit>
+</persistence>

@@ -1,0 +1,180 @@
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://singaporeair.com/mro/TRAX" targetNamespace="http://singaporeair.com/mro/TRAX">
+   <xsd:element name="MT_RCV_TRAX_I16_I50_4061" type="DT_RCV_TRAX_I16_I50_4061" />
+   <xsd:complexType name="DT_RCV_TRAX_I16_I50_4061">
+      <xsd:annotation>
+         <xsd:appinfo source="http://sap.com/xi/VersionID">
+         57ffa928da4211eca8f6000000747962
+         </xsd:appinfo>
+      </xsd:annotation>
+      <xsd:sequence>
+         <xsd:element name="PartNumber">
+            <xsd:annotation>
+               <xsd:appinfo source="http://sap.com/xi/TextID">
+               628cc666d7e311ec935e0050569055d0
+               </xsd:appinfo>
+               <xsd:documentation />
+            </xsd:annotation>
+            <xsd:complexType>
+               <xsd:sequence>
+                  <xsd:element name="PartNumber">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc65ad7e311ecbfac0050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="35" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="Description">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc65bd7e311eca8670050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="300" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="PN_category">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc65cd7e311ec865a0050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="8" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="UOM">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc65dd7e311ec97de0050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="8" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="ATA" minOccurs="0">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc65ed7e311ec93840050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="8" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="Effectivity" minOccurs="0">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc65fd7e311ecaaa90050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="4000" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="ToolControl" minOccurs="0">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc660d7e311ecc2800050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="1" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="ToolCalibration" minOccurs="0">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc661d7e311ecc38c0050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="1" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="ToolLife" minOccurs="0">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc662d7e311ecc7d60050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="5" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="DeletionFlag" minOccurs="0">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc663d7e311ecb6c50050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                           <xsd:maxLength value="1" />
+                        </xsd:restriction>
+                     </xsd:simpleType>
+                  </xsd:element>
+                  <xsd:element name="InterchangableList" minOccurs="0">
+                     <xsd:annotation>
+                        <xsd:appinfo source="http://sap.com/xi/TextID">
+                        628cc665d7e311ecaf990050569055d0
+                        </xsd:appinfo>
+                        <xsd:documentation />
+                     </xsd:annotation>
+                     <xsd:complexType>
+                        <xsd:sequence>
+                           <xsd:element name="PartNumber" minOccurs="0" maxOccurs="unbounded">
+                              <xsd:annotation>
+                                 <xsd:appinfo source="http://sap.com/xi/TextID">
+                                 628cc664d7e311ec8f400050569055d0
+                                 </xsd:appinfo>
+                                 <xsd:documentation />
+                              </xsd:annotation>
+                              <xsd:simpleType>
+                                 <xsd:restriction base="xsd:string">
+                                    <xsd:maxLength value="35" />
+                                 </xsd:restriction>
+                              </xsd:simpleType>
+                           </xsd:element>
+                        </xsd:sequence>
+                     </xsd:complexType>
+                  </xsd:element>
+               </xsd:sequence>
+            </xsd:complexType>
+         </xsd:element>
+      </xsd:sequence>
+   </xsd:complexType>
+</xsd:schema>

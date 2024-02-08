@@ -1,0 +1,25 @@
+package trax.aero.pojo;
+
+import java.util.ArrayList;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name="MT_TRAX_RCV_I46_4077_RES", namespace="http://singaporeair.com/mro/TRAX")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class MT_TRAX_RCV_I46_4077_RES {
+
+	@XmlElement(name = "MaterialDetails")
+	private ArrayList<MaterialDetails> MaterialDetails;
+
+	public ArrayList<MaterialDetails> getMaterialDetails() {
+		return MaterialDetails;
+	}
+
+	public void setMaterialDetails(ArrayList<MaterialDetails> materialDetails) {
+		MaterialDetails = materialDetails;
+	}
+
+}

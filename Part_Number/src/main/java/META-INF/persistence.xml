@@ -1,0 +1,32 @@
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence                  
+                                http://java.sun.com/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="ImportDS"
+		transaction-type="JTA">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<jta-data-source>ImportDS</jta-data-source>
+		<class>trax.aero.model.PnInterchangeable</class>
+		<class>trax.aero.model.PnInventoryDetail</class>
+		<class>trax.aero.model.PnMaster</class>
+		<class>trax.aero.model.SystemTranCode</class>
+		<class>trax.aero.model.SystemTranCodePK</class>
+		<class>trax.aero.model.RelationMaster</class>
+		<class>trax.aero.model.RelationMasterPK</class>
+		<class>trax.aero.model.PnInterchgOneWay</class>
+		<class>trax.aero.model.PnInterchgOneWayPK</class>
+		<class>trax.aero.model.AcMaster</class>
+		<class>trax.aero.model.AcTypeSeriesMaster</class>
+		<class>trax.aero.model.AcTypeSeriesMasterPK</class>
+		<class>trax.aero.model.PnEffectivityDistribution</class>
+		<class>trax.aero.model.PnEffectivityDistributionPK</class>
+		<class>trax.aero.model.PnEffectivityHeader</class>
+		<class>trax.aero.model.PnEffectivityHeaderPK</class>
+		<class>trax.aero.model.InterfaceLockMaster</class>
+		<shared-cache-mode>NONE</shared-cache-mode>
+		<properties>
+			<property name="hibernate.dialect"
+				value="org.hibernate.dialect.Oracle10gDialect" />
+		</properties>
+	</persistence-unit>
+</persistence>
