@@ -65,8 +65,8 @@ public class ImportWarehouseData implements IImportWarehouseData {
 		PnMaster pnmas = null;
 		
 		String partNumber_Tool ;
-		partNumber_Tool = i.getPN().replaceAll("\"", "in");
-		partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+		partNumber_Tool = i.getPN().replaceAll("\"", "IN");
+		partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 		if(!partNumber_Tool.contains(":"))
 		{
 			partNumber_Tool = partNumber_Tool.concat(":UPLOAD");
@@ -249,8 +249,8 @@ public class ImportWarehouseData implements IImportWarehouseData {
 		
 		
 		String partNumber_Tool ;
-		partNumber_Tool = i.getPN().replaceAll("\"", "in");
-		partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+		partNumber_Tool = i.getPN().replaceAll("\"", "IN");
+		partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 		
 		
 		if(!partNumber_Tool.contains(":") && getPN(partNumber_Tool) == null)
@@ -474,8 +474,8 @@ public class ImportWarehouseData implements IImportWarehouseData {
 					
 					String pn = pndlist.get(i).getPn();
 					
-					pn = pn.replaceAll("in", "\"");
-					pn = pn.replaceAll("ft", "'");
+					pn = pn.replaceAll("IN", "\"");
+					pn = pn.replaceAll("FT", "'");
 					
 					if(pn.contains(":UPLOAD"))
 					{

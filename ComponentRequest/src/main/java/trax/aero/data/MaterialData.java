@@ -183,8 +183,8 @@ public class MaterialData implements IMaterialData {
 												
 						String pn = detail.getPn();
 						
-						pn = pn.replaceAll("in", "\"");
-						pn = pn.replaceAll("ft", "'");
+						pn = pn.replaceAll("IN", "\"");
+						pn = pn.replaceAll("FT", "'");
 						
 						if(pn.contains(":UPLOAD"))
 						{
@@ -336,8 +336,8 @@ public class MaterialData implements IMaterialData {
 					
 					String pn = detail.getPn();
 					
-					pn = pn.replaceAll("in", "\"");
-					pn = pn.replaceAll("ft", "'");
+					pn = pn.replaceAll("IN", "\"");
+					pn = pn.replaceAll("FT", "'");
 					
 					if(pn.contains(":UPLOAD"))
 					{

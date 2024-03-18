@@ -267,8 +267,8 @@ public class TaskCardsIngestionData {
 						
 						if(rstc.getString(2) != null && !rstc.getNString(2).isEmpty() && !rstc.getNString(2).equalsIgnoreCase("                                   ")) {
 							Inbound.setMaterialNumber(rstc.getString(2));
-							Inbound.setMaterialNumber(Inbound.getMaterialNumber().replaceAll("in", "\""));
-							Inbound.setMaterialNumber(Inbound.getMaterialNumber().replaceAll("ft", "'"));
+							Inbound.setMaterialNumber(Inbound.getMaterialNumber().replaceAll("IN", "\""));
+							Inbound.setMaterialNumber(Inbound.getMaterialNumber().replaceAll("FT", "'"));
 							
 							if(Inbound.getMaterialNumber().contains(":UPLOAD"))
 							{

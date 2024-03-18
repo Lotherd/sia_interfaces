@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -19,6 +20,7 @@ import javax.xml.bind.Unmarshaller;
 import trax.aero.data.ModelData;
 import trax.aero.logger.LogManager;
 import trax.aero.model.WoTaskCard;
+import trax.aero.pojo.ADDATTR;
 import trax.aero.pojo.OUTPUT;
 
 public class TimerExecutor implements Runnable {
@@ -103,7 +105,14 @@ public class TimerExecutor implements Runnable {
 									}catch(Exception e) {
 										try {
 											e.printStackTrace();
-											insertFile(xml, "FAILURE");
+											String outcomeFile = insertFile(xml, "FAILURE");
+											data.error = data.error.concat(" Error Message: "+e.toString() +
+													" , Error File: " +outcomeFile  + System.lineSeparator() +  System.lineSeparator());
+											if(data.error.length() > 0)
+											{
+												errors += data.error;
+												data.error = "";
+											}
 											continue;
 										}catch (Exception e1) {
 											e1.printStackTrace();
@@ -127,7 +136,44 @@ public class TimerExecutor implements Runnable {
 									
 									if(success)
 									{
-										insertFile(xml, "SUCCESS");
+										List<ADDATTR> attributes = out.getMODEL().getEFFECTIVITY().getJOBCARD().getJOBI().getPLI().getADDATTR();
+										String taskNBR = data.filterADDATTR(attributes, "TASK-NBR");
+										String taskId = "" ,groupNo = "" ,refer = "";
+										
+										String wonbr = out.getMODEL().getEFFECTIVITY().getJOBCARD().getWONBR();
+										if(wonbr != null){
+											if(wonbr.length() > 4){
+												refer = (wonbr.substring(wonbr.length()- 4));
+											}
+										}	
+										
+										if(out.getMODEL().getEFFECTIVITY().getJOBCARD().getJCNBR() != null && out.getMODEL().getEFFECTIVITY().getJOBCARD().getJCNBR().length() > 8)
+										{
+											groupNo = out.getMODEL().getEFFECTIVITY().getJOBCARD().getJCNBR().substring(0, 8);
+										}
+										else if(out.getMODEL().getEFFECTIVITY().getJOBCARD().getJCNBR() != null)
+										{
+											groupNo = out.getMODEL().getEFFECTIVITY().getJOBCARD().getJCNBR();
+										}										
+										int length = (taskNBR + "_" + groupNo + "_" + refer).length();
+										if(length > 35){
+											taskId = taskNBR.substring(0, taskNBR.length() - (length - 35)) +"_" + groupNo + "_" + refer;
+										}else{
+											taskId = taskNBR + "_" + groupNo + "_" + refer;
+										}
+										
+										String ref = out.getMODEL().getEFFECTIVITY().getJOBCARD().getWONBR();
+										if(wonbr != null)
+										{
+											if(wonbr.length() > 4)
+											{
+												ref = (wonbr.substring(0, wonbr.length()- 4));
+											}
+										}
+										
+										String outcomeFile = insertFile(xml, "SUCCESS");
+										data.error = data.error.concat("SUCCESS INSERTED Task Card: " +taskId +" , SVO: "+ref+  " ,SUCCESS File: " +outcomeFile + 
+												System.lineSeparator() +  System.lineSeparator() );
 									}
 									else
 									{

@@ -124,8 +124,8 @@ public class MaterialMovementData implements IMaterialMovementData {
 		{
 			logger.info("After checkMinValue");
 			String partNumber_Tool ;
-			partNumber_Tool = input.getMaterial().replaceAll("\"", "in");
-			partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+			partNumber_Tool = input.getMaterial().replaceAll("\"", "IN");
+			partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 			if(!partNumber_Tool.contains(":"))
 			{
 				partNumber_Tool = partNumber_Tool.concat(":UPLOAD");

@@ -224,8 +224,8 @@ public class MaterialLocationData {
 							
 							String pn = rs1.getString("MATERIALNUMBER");
 							
-							pn = pn.replaceAll("in", "\"");
-							pn = pn.replaceAll("ft", "'");
+							pn = pn.replaceAll("IN", "\"");
+							pn = pn.replaceAll("FT", "'");
 							
 							if(pn.contains(":UPLOAD"))
 							{

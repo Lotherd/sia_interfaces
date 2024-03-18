@@ -85,8 +85,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 				if(wo != null && o.getMaterialNumber() != null) {
 					
 					String partNumber_Tool ;
-					partNumber_Tool = o.getMaterialNumber().replaceAll("\"", "in");
-					partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+					partNumber_Tool = o.getMaterialNumber().replaceAll("\"", "IN");
+					partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 					if(!partNumber_Tool.contains(":"))
 					{
 						partNumber_Tool = partNumber_Tool.concat(":UPLOAD");
@@ -135,8 +135,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 				throw new Exception("Can not insert/update WO SHOP PN: " + o.getMaterialNumber()  +" as PN does not exist in PN master");
 			}else if (getPN(o.getMaterialNumber()) == null) {
 				String partNumber_Tool ;
-				partNumber_Tool = o.getMaterialNumber().replaceAll("\"", "in");
-				partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+				partNumber_Tool = o.getMaterialNumber().replaceAll("\"", "IN");
+				partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 				if(!partNumber_Tool.contains(":"))
 				{
 					partNumber_Tool = partNumber_Tool.concat(":UPLOAD");
@@ -152,8 +152,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 							for(Component component : operation.getComponent()) {
 								if(component.getMaterialNumber() != null) {
 									String partNumber_Tool ;
-									partNumber_Tool = component.getMaterialNumber().replaceAll("\"", "in");
-									partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+									partNumber_Tool = component.getMaterialNumber().replaceAll("\"", "IN");
+									partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 									if(!partNumber_Tool.contains(":"))
 									{
 										partNumber_Tool = partNumber_Tool.concat(":UPLOAD");
@@ -480,8 +480,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 				
 				
 				
-				pn = pn.replaceAll("\"", "in");
-				pn = pn.replaceAll("'", "ft");
+				pn = pn.replaceAll("\"", "IN");
+				pn = pn.replaceAll("'", "FT");
 				if(!pn.contains(":"))
 				{
 					pn = pn.concat(":UPLOAD");
@@ -807,8 +807,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 					
 					
 					
-					pn = pn.replaceAll("\"", "in");
-					pn = pn.replaceAll("'", "ft");
+					pn = pn.replaceAll("\"", "IN");
+					pn = pn.replaceAll("'", "FT");
 					if(!pn.contains(":"))
 					{
 						pn = pn.concat(":UPLOAD");
@@ -979,8 +979,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 				
 				
 				String partNumber_Tool;
-				partNumber_Tool = component.getMaterialNumber().replaceAll("\"", "in");
-				partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+				partNumber_Tool = component.getMaterialNumber().replaceAll("\"", "IN");
+				partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 				if(!partNumber_Tool.contains(":"))
 				{
 					partNumber_Tool = partNumber_Tool.concat(":UPLOAD");
@@ -1156,8 +1156,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 				if(component.getMaterialNumber() !=null && !component.getMaterialNumber().isEmpty()) {
 					
 					String partNumber_Tool;
-					partNumber_Tool = component.getMaterialNumber().replaceAll("\"", "in");
-					partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+					partNumber_Tool = component.getMaterialNumber().replaceAll("\"", "IN");
+					partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 					if(!partNumber_Tool.contains(":"))
 					{
 						partNumber_Tool = partNumber_Tool.concat(":UPLOAD");

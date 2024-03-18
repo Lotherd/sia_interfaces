@@ -641,8 +641,8 @@ public class TaskCardData {
 			
 			logger.info("Converting and appending information for material: " + material.getPartNumber_Tool());
 			String partNumber_Tool , part_ToolIndicator;
-			partNumber_Tool = material.getPartNumber_Tool().replaceAll("\"", "in");
-			partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+			partNumber_Tool = material.getPartNumber_Tool().replaceAll("\"", "IN");
+			partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 			if(!partNumber_Tool.contains(":"))
 			{
 				partNumber_Tool = partNumber_Tool.concat(":UPLOAD");

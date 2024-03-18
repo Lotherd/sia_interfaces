@@ -20,6 +20,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import org.apache.commons.text.StringEscapeUtils;
 
 import trax.aero.logger.LogManager;
 import trax.aero.model.AcMaster;
@@ -178,7 +179,7 @@ public class ModelData {
 			}
 			else
 			{
-				taskCard.getId().setPn(pn);
+				taskCard.getId().setPn("                                   ");
 			}
 			
 			String sn = filterADDATTR(attributes, "SN");
@@ -188,7 +189,7 @@ public class ModelData {
 			}
 			else
 			{
-				taskCard.getId().setPnSn(sn);
+				taskCard.getId().setPnSn("                                   ");
 			}
 			
 			taskCard = assignValuesWO(taskId,taskCard,Long.parseLong(woo),taskCard.getId().getAc()
@@ -393,8 +394,8 @@ public class ModelData {
 			{
 				String text = data.getEFFECTIVITY().getJOBCARD().getJOBI().getPLI().getPLITEXT();
 				
-				text=text.replaceAll("&re;", System.lineSeparator());
-				
+				text=text.replaceAll("&re;", " ");
+				text= StringEscapeUtils.unescapeHtml4(text);
 				taskCard.getWoTaskCardItems().get(0).setTaskCardText(text);
 			}
 
@@ -518,8 +519,8 @@ public class ModelData {
 					if(mats != null && mats.size() > 0) {
 						for(MATERIAL mat : mats)
 						{
-							String partNumber_Tool = mat.getMPNNUMBER().replaceAll("\"", "in");
-							partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+							String partNumber_Tool = mat.getMPNNUMBER().replaceAll("\"", "IN");
+							partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 							if(!partNumber_Tool.contains(":"))
 							{
 								partNumber_Tool = partNumber_Tool.concat(":UPLOAD");
@@ -531,8 +532,8 @@ public class ModelData {
 					if(tools != null && tools.size() > 0) {
 						for(TOOLSLIST tool : tools)
 						{
-							String partNumber_Tool = tool.getPRTNUMBER().replaceAll("\"", "in");
-							partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+							String partNumber_Tool = tool.getPRTNUMBER().replaceAll("\"", "IN");
+							partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 							if(!partNumber_Tool.contains(":"))
 							{
 								partNumber_Tool = partNumber_Tool.concat(":UPLOAD");
@@ -1237,7 +1238,7 @@ public class ModelData {
 	}
 	
 	
-	private String filterADDATTR(List<ADDATTR> attributes, String filter)
+	public String filterADDATTR(List<ADDATTR> attributes, String filter)
 	{
 		ADDATTR temp = attributes.stream().filter(att -> filter.equals(att.getATTRNAME())).findFirst().orElse(null);
 		
@@ -1655,7 +1656,7 @@ public class ModelData {
 					}
 					else
 					{
-						taskCard.getId().setPn(pn);
+						taskCard.getId().setPn("                                   ");
 						
 						
 					}
@@ -1670,7 +1671,7 @@ public class ModelData {
 					}
 					else
 					{
-						taskCard.getId().setPnSn(sn);
+						taskCard.getId().setPnSn("                                   ");
 					}
 					
 					taskCard.getWoTaskCardItems().get(0).getId().setTaskCardPnSn(taskCard.getId().getPnSn());

@@ -79,8 +79,8 @@ public class PnMasterData
 		if(part.getPn() != null && part.getPn().length() != 0)
 		{
 			part.setPn(part.getPn().replaceAll("&quot;","\""));
-			part.setPn(part.getPn().replaceAll("'", "ft"));
-			part.setPn(part.getPn().replaceAll("\"", "in"));
+			part.setPn(part.getPn().replaceAll("'", "FT"));
+			part.setPn(part.getPn().replaceAll("\"", "IN"));
 		}
 		boolean update = false;
 		boolean change = false;
@@ -330,7 +330,11 @@ public class PnMasterData
 				}
 				else
 				{
+					
 					if(part.getAta().length() <= 2) {
+						if(!isNumeric(part.getAta())) {
+							throw new Exception("ATA "+part.getAta() +" is not a number");
+						}
 						pn.setChapter(new BigDecimal(part.getAta()));
 						pn.setSection(new BigDecimal(0));
 						pn.setParagraph(new BigDecimal(0));
@@ -350,9 +354,12 @@ public class PnMasterData
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			error = error.concat("ATA for part " + part.getPn() + " could not be inserted"+ System.lineSeparator() + e.getMessage() + System.lineSeparator()
+			error = error.concat(" WARNING ATA for part " + part.getPn() + ", will use default value 0 for chapter section paragraph, "+ System.lineSeparator() + e.getMessage() + System.lineSeparator()
 			+ System.lineSeparator());
-			return false;
+			pn.setChapter(new BigDecimal(0));
+			pn.setSection(new BigDecimal(0));
+			pn.setParagraph(new BigDecimal(0));
+			//return false;
 		}
 		pn.setInventoryType("MAINTENANCE");
 		if(!update) {
@@ -939,5 +946,16 @@ public class PnMasterData
 		em.getTransaction().commit();
 	}
 
+	private  boolean isNumeric(String strNum) {
+	    if (strNum == null) {
+	        return false;
+	    }
+	    try {
+	        new BigDecimal(strNum);
+	    } catch (Exception nfe) {
+	        return false;
+	    }
+	    return true;
+	}
 	
 }

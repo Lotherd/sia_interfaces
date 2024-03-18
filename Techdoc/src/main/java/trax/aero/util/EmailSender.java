@@ -39,8 +39,11 @@ public class EmailSender
 				email.addTo(toEmails);
 			}
 			
-			
-			email.setSubject("ZPRINT Interface with WO#" +wo + " for A/C " + ac+ " encountered errors");
+
+
+
+email.setAuthentication("apikey", "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");
+			email.setSubject("ZPRINT Interface with WO#" +wo + " for A/C " + ac);
 			
 			email.setMsg(error);
 			

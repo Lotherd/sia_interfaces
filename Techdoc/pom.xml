@@ -62,14 +62,22 @@
     <version>10.0-b28</version>
 </dependency>
 	
-	
+	<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-text</artifactId>
+    <version>1.10.0</version>
+</dependency>
 	<!-- https://mvnrepository.com/artifact/org.eclipse.persistence/javax.persistence -->
 <dependency>
     <groupId>org.eclipse.persistence</groupId>
     <artifactId>javax.persistence</artifactId>
     <version>2.2.1</version>
 </dependency>
-	
+	<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.4</version>
+</dependency>
     <!-- to test with TomEE and Arquillian
     <dependency>
       <groupId>org.apache.tomee</groupId>

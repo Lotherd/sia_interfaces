@@ -97,8 +97,8 @@ public class ToolsCalibrationData implements IToolsCalibrationData {
 		if(toolsCalibrationMaster.getPartNumber() != null  && !toolsCalibrationMaster.getPartNumber().isEmpty() && toolsCalibrationMaster.getSerialNumber() != null  && !toolsCalibrationMaster.getSerialNumber().isEmpty()) 
 		{
 			String partNumber_Tool ;
-			partNumber_Tool = toolsCalibrationMaster.getPartNumber().replaceAll("\"", "in");
-			partNumber_Tool = partNumber_Tool.replaceAll("'", "ft");
+			partNumber_Tool = toolsCalibrationMaster.getPartNumber().replaceAll("\"", "IN");
+			partNumber_Tool = partNumber_Tool.replaceAll("'", "FT");
 			if(!partNumber_Tool.contains(":"))
 			{
 				partNumber_Tool = partNumber_Tool.concat(":UPLOAD");

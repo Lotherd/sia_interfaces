@@ -151,8 +151,8 @@ public class NRData implements INRData {
 					
 					data.getOrder().setPartNumber(card.getId().getPn());
 					
-					data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("in", "\""));
-					data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("ft", "'"));
+					data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("IN", "\""));
+					data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("FT", "'"));
 					
 					if(data.getOrder().getPartNumber().contains(":UPLOAD"))
 					{
@@ -316,8 +316,8 @@ public class NRData implements INRData {
 				if( card.getId().getPn() != null && !card.getId().getPn().isEmpty() && !card.getId().getPn().equalsIgnoreCase("                                   ")) {
 						data.getOrder().setPartNumber(card.getId().getPn());
 						
-						data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("in", "\""));
-						data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("ft", "'"));
+						data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("IN", "\""));
+						data.getOrder().setPartNumber(data.getOrder().getPartNumber().replaceAll("FT", "'"));
 						
 						if(data.getOrder().getPartNumber().contains(":UPLOAD"))
 						{
@@ -768,8 +768,8 @@ public class NRData implements INRData {
 			
 			
 			
-			pn = pn.replaceAll("\"", "in");
-			pn = pn.replaceAll("'", "ft");
+			pn = pn.replaceAll("\"", "IN");
+			pn = pn.replaceAll("'", "FT");
 			if(!pn.contains(":"))
 			{
 				pn = pn.concat(":UPLOAD");

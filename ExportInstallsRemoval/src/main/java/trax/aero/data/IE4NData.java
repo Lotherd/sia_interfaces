@@ -365,8 +365,8 @@ public class IE4NData {
 																				
 							String pn = out.getMaterial_Number();
 							
-							pn = pn.replaceAll("in", "\"");
-							pn = pn.replaceAll("ft", "'");
+							pn = pn.replaceAll("IN", "\"");
+							pn = pn.replaceAll("FT", "'");
 							
 							if(pn.contains(":UPLOAD"))
 							{
