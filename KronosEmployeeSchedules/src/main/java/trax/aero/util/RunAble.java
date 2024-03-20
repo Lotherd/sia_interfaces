@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -27,6 +28,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 
 import trax.aero.Encryption.PGPEncryption;
 import trax.aero.controller.KronosController;
@@ -305,8 +307,9 @@ public class RunAble implements Runnable {
 												Date startdt = Date.from( LocalDateTime.parse(empstartdt,formatter).atZone(ZoneId.systemDefault()).toInstant());  
 												Date enddt = Date.from(LocalDateTime.parse(empenddt,formatter).atZone(ZoneId.systemDefault()).toInstant());  
 												
-												
-												
+												if(enddt.before(startdt)) {
+													enddt =  new DateTime(enddt).plusDays(1).toDate();
+												}
 												
 												if(startdt .before(cal.getTime()) || enddt.before( cal.getTime())) {
 													logger.info("Ignore Schedule as its -"+ignoreDay+" from current Date " + calCurrent.getTime()
