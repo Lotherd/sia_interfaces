@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -115,6 +117,13 @@ public class JobConfirmationData {
 		Logger logger = LogManager.getLogger("JobConfirmation_I39I40");
 		public InterfaceLockMaster lock;
 		
+		String xml10pattern = "[^"
+                + "\u0009\r\n"
+                + "\u0020-\uD7FF"
+                + "\uE000-\uFFFD"
+                + "\ud800\udc00-\udbff\udfff"
+                + "]";
+		
 		public JobConfirmationData(String mark)
 		{
 			try 
@@ -196,39 +205,102 @@ public class JobConfirmationData {
 			
 			String sql = 
 			"SELECT NVL(WTC.REFERENCE_TASK_CARD,w.refurbishment_order) as Order_number, WTCI.OPS_NO as Operation_number, \r\n" + 
-			"WOA.employee as Personnel_number, WOA.transaction_date as \"Date\",PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.START_HOUR) as StartHour,\r\n" + 
-			"PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.START_MINUTE) as startminute, PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.END_HOUR) as endhour,\r\n" + 
-			"PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.END_MINUTE) as endminute, PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.hours) as hours,\r\n" + 
-			"PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.minutes) as minutes, WOA.category as category, WTCI.WORK_ACCOMPLISHED as Confirmation_text, \r\n" + 
-			"WTCI.TASK_CARD_TEXT as Defect_text, WOA.STATUS status, WOA.WO_ACTUAL_TRANSACTION, WOA.TASK_CARD, WOA.TASK_CARD_ITEM, \r\n" + 
-			"WOA.WO,RM.Mechanic_Stamp, WTCI.STATUS as stat\r\n" + 
-			"FROM WO_ACTUALS WOA, WO_TASK_CARD_ITEM WTCI, WO_TASK_CARD WTC, RELATION_MASTER RM, WO W where \r\n" + 
-			" WOA.TASK_CARD = WTCI.TASK_CARD AND WOA.TASK_CARD_ITEM = WTCI.TASK_CARD_ITEM AND\r\n" + 
-			"WOA.WO = WTCI.WO AND WOA.TASK_CARD = WTC.TASK_CARD AND WOA.WO = WTC.WO AND\r\n" + 
-			"WOA.EMPLOYEE = RM.RELATION_CODE AND WOA.WO = W.WO AND RM.RELATION_TRANSACTION = 'EMPLOYEE' AND\r\n" + 
-			"WOA.INTERFACE_MODIFIED_DATE IS NULL AND WOA.trasaction_category = 'LABOR' AND (WTC.REFERENCE_TASK_CARD IS NOT NULL\r\n" + 
-			"OR 1=( SELECT count(*) FROM WO W WHERE W.WO = WTC.WO AND W.MODULE = 'SHOP' AND W.refurbishment_order is not null \r\n" + 
-			"AND (WTC.non_routine = 'N' OR WTC.non_routine IS NULL)))	";
+			"			WOA.employee as Personnel_number, WOA.transaction_date as \"Date\",PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.START_HOUR) as StartHour,\r\n" + 
+			"			PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.START_MINUTE) as startminute, PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.END_HOUR) as endhour,\r\n" + 
+			"			PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.END_MINUTE) as endminute, PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.hours) as hours,\r\n" + 
+			"			PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.minutes) as minutes, WOA.category as category, WTCI.WORK_ACCOMPLISHED as Confirmation_text, \r\n" + 
+			"			WTCI.TASK_CARD_TEXT as Defect_text, WOA.STATUS status, WOA.WO_ACTUAL_TRANSACTION, WOA.TASK_CARD, WOA.TASK_CARD_ITEM, \r\n" + 
+			"			WOA.WO,RM.Mechanic_Stamp, WTCI.STATUS as stat\r\n" + 
+			"			FROM WO_ACTUALS WOA, WO_TASK_CARD_ITEM WTCI, WO_TASK_CARD WTC, RELATION_MASTER RM, WO W where \r\n" + 
+			"			 WOA.TASK_CARD = WTCI.TASK_CARD AND WOA.TASK_CARD_ITEM = WTCI.TASK_CARD_ITEM AND\r\n" + 
+			"			WOA.WO = WTCI.WO AND WOA.TASK_CARD = WTC.TASK_CARD AND WOA.WO = WTC.WO AND\r\n" + 
+			"             WOA.TASK_CARD_PN = WTC.PN AND WOA.TASK_CARD_SN = WTC.PN_SN  AND WTC.PN = WTCI.TASK_CARD_PN AND \r\n" + 
+			"            WTC.PN_SN = WTCI.TASK_CARD_PN_SN AND WTC.AC = WTCI.AC AND \r\n" + 
+			"			WOA.EMPLOYEE = RM.RELATION_CODE AND WOA.WO = W.WO AND RM.RELATION_TRANSACTION = 'EMPLOYEE' AND\r\n" + 
+			"			WOA.INTERFACE_MODIFIED_DATE IS NULL AND WOA.trasaction_category = 'LABOR' AND (WTC.REFERENCE_TASK_CARD IS NOT NULL\r\n" + 
+			"			OR 1=( SELECT count(*) FROM WO W WHERE W.WO = WTC.WO AND W.MODULE = 'SHOP' AND W.refurbishment_order is not null \r\n" + 
+			"			AND (WTC.non_routine = 'N' OR WTC.non_routine IS NULL)))		";
 
 			
 			
-			String sqlHeader = "SELECT NVL(WTC.REFERENCE_TASK_CARD,w.refurbishment_order) as Order_number, WOA.employee as Personnel_number,\r\n" + 
-					"WOA.transaction_date as \"Date\", PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.START_HOUR) as StartHour,\r\n" + 
-					"PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.START_MINUTE) as startminute, PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.END_HOUR) as endhour,\r\n" + 
-					"PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.END_MINUTE) as endminute,PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.hours) as \"hours\",\r\n" + 
-					"PKG_INTERFACE.GETXMLNUMBERSTRING(WOA.minutes) as \"minutes\", WOA.category as \"category\",\r\n" + 
-					"WOA.STATUS as \"status\", WOA.WO_ACTUAL_TRANSACTION, WOA.TASK_CARD, WOA.TASK_CARD_ITEM,\r\n" + 
-					"WOA.WO, RM.Mechanic_Stamp,WTC.WORK_ACCOMPLISHED,WTC.REFERENCE_TASK_CARD,w.refurbishment_order\r\n" + 
-					"FROM WO_ACTUALS WOA,WO_TASK_CARD WTC, RELATION_MASTER RM, WO W\r\n" + 
-					"where WOA.TASK_CARD_ITEM = '0' AND WOA.TASK_CARD = WTC.TASK_CARD AND WOA.WO = WTC.WO AND WOA.EMPLOYEE = RM.RELATION_CODE AND WOA.WO = W.WO\r\n" + 
-					"AND RM.RELATION_TRANSACTION = 'EMPLOYEE' AND WOA.INTERFACE_MODIFIED_DATE IS NULL AND\r\n" + 
-					"WOA.trasaction_category = 'LABOR' AND (WTC.REFERENCE_TASK_CARD IS NOT NULL\r\n" + 
-					"OR 1=( SELECT count(*) FROM WO W WHERE W.WO = WTC.WO AND W.MODULE = 'SHOP' AND W.refurbishment_order is not null \r\n" + 
-					"AND (WTC.non_routine = 'N' OR WTC.non_routine IS NULL)))";
+			String sqlHeader = "SELECT\r\n" + 
+					"    nvl(wtc.reference_task_card, w.refurbishment_order) AS order_number,\r\n" + 
+					"    woa.employee                                        AS personnel_number,\r\n" + 
+					"    woa.transaction_date                                AS \"Date\",\r\n" + 
+					"    pkg_interface.getxmlnumberstring(woa.start_hour)    AS starthour,\r\n" + 
+					"    pkg_interface.getxmlnumberstring(woa.start_minute)  AS startminute,\r\n" + 
+					"    pkg_interface.getxmlnumberstring(woa.end_hour)      AS endhour,\r\n" + 
+					"    pkg_interface.getxmlnumberstring(woa.end_minute)    AS endminute,\r\n" + 
+					"    pkg_interface.getxmlnumberstring(woa.hours)         AS hours,\r\n" + 
+					"    pkg_interface.getxmlnumberstring(woa.minutes)       AS minutes,\r\n" + 
+					"    woa.category                                        AS category,\r\n" + 
+					"    woa.status                                          AS \"status\",\r\n" + 
+					"    woa.wo_actual_transaction,\r\n" + 
+					"    woa.task_card,\r\n" + 
+					"    woa.task_card_item,\r\n" + 
+					"    woa.wo,\r\n" + 
+					"    rm.mechanic_stamp,\r\n" + 
+					"    wtc.work_accomplished,\r\n" + 
+					"    wtc.reference_task_card,\r\n" + 
+					"    w.refurbishment_order,\r\n" + 
+					"    woa.task_card_pn,\r\n" + 
+					"    woa.TASK_CARD_SN,\r\n" + 
+					"    wtc.ac\r\n" + 
+					"FROM\r\n" + 
+					"    wo_actuals      woa,\r\n" + 
+					"    wo_task_card    wtc,\r\n" + 
+					"    relation_master rm,\r\n" + 
+					"    wo              w\r\n" + 
+					"WHERE\r\n" + 
+					"        woa.task_card_item = '0'\r\n" + 
+					"    AND woa.task_card = wtc.task_card\r\n" + 
+					"    AND woa.wo = wtc.wo\r\n" + 
+					"    AND woa.employee = rm.relation_code\r\n" + 
+					"    AND woa.wo = w.wo\r\n" + 
+					"    AND rm.relation_transaction = 'EMPLOYEE'\r\n" + 
+					"    AND woa.interface_modified_date IS NULL\r\n" + 
+					"    AND woa.task_card_pn = wtc.pn\r\n" + 
+					"    AND woa.task_card_sn = wtc.pn_sn\r\n" + 
+					"    AND woa.trasaction_category = 'LABOR'\r\n" + 
+					"    AND ( wtc.reference_task_card IS NOT NULL\r\n" + 
+					"          OR 1 = (\r\n" + 
+					"        SELECT\r\n" + 
+					"            COUNT(*)\r\n" + 
+					"        FROM\r\n" + 
+					"            wo w\r\n" + 
+					"        WHERE\r\n" + 
+					"                w.wo = wtc.wo\r\n" + 
+					"            AND w.module = 'SHOP'\r\n" + 
+					"            AND w.refurbishment_order IS NOT NULL\r\n" + 
+					"            AND ( wtc.non_routine = 'N'\r\n" + 
+					"                  OR wtc.non_routine IS NULL )\r\n" + 
+					"    ) )";
 			
-			String sqlItem = "SELECT WTCI.OPS_NO as Operation_number, WTCI.WORK_ACCOMPLISHED as Confirmation_text, dbms_lob.substr( WTCI.TASK_CARD_TEXT , 4000, 1 ) as Defect_text, WTCI.STATUS as stat,"
-					+" (SELECT  Count(wtci.task_card_item) as count FROM WO_TASK_CARD_ITEM WTCI WHERE WTCI.WO = ? AND WTCI.TASK_CARD = ?) as count\r\n" + 
-					"FROM WO_TASK_CARD_ITEM WTCI WHERE WTCI.WO = ? AND WTCI.TASK_CARD = ?";
+			String sqlItem = "SELECT\r\n" + 
+					"    wtci.ops_no                                   AS operation_number,\r\n" + 
+					"    wtci.work_accomplished                        AS confirmation_text,\r\n" + 
+					"    dbms_lob.substr(wtci.task_card_text, 4000, 1) AS defect_text,\r\n" + 
+					"    wtci.status                                   AS stat,\r\n" + 
+					"    (\r\n" + 
+					"        SELECT\r\n" + 
+					"            COUNT(wtci.task_card_item) AS count\r\n" + 
+					"        FROM\r\n" + 
+					"            wo_task_card_item wtci\r\n" + 
+					"        WHERE\r\n" + 
+					"                wtci.wo = ?\r\n" + 
+					"            AND wtci.task_card = ?\r\n" + 
+					"            AND wtci.task_card_pn_sn = ?\r\n" + 
+					"            AND wtci.ac = ?\r\n" + 
+					"            AND wtci.task_card_pn = ?\r\n" + 
+					"    )                                             AS count\r\n" + 
+					"FROM\r\n" + 
+					"    wo_task_card_item wtci\r\n" + 
+					"WHERE\r\n" + 
+					"        wtci.wo = ?\r\n" + 
+					"    AND wtci.task_card = ?\r\n" + 
+					"    AND wtci.task_card_pn_sn = ?\r\n" + 
+					"    AND wtci.ac = ?\r\n" + 
+					"    AND wtci.task_card_pn = ? ";
 			
 			
 			
@@ -409,7 +481,10 @@ public class JobConfirmationData {
 						}
 						
 						if(rs1.getString(12) != null && !rs1.getNString(12).isEmpty()) {
-							Inbound.setConfirmation_text(rs1.getString(12));
+							String text = rs1.getNString(12).replaceAll("\\p{Cntrl}", "");
+							text = text.replaceAll("\u0019", "");
+							text =text.replaceAll(xml10pattern, "");
+							Inbound.setConfirmation_text(text);
 						}
 						else {
 							Inbound.setConfirmation_text("");
@@ -589,7 +664,11 @@ public class JobConfirmationData {
 						
 						
 						if(rs1.getString(17) != null && !rs1.getNString(17).isEmpty()) {
-							Inbound.setConfirmation_text(rs1.getString(17));
+							String text = rs1.getNString(17).replaceAll("\\p{Cntrl}", ""); 
+							text = text.replaceAll("\u0019", "");
+							text =text.replaceAll(xml10pattern, "");
+							Inbound.setConfirmation_text(text);
+							
 						}
 						else {
 							Inbound.setConfirmation_text("");
@@ -597,11 +676,19 @@ public class JobConfirmationData {
 						
 						
 						//ITEM
+						
+						//TODO
 						pstmt2.setString(1, rs1.getNString(15));
 						pstmt2.setString(2, rs1.getNString(13));
+						pstmt2.setString(3, rs1.getNString(21));
+						pstmt2.setString(4, rs1.getNString(22));
+						pstmt2.setString(5, rs1.getNString(20));
 						
-						pstmt2.setString(3, rs1.getNString(15));
-						pstmt2.setString(4, rs1.getNString(13));
+						pstmt2.setString(6, rs1.getNString(15));
+						pstmt2.setString(7, rs1.getNString(13));
+						pstmt2.setString(8, rs1.getNString(21));
+						pstmt2.setString(9, rs1.getNString(22));
+						pstmt2.setString(10, rs1.getNString(20));
 						
 						rs2 = pstmt2.executeQuery();
 						
@@ -634,7 +721,9 @@ public class JobConfirmationData {
 									Document document = rtfParser.createDefaultDocument();
 									rtfParser.read(new ByteArrayInputStream(rs2.getString(3).getBytes()), document, 0);
 									String text = document.getText(0, document.getLength());
-									
+									text = text.replaceAll("\\p{Cntrl}", ""); 
+									text = text.replaceAll("\u0019", "");
+									text =text.replaceAll(xml10pattern, "");
 									Inbound2.setDefect_text(text);
 								}
 								else {
@@ -710,7 +799,11 @@ public class JobConfirmationData {
 						
 			//logger.info("size "  + MasterInbounds.size());
 			
-			
+			Set<MasterInbound> s= new HashSet<MasterInbound>();
+		    s.addAll(MasterInbounds);         
+		    MasterInbounds = new ArrayList<MasterInbound>();
+		    MasterInbounds.addAll(s);     
+		   // logger.info("size After "  + MasterInbounds.size());
 			return MasterInbounds;
 		}
 		
@@ -870,6 +963,78 @@ public class JobConfirmationData {
 			em.lock(lock, LockModeType.NONE);
 			em.merge(lock);
 			em.getTransaction().commit();
+		}
+
+		public void markTransactionIn(MasterInbound Inbound) throws Exception
+		{
+			//setting up variables
+			exceuted = "OK";
+			
+			String sqlDate =
+			"UPDATE \r\n" + 
+			"WO_ACTUALS      \r\n" + 
+			"SET   \r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = sysdate\r\n" + 
+			"WHERE\r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_DATE IS NULL AND\r\n" + 
+			"WO_ACTUALS.WO_ACTUAL_TRANSACTION = ?";
+			
+			PreparedStatement pstmt2 = null; 
+			pstmt2 = con.prepareStatement(sqlDate);
+			try 
+			{
+						pstmt2.setString(1, Inbound.getJobConfirmationInbounds().getWO_ActualTransaction());
+						pstmt2.executeQuery();		
+			}
+			catch (Exception e) 
+	        {
+				exceuted = e.toString();
+				JobConfirmationController.addError(exceuted);
+	            logger.severe(exceuted);
+	            
+	            throw new Exception("Issue found");
+			}finally {
+				
+				if(pstmt2 != null && !pstmt2.isClosed())
+					pstmt2.close();
+				
+			}
+			
+		}
+
+		public void unMarkTransaction(MasterOutbound Outbound) throws Exception {
+			//setting up variables
+			exceuted = "OK";
+			
+			String sqlDate =
+			"UPDATE \r\n" + 
+			"WO_ACTUALS      \r\n" + 
+			"SET   \r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = null\r\n" + 
+			"WHERE\r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_DATE IS NOT NULL AND\r\n" + 
+			"WO_ACTUALS.WO_ACTUAL_TRANSACTION = ?";
+			
+			PreparedStatement pstmt2 = null; 
+			pstmt2 = con.prepareStatement(sqlDate);
+			try 
+			{
+				for(Outbound outbound : Outbound.getJobConfirmationOutbounds()) 
+				{
+						pstmt2.setString(1, outbound.getWO_ActualTransaction());
+						pstmt2.executeQuery();	
+				}
+			}
+			catch (Exception e) 
+	        {
+				exceuted = e.toString();
+				JobConfirmationController.addError(exceuted);
+	            logger.severe(exceuted);
+	            throw new Exception("Issue found");
+			}finally {
+				if(pstmt2 != null && !pstmt2.isClosed())
+					pstmt2.close();
+			}
 		}
 		
 }

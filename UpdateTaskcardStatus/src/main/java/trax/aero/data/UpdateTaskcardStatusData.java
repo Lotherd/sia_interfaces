@@ -322,7 +322,11 @@ public class UpdateTaskcardStatusData {
 					while (rs1.next()) // LOOP EACH INV LINE
 					{
 						map.put("STATUS",rs1.getNString(1));
-						map.put("STATUS_CATEGORY",rs1.getNString(2));
+						if(rs1.getNString(2) != null && !rs1.getNString(2).isEmpty()) {
+							map.put("STATUS_CATEGORY",rs1.getNString(2));
+						}else {
+							map.put("STATUS_CATEGORY","");
+						}
 						return map; 
 						
 					}
@@ -333,7 +337,7 @@ public class UpdateTaskcardStatusData {
 		}
 		catch (Exception e) 
         {
-			
+			e.printStackTrace();
 		}finally {
 			try {
 				if(rs1 != null && !rs1.isClosed())

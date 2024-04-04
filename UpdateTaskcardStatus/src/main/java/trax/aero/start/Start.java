@@ -34,7 +34,7 @@ public class Start
 			 logger.info("Creating default Scheduled Executor Service [poolSize =" + String.valueOf(scheduledPoolSize) + "]");
 			this.scheduledServ = Executors.newScheduledThreadPool(scheduledPoolSize);
 		}
-		scheduledServ.scheduleAtFixedRate(timer, 30, Long.parseLong(System.getProperty("UpdateTaskCardStatus_interval")), TimeUnit.SECONDS);
+		scheduledServ.scheduleWithFixedDelay(timer, 30, Long.parseLong(System.getProperty("UpdateTaskCardStatus_interval")), TimeUnit.SECONDS);
 	
 	}
 	@PreDestroy

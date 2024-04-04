@@ -4,6 +4,7 @@ package trax.aero.utils;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -62,7 +63,25 @@ public class Run implements Runnable {
 								success = poster.post(ArrayRequest, url);
 								if(success)
 								{
-									break;
+									String body = poster.getBody();
+									boolean lock = true;
+									StringReader sr = new StringReader(body);				
+									jc = JAXBContext.newInstance(MT_TRAX_RCV_I84_4071_RES.class);
+							        Unmarshaller unmarshaller = jc.createUnmarshaller();
+							        MT_TRAX_RCV_I84_4071_RES input = (MT_TRAX_RCV_I84_4071_RES) unmarshaller.unmarshal(sr);
+							       for(OrderRES r : input.getOrder()) {
+								        if(r.getErrorCode() != null && !r.getErrorCode().isEmpty() 
+								        	&& r.getErrorCode().equalsIgnoreCase("51")
+								        	&&	r.getRemarks() != null && !r.getRemarks().isEmpty() 
+								        	&& r.getRemarks().contains("locked") ) {
+								        	lock = false;
+								        }
+							       }
+							       if(lock) {
+							    	   break;
+							       }else {
+							    	   Thread.sleep(60000); 
+							       }
 								}
 							}
 							if(!success)

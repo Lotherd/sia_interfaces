@@ -86,6 +86,9 @@ public class Run implements Runnable {
 						if(System.getProperty("JobConfirmation_outFiles") !=null) {
 							insertFile(jobs);
 						}
+						
+						data.markTransactionIn(MasterInbound);
+						
 					}
 				}
 				if(!JobConfirmationController.getError().isEmpty()) {

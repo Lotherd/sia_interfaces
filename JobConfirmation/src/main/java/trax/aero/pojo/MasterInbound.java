@@ -26,5 +26,22 @@ public class MasterInbound {
 	}
 
    
-   
+	 @Override
+	    public boolean equals(Object obj) {
+	        // TODO Auto-generated method stub
+	        if(obj instanceof MasterInbound)
+	        {
+	        	MasterInbound temp = (MasterInbound) obj;
+	            if(this.JobConfirmationInbound.equals(temp.JobConfirmationInbound) )
+	                return true;
+	        }
+	        return false;
+	    }
+
+	    @Override
+	    public int hashCode() {
+	        // TODO Auto-generated method stub
+	        
+	        return (this.JobConfirmationInbound.hashCode() );        
+	    }
 }

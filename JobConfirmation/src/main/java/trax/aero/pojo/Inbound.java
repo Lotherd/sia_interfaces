@@ -271,6 +271,64 @@ public class Inbound {
     {
         this.Defect_text = Defect_text;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        // TODO Auto-generated method stub
+        if(obj instanceof Inbound)
+        {
+        	Inbound temp = (Inbound) obj;
+            if(this.Order_number.equals(temp.Order_number) &&
+            		this.Operation_number.equals(temp.Operation_number) &&	
+            		this.Work_Center.equals(temp.Work_Center) &&
+            		this.Plant.equals(temp.Plant) &&
+            		this.Personnel_number.equals(temp.Personnel_number) &&
+            		this.Actual_work.equals(temp.Actual_work) &&
+            		this.Unit_for_work.equals(temp.Unit_for_work) &&
+            		this.Activity_type_for_confirmation.equals(temp.Activity_type_for_confirmation) &&
+            		this.Posting_date.equals(temp.Posting_date) &&
+            		this.Final_confirmation.equals(temp.Final_confirmation) &&
+            		this.Indicator_No_remaining_work.equals(temp.Indicator_No_remaining_work) &&
+            		this.Accounting_indicator.equals(temp.Accounting_indicator) &&
+            		this.Actual_start_date.equals(temp.Actual_start_date) &&
+            		this.Actual_start_time.equals(temp.Actual_start_time) &&
+            		this.Actual_finish_date.equals(temp.Actual_finish_date) &&
+            		this.Actual_finish_time.equals(temp.Actual_finish_time) &&
+            		this.General_flag.equals(temp.General_flag) &&
+            		this.Confirmation_text.equals(temp.Confirmation_text) &&
+            		this.Defect_text.equals(temp.Defect_text) &&
+            		this.WO_ActualTransaction.equals(temp.WO_ActualTransaction)
+            		)
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        // TODO Auto-generated method stub
+        
+        return (this.Order_number.hashCode() +
+        		this.Operation_number.hashCode() +	
+        		this.Work_Center.hashCode() +
+        		this.Plant.hashCode() +
+        		this.Personnel_number.hashCode() +
+        		this.Actual_work.hashCode() +
+        		this.Unit_for_work.hashCode() +
+        		this.Activity_type_for_confirmation.hashCode() +
+        		this.Posting_date.hashCode() +
+        		this.Final_confirmation.hashCode() +
+        		this.Indicator_No_remaining_work.hashCode() +
+        		this.Accounting_indicator.hashCode() +
+        		this.Actual_start_date.hashCode() +
+        		this.Actual_start_time.hashCode() +
+        		this.Actual_finish_date.hashCode() +
+        		this.Actual_finish_time.hashCode() +
+        		this.General_flag.hashCode() +
+        		this.Confirmation_text.hashCode() +
+        		this.Defect_text.hashCode() +
+        		this.WO_ActualTransaction.hashCode());        
+    }
 
    
 }

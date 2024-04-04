@@ -15,6 +15,7 @@ public class Schedule implements Serializable
 	private String group;
 	private String location;
 	private String site;
+	private String costCenter;
 	private java.util.Date empstartdt;
 	private java.util.Date empenddt;
 	
@@ -104,5 +105,13 @@ public class Schedule implements Serializable
         sb.append("\nempenddt: ").append(this.getEmpenddt() != null ? this.getEmpenddt() : "null"); 
         
         return sb.toString();	    
+	}
+
+	public String getCostCenter() {
+		return costCenter;
+	}
+
+	public void setCostCenter(String costCenter) {
+		this.costCenter = costCenter;
 	}	
 }

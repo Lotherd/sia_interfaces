@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -59,7 +60,29 @@ public class Run implements Runnable {
 						
 						logger.info("Ouput: " + sw.toString());
 						
-						success = poster.postTaskCard(req, url);
+						for(int i = 0; i < MAX_ATTEMPTS; i++)
+						{
+							success = poster.postTaskCard(req, url);
+							if(success)
+							{
+								String body = poster.getBody();
+								StringReader sr = new StringReader(body);				
+								jc = JAXBContext.newInstance(I74_Response.class);
+						        Unmarshaller unmarshaller = jc.createUnmarshaller();
+						        I74_Response input = (I74_Response) unmarshaller.unmarshal(sr);
+						        if(input.getErrorCode() != null && !input.getErrorCode().isEmpty() 
+						        	&& input.getErrorCode().equalsIgnoreCase("51")
+						        	&&	input.getRemarks() != null && !input.getRemarks().isEmpty() 
+						        	&& input.getRemarks().contains("locked") ) {
+						        	Thread.sleep(60000); 
+						        	continue;
+						        }else {
+						        	break;
+						        }
+						        
+							}
+							
+						}			
 
 						if(!success)
 						{

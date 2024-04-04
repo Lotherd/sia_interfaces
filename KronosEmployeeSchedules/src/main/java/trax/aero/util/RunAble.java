@@ -341,6 +341,7 @@ public class RunAble implements Runnable {
 												String costCenter = data.getCostCenterByEmployee(sch.getEmployee());
 												String group = data.getGroupByCostCenterEmployee(costCenter);
 												result = data.getLocationSiteByGroup(group);
+												sch.setCostCenter(costCenter);
 												sch.setLocation(result[0]);
 												sch.setSite(result[1]);
 												sch.setGroup(group);

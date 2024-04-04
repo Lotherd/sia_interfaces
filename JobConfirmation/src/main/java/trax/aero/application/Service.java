@@ -66,7 +66,7 @@ public class Service {
 			if(request.getSuccess_errorLog().getIDOC_Status().equalsIgnoreCase("53")) {
 				data.markTransaction(request);
 			}else {
-				data.markTransaction(request);
+				data.unMarkTransaction(request);
 				JobConfirmationController.sendEmailACK("Received acknowledgement with IDOC Status: " + request.getSuccess_errorLog().getIDOC_Status() +", IDOC Number: "+request.getSuccess_errorLog().getIDOC_Number()+", Status Error Code: "+request.getSuccess_errorLog().getStatus_ErrorCode() + ", Status Message: " + request.getSuccess_errorLog().getStatusMessage() ) ;
 			}
 		}

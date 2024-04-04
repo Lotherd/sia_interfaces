@@ -85,7 +85,7 @@ public class WorkerValidation implements Runnable{
 		}
 		if(!"".equalsIgnoreCase(errorType)) 
 		{
-			Validation.errorData += "{Error Type: "+ errorType +", group: " + s.getGroup() + ", employee: " + s.getEmployee() + ", location: " + s.getLocation() + ", site: " + s.getSite() + ", Empstartdt: " + s.getEmpstartdt() + ", Empenddt:" + s.getEmpenddt() + " }\n";	
+			Validation.errorData += "{Error Type: "+ errorType +", group: " + s.getGroup() + ", employee: " + s.getEmployee() + ", cost Center: " + s.getCostCenter() + ", location: " + s.getLocation() + ", site: " + s.getSite() + ", Empstartdt: " + s.getEmpstartdt() + ", Empenddt:" + s.getEmpenddt() + " }\n";	
 		}
 		if(isOkayItem) {
 			Validation.valid.add(s);

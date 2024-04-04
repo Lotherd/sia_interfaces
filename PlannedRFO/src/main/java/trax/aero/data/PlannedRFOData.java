@@ -104,7 +104,10 @@ public class PlannedRFOData implements IPlannedRFOData {
 								for(Component component : operation.getComponent()) {
 									if(component.getMaterialNumber() != null) {
 										updatePnInventoryDetail(component,o.getSerialNumber());
-										if(wo !=null ) {
+										if(wo !=null && 
+											(operation.getControlKey() == null || 
+											operation.getControlKey().isEmpty() ||
+											!operation.getControlKey().equalsIgnoreCase("E_X1")) ) {
 											insertComponent(o, component, wo);
 										}
 									}
