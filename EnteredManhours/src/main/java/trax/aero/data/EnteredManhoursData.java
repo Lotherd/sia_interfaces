@@ -236,13 +236,49 @@ public class EnteredManhoursData {
 		
 		
 		String sqlTaskCard =
-		"SELECT REFERENCE_TASK_CARD,TASK_CARD_DESCRIPTION,PRIORITY,WO,TASK_CARD,STATUS,\r\n" + 
-		"(SELECT W.refurbishment_order FROM WO W WHERE W.WO = WO_TASK_CARD.WO AND W.MODULE = 'SHOP' AND WO_TASK_CARD.INTERFACE_FLAG is not null \r\n" + 
-		"AND (WO_TASK_CARD.non_routine = 'N' OR WO_TASK_CARD.non_routine IS NULL)) as RFO \r\n" + 
-		"FROM WO_TASK_CARD WHERE INTERFACE_TRANSFERRED_DATE IS NULL AND (REFERENCE_TASK_CARD IS NOT NULL  OR \r\n" + 
-		"1=(SELECT count(*) FROM WO W WHERE W.WO = WO_TASK_CARD.WO AND W.MODULE = 'SHOP' AND WO_TASK_CARD.INTERFACE_FLAG is not null AND W.refurbishment_order is not null \r\n" + 
-		"AND (WO_TASK_CARD.non_routine = 'N' OR WO_TASK_CARD.non_routine IS NULL)))  \r\n" + 
-		"AND (non_routine = 'N' OR non_routine = 'Y' OR non_routine IS NULL) ";
+		"SELECT\r\n" + 
+		"    reference_task_card,\r\n" + 
+		"    task_card_description,\r\n" + 
+		"    priority,\r\n" + 
+		"    wo,\r\n" + 
+		"    task_card,\r\n" + 
+		"    status,\r\n" + 
+		"    (\r\n" + 
+		"        SELECT\r\n" + 
+		"            w.refurbishment_order\r\n" + 
+		"        FROM\r\n" + 
+		"            wo w\r\n" + 
+		"        WHERE\r\n" + 
+		"                w.wo = wo_task_card.wo\r\n" + 
+		"            AND w.module = 'SHOP'\r\n" + 
+		"            AND wo_task_card.interface_flag IS NOT NULL\r\n" + 
+		"            AND ( wo_task_card.non_routine = 'N'\r\n" + 
+		"                  OR wo_task_card.non_routine IS NULL )\r\n" + 
+		"    ) AS rfo,\r\n" + 
+		"    pn,\r\n" + 
+		"    pn_sn,\r\n" + 
+		"    ac\r\n" + 
+		"FROM\r\n" + 
+		"    wo_task_card\r\n" + 
+		"WHERE\r\n" + 
+		"    interface_transferred_date IS NULL\r\n" + 
+		"    AND ( reference_task_card IS NOT NULL\r\n" + 
+		"          OR 1 = (\r\n" + 
+		"        SELECT\r\n" + 
+		"            COUNT(*)\r\n" + 
+		"        FROM\r\n" + 
+		"            wo w\r\n" + 
+		"        WHERE\r\n" + 
+		"                w.wo = wo_task_card.wo\r\n" + 
+		"            AND w.module = 'SHOP'\r\n" + 
+		"            AND wo_task_card.interface_flag IS NOT NULL\r\n" + 
+		"            AND w.refurbishment_order IS NOT NULL\r\n" + 
+		"            AND ( wo_task_card.non_routine = 'N'\r\n" + 
+		"                  OR wo_task_card.non_routine IS NULL )\r\n" + 
+		"    ) )\r\n" + 
+		"    AND ( non_routine = 'N'\r\n" + 
+		"          OR non_routine = 'Y'\r\n" + 
+		"          OR non_routine IS NULL )";
 		
 		if(MaxRecord != null && !MaxRecord.isEmpty()) {
 			sqlTaskCard=  "SELECT *	FROM (" + sqlTaskCard;
@@ -252,7 +288,8 @@ public class EnteredManhoursData {
 			sqlTaskCard= sqlTaskCard + "  )WHERE ROWNUM <= ?";		
 		}
 		
-		String sqlItem = " SELECT OPS_NO,TASK_CARD_TEXT,MAN_REQUIRE,MAN_HOURS,TASK_CARD_ITEM,INSPECTOR_MAN_HOURS,DUAL_INSPECTOR_MAN_HOURS   FROM WO_TASK_CARD_ITEM WHERE WO = ? AND TASK_CARD = ?";
+		String sqlItem = " SELECT OPS_NO,TASK_CARD_TEXT,MAN_REQUIRE,MAN_HOURS,TASK_CARD_ITEM,INSPECTOR_MAN_HOURS,DUAL_INSPECTOR_MAN_HOURS   FROM WO_TASK_CARD_ITEM WHERE WO = ? AND TASK_CARD = ? " + 
+				" AND TASK_CARD_PN = ? AND TASK_CARD_PN_SN = ? AND AC = ?";
 		
 		//EO = TASK CARD AND ORDER_NUMBER = WO 
 		String sqlItemAudit = "SELECT INTD.xml_document,INTA.TRANSACTION  FROM INTERFACE_AUDIT INTA, INTERFACE_DATA INTD \r\n" + 
@@ -349,6 +386,9 @@ public class EnteredManhoursData {
 					
 					pstmt2.setString(1, Inbound.getWO());
 					pstmt2.setString(2, Inbound.getTaskCard());
+					pstmt2.setString(3, rs1.getString(8));
+					pstmt2.setString(4, rs1.getString(9));
+					pstmt2.setString(5, rs1.getString(10));
 					
 					rs2 = pstmt2.executeQuery();
 
@@ -1024,7 +1064,7 @@ public class EnteredManhoursData {
 					
 			String email = "ERROR";
 			
-			String query = " Select \"EMAIL\", cost_centre FROM OPS_LINE_EMAIL_MASTER where OPS_LINE = ?";
+			String query = " Select \"EMAIL\" FROM OPS_LINE_EMAIL_MASTER where OPS_LINE = ?";
 			
 			PreparedStatement ps = null;
 				

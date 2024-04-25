@@ -17,6 +17,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -166,8 +167,9 @@ public class ImportWarehouseData implements IImportWarehouseData {
 				
 					try 
 					{
-						notepad = em.createQuery("Select n from NotePad n where n.id.notes = :not", NotePad.class)
+						notepad = em.createQuery("Select n from NotePad n where n.id.notes = :not and n.notesText = :text", NotePad.class)
 								.setParameter("not", pnindet.getNotes())
+								.setParameter("text", i.getNotesText())
 								.getSingleResult();
 						existNote = true;
 					}
@@ -210,6 +212,8 @@ public class ImportWarehouseData implements IImportWarehouseData {
 				try {
 					notepad.getId().setNotes(((getTransactionNo("NOTES").longValue())));
 					pnindet.setNotes(new BigDecimal(notepad.getId().getNotes()));
+					notepad.getId().setNotesLine(getLine(new BigDecimal( notepad.getId().getNotes())
+							, "notes_line", "NOTE_PAD", "NOTES"));
 				} catch (Exception e1) {
 					
 				}
@@ -222,6 +226,7 @@ public class ImportWarehouseData implements IImportWarehouseData {
 			insertData(pnindet);
 			
 			if(i.getNotesText() != null && !i.getNotesText().isEmpty()) {
+				
 				logger.info("INSERTING NOTEPAD: " + notepad.getId().getNotes());
 				insertData(notepad);
 			}
@@ -373,8 +378,9 @@ public class ImportWarehouseData implements IImportWarehouseData {
 				
 					try 
 					{
-						notepad = em.createQuery("Select n from NotePad n where n.id.notes = :not", NotePad.class)
+						notepad = em.createQuery("Select n from NotePad n where n.id.notes = :not and n.notesText = :text", NotePad.class)
 								.setParameter("not", pnindet.getNotes())
+								.setParameter("text", i.getNotesText())
 								.getSingleResult();
 						existNote = true;
 					}
@@ -417,6 +423,8 @@ public class ImportWarehouseData implements IImportWarehouseData {
 				try {
 					notepad.getId().setNotes(((getTransactionNo("NOTES").longValue())));
 					pnindet.setNotes(new BigDecimal(notepad.getId().getNotes()));
+					notepad.getId().setNotesLine(getLine(new BigDecimal( notepad.getId().getNotes())
+							, "notes_line", "NOTE_PAD", "NOTES"));
 				} catch (Exception e1) {
 					
 				}
@@ -430,6 +438,8 @@ public class ImportWarehouseData implements IImportWarehouseData {
 			
 			logger.info("INSERTING PN INVENTORY DETAIL: " + pnindet.getPn() + " TRAX BATCH: " +pnindet.getBatch());
 			insertData(pnindet);
+			
+			checkQtyZero(i);
 			
 			if(i.getNotesText() != null && !i.getNotesText().isEmpty()) {
 				logger.info("INSERTING NOTEPAD: " + notepad.getId().getNotes());
@@ -454,6 +464,35 @@ public class ImportWarehouseData implements IImportWarehouseData {
 	
 	
 	
+	private void checkQtyZero(MaterialDetails i) {
+		
+		if(i.getLOCATION() != null && !i.getLOCATION().isEmpty()) {
+			return;
+		}
+		
+		try {
+			List<PnInventoryDetail> pnindets = em.createQuery("SELECT p FROM PnInventoryDetail p where p.pn = :eqNum and p.sn is null and p.createdBy != :create", PnInventoryDetail.class)
+				.setParameter("eqNum", i.getPN())
+				.setParameter("create", "ISSUEIFACE")
+				.getResultList();
+			for(PnInventoryDetail pnindet: pnindets) {
+				if(i.getQTY() != null && !i.getQTY().isEmpty()
+					&&  new BigDecimal(i.getQTY()).compareTo(BigDecimal.ZERO) == 0	) {
+					pnindet.setQtyAvailable(new BigDecimal(i.getQTY()));
+				}
+				logger.info("INSERTING PN INVENTORY DETAIL: " + pnindet.getPn() + " TRAX BATCH: " +pnindet.getBatch());
+				
+				insertData(pnindet);
+			}
+			
+			
+		}catch (Exception e) {
+			logger.info(e.getMessage());
+		}
+		
+	}
+
+
 	public ArrayList<MT_TRAX_SND_I46_4077_REQ> getWarehouse() {
 		
 		
@@ -823,6 +862,28 @@ public class ImportWarehouseData implements IImportWarehouseData {
 			
 			lock.setUnlockedDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()) );
 			insertData(lock,"lock");
+		}
+		
+		private long getLine(BigDecimal no, String table_line, String table, String table_no)
+		{		
+			long line = 0;
+			String sql = " SELECT  MAX("+table_line+") FROM "+table+" WHERE "+table_no+" = ?";
+			try
+			{
+				logger.info(no.toString());
+				Query query = em.createNativeQuery(sql);
+				query.setParameter(1, no);  
+			
+				BigDecimal dec = (BigDecimal) query.getSingleResult(); 
+				line = dec.longValue();
+				line++;
+			}
+			catch (Exception e) 
+			{
+				line = 1;
+			}
+			
+			return line;
 		}
 		
 }

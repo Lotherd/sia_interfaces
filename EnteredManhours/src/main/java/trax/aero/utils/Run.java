@@ -80,7 +80,7 @@ public class Run implements Runnable {
 							       if(lock) {
 							    	   break;
 							       }else {
-							    	   Thread.sleep(60000); 
+							    	   Thread.sleep(300000); 
 							       }
 								}
 							}

@@ -74,7 +74,7 @@ public class Run implements Runnable {
 						        	&& input.getErrorCode().equalsIgnoreCase("51")
 						        	&&	input.getRemarks() != null && !input.getRemarks().isEmpty() 
 						        	&& input.getRemarks().contains("locked") ) {
-						        	Thread.sleep(60000); 
+						        	Thread.sleep(300000); 
 						        	continue;
 						        }else {
 						        	break;

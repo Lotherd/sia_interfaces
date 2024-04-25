@@ -612,7 +612,11 @@ public class PlannedRFOData implements IPlannedRFOData {
 						
 					}
 					
-					
+					if(order.getShopSite() != null && !order.getShopSite().isEmpty()) {
+						wo.setSite(order.getShopSite());
+					}else if(existwo != null && existwo.getSite() != null && !existwo.getSite().isEmpty()) {
+						wo.setSite(existwo.getSite());
+					}
 				}
 				
 			
@@ -639,9 +643,8 @@ public class PlannedRFOData implements IPlannedRFOData {
 				
 				if(order.getShopSite() != null && !order.getShopSite().isEmpty()) {
 					wo.setSite(order.getShopSite());
-				}else if(existwo != null && existwo.getSite() != null && !existwo.getSite().isEmpty()) {
-					wo.setSite(existwo.getSite());
 				}
+				
 				
 				if(existwo != null && existwo.getLocation() != null && !existwo.getLocation().isEmpty()) {
 					wo.setLocation(existwo.getLocation());

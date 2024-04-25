@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
 import trax.aero.controller.ACConfigurationController;
@@ -349,8 +350,9 @@ public class ACConfigurationData {
 				
 					try 
 					{
-						notepad = em.createQuery("Select n from NotePad n where n.id.notes = :not", NotePad.class)
+						notepad = em.createQuery("Select n from NotePad n where n.id.notes = :not and n.notesText = :text", NotePad.class)
 								.setParameter("not", pnindet.getNotes().longValue())
+								.setParameter("text", input.getDescription())
 								.getSingleResult();
 					}
 					catch(Exception e)
@@ -361,7 +363,7 @@ public class ACConfigurationData {
 						notepad.setCreatedBy("TRAX_IFACE");
 						notepad.setId(pk);
 						
-						notepad.getId().setNotesLine(1);
+						
 						notepad.setPrintNotes("YES");
 						
 						try {
@@ -370,7 +372,8 @@ public class ACConfigurationData {
 							
 							e1.printStackTrace();
 						}
-						
+						notepad.getId().setNotesLine(getLine(new BigDecimal( notepad.getId().getNotes())
+								, "notes_line", "NOTE_PAD", "NOTES"));
 						pnindet.setNotes(new BigDecimal(notepad.getId().getNotes()));
 						
 						//EMRO fields to create basic object
@@ -590,6 +593,28 @@ public class ACConfigurationData {
 		//em.lock(lock, LockModeType.NONE);
 		em.merge(lock);
 		em.getTransaction().commit();
+	}
+	
+	private long getLine(BigDecimal no, String table_line, String table, String table_no)
+	{		
+		long line = 0;
+		String sql = " SELECT  MAX("+table_line+") FROM "+table+" WHERE "+table_no+" = ?";
+		try
+		{
+			logger.info(no.toString());
+			Query query = em.createNativeQuery(sql);
+			query.setParameter(1, no);  
+		
+			BigDecimal dec = (BigDecimal) query.getSingleResult(); 
+			line = dec.longValue();
+			line++;
+		}
+		catch (Exception e) 
+		{
+			line = 1;
+		}
+		
+		return line;
 	}
 	
 }

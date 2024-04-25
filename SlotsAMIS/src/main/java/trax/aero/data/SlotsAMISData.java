@@ -343,7 +343,7 @@ public class SlotsAMISData {
 						
 					}else if(item.getAmis().getAction().equalsIgnoreCase("U")) {
 						
-						if(existWO) {
+						
 							if(notepad !=null) {
 								logger.info("UPDATING NOTE: " + notepad.getId().getNotes()+ " WO: " + wo.getWo());
 								insertData(notepad);
@@ -352,13 +352,7 @@ public class SlotsAMISData {
 							logger.info("UPDATING OID: " + item.getAmis().getOid()+ " WO: " + wo.getWo());
 							insertData(wo);
 							
-						}else {
-							
-							exceuted = "Can not update OID: "+ item.getAmis().getOid() +" as ERROR: WO does not exist";
-							logger.severe(exceuted);
-							SlotsAMISController.addError(exceuted);
-							return;
-						}
+						
 					
 					}else {
 						exceuted = "Can not insert/update/delete OID: "+ item.getAmis().getOid() +" as ERROR: ACTION is incorrect format";

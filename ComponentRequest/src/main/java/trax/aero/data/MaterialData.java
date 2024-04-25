@@ -114,9 +114,12 @@ public class MaterialData implements IMaterialData {
 				
 				try
 				{				
-					card =  em.createQuery("select w from WoTaskCard w where w.id.wo = :wo and w.id.taskCard = :card", WoTaskCard.class)
+					card =  em.createQuery("select w from WoTaskCard w where w.id.wo = :wo and w.id.taskCard = :card"
+							+ " and w.id.pn = :taskPn and w.id.pnSn = :taskSn ", WoTaskCard.class)
 							.setParameter("wo", header.getWo().longValue())
 							.setParameter("card", header.getTaskCard())
+							.setParameter("taskPn", gf_nvl(header.getTaskCardPn(),"                                   "))
+							.setParameter("taskSn", gf_nvl(header.getTaskCardSn(),"                                   "))
 							.getSingleResult();
 					em.refresh(card);
 					
@@ -202,7 +205,9 @@ public class MaterialData implements IMaterialData {
 						String site = "",recepient = "" ;
 						site = getSAPSite(detail.getPicklistHeader().getWo());
 						recepient = getRecepient(site);
-						c.setRecepient(recepient);
+						if(recepient != null && !recepient.isEmpty()) {
+							c.setRecepient(recepient);
+						}
 						c.setReservationNumber(detail.getExternalCustRes());
 						c.setReservationItem(detail.getExternalCustResItem());
 						if(c.getReservationNumber() != null && !c.getReservationNumber().isEmpty() &&
@@ -287,9 +292,12 @@ public class MaterialData implements IMaterialData {
 					WoTaskCard card = null;
 					try
 					{
-						card = (WoTaskCard) this.em.createQuery("select w from WoTaskCard w where w.id.wo = :wo and w.id.taskCard = :card")
+						card =  em.createQuery("select w from WoTaskCard w where w.id.wo = :wo and w.id.taskCard = :card"
+								+ " and w.id.pn = :taskPn and w.id.pnSn = :taskSn ", WoTaskCard.class)
 								.setParameter("wo", detail.getPicklistHeader().getWo().longValue())
-								.setParameter("card",  detail.getPicklistHeader().getTaskCard())
+								.setParameter("card", detail.getPicklistHeader().getTaskCard())
+								.setParameter("taskPn", gf_nvl(detail.getPicklistHeader().getTaskCardPn(),"                                   "))
+								.setParameter("taskSn", gf_nvl(detail.getPicklistHeader().getTaskCardSn(),"                                   "))
 								.getSingleResult();
 						em.refresh(card);
 						if(card.getReferenceTaskCard() != null) {
@@ -358,8 +366,9 @@ public class MaterialData implements IMaterialData {
 					String site = "",recepient = "" ;
 					site = getSAPSite(detail.getPicklistHeader().getWo());
 					recepient = getRecepient(site);
-					
-					c.setRecepient(recepient);
+					if(recepient != null && !recepient.isEmpty()) {
+						c.setRecepient(recepient);
+					}
 					ord.setComponent(component);
 					
 					c.setReservationNumber(detail.getExternalCustRes());
@@ -862,6 +871,15 @@ try {
 		insertData(lock);
 	}
 	
+	
+	public <T> T gf_nvl(T a, T b) {
+		if (a == null)
+			return b;
+		else if (a != null && (a instanceof String) && ((String) a).trim().length() == 0)
+			return b;
+		else
+			return a;
+	}
 	
 }
 
