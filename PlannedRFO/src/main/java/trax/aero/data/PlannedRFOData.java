@@ -648,11 +648,13 @@ public class PlannedRFOData implements IPlannedRFOData {
 				
 				if(existwo != null && existwo.getLocation() != null && !existwo.getLocation().isEmpty()) {
 					wo.setLocation(existwo.getLocation());
+				}else {
+					wo.setLocation(setLocation(wo.getSite()));
 				}
 //				if(existwo != null && existwo.getSite() != null && !existwo.getSite().isEmpty()) {
 //					wo.setLocation(setLocation(existwo.getSite()));
 //				}else {
-//					wo.setLocation(setLocation(wo.getSite()));
+//					
 //				}
 				
 				
@@ -1351,7 +1353,7 @@ public class PlannedRFOData implements IPlannedRFOData {
 				locationMaster = em.createQuery("SELECT l FROM LocationMaster l WHERE l.location = :loc", LocationMaster.class)
 				.setParameter("loc", loc)
 				.getSingleResult();
-				if(locationMaster.getInventoryQuarantine() !=null && !locationMaster.getInventoryQuarantine() .isEmpty() && locationMaster.getInventoryQuarantine() .equalsIgnoreCase("Y")){
+				if(locationMaster.getInventoryQuarantine() !=null && !locationMaster.getInventoryQuarantine() .isEmpty() && locationMaster.getInventoryQuarantine() .equalsIgnoreCase("N")){
 					return true;
 				}else{
 					return false;

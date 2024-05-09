@@ -83,7 +83,7 @@ public class UpdateTaskcardStatusController {
 		}
 	}
 	
-	public static void sendEmailResponse(I74_Response response, String status, String status_category)
+	public static void sendEmailResponse(I74_Response response, String status, String status_category ,String wo , String task_card)
 	{
 		try
 		{
@@ -106,6 +106,7 @@ public class UpdateTaskcardStatusController {
 	        }
 			email.setMsg("Order Number: " 
 					+ response.getOrderNumber() + " Status: "  +status  + " Status Category: "  + status_category 
+					+ " Wo: "  + wo  + " Task Card: "  + task_card 
 					+" has encountered an issue. "			
 					+ "Enter records manually. "
 					+ "Issues found at:\n"  

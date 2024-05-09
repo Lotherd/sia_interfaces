@@ -302,7 +302,7 @@ public class UpdateTaskcardStatusData {
 		Map<String,String> map = new HashMap<String,String>();
 		
 		String sqlDate =
-		"SELECT STATUS, STATUS_CATEGORY FROM WO_TASK_CARD WHERE WO_TASK_CARD.REFERENCE_TASK_CARD = ?";
+		"SELECT STATUS, STATUS_CATEGORY FROM WO_TASK_CARD WHERE WO_TASK_CARD.REFERENCE_TASK_CARD = ? AND (non_routine = 'N' OR non_routine = 'Y' OR non_routine IS NULL)";
 		
 		PreparedStatement pstmt2 = null; 
 		ResultSet rs1 = null;
@@ -326,6 +326,63 @@ public class UpdateTaskcardStatusData {
 							map.put("STATUS_CATEGORY",rs1.getNString(2));
 						}else {
 							map.put("STATUS_CATEGORY","");
+						}
+						return map; 
+						
+					}
+				
+				}
+				
+			
+		}
+		catch (Exception e) 
+        {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs1 != null && !rs1.isClosed())
+					rs1.close();
+				if(pstmt2 != null && !pstmt2.isClosed())
+					pstmt2.close();
+			} catch (SQLException e) {
+					
+					e.printStackTrace();
+			}
+		}
+		
+		return map;            
+		
+	}
+	
+	public Map<String,String> getWoTaskCard(String orderNumber)
+	{
+		Map<String,String> map = new HashMap<String,String>();
+		
+		String sqlDate =
+		"SELECT WO, TASK_CARD FROM WO_TASK_CARD WHERE WO_TASK_CARD.REFERENCE_TASK_CARD = ? AND (non_routine = 'N' OR non_routine = 'Y' OR non_routine IS NULL)";
+		
+		PreparedStatement pstmt2 = null; 
+		ResultSet rs1 = null;
+		try 
+		{
+			
+				pstmt2 = con.prepareStatement(sqlDate);
+				
+				pstmt2.setString(1, orderNumber);
+				
+				rs1 =  pstmt2.executeQuery();
+				
+				
+
+				if (rs1 != null) 
+				{
+					while (rs1.next()) // LOOP EACH INV LINE
+					{
+						map.put("WO",rs1.getNString(1));
+						if(rs1.getNString(2) != null && !rs1.getNString(2).isEmpty()) {
+							map.put("TASK_CARD",rs1.getNString(2));
+						}else {
+							map.put("TASK_CARD","");
 						}
 						return map; 
 						

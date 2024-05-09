@@ -123,8 +123,10 @@ public class Run implements Runnable {
 							catch(Exception e)
 							{
 								Map<String,String> map = data.getStatus(input.getOrderNumber());
+								Map<String,String> mapwtc = data.getWoTaskCard(input.getOrderNumber());
 								UpdateTaskcardStatusController.addError(e.toString());
-								UpdateTaskcardStatusController.sendEmailResponse(input, map.get("STATUS"),map.get("STATUS_CATEGORY"));
+								UpdateTaskcardStatusController.sendEmailResponse(input, map.get("STATUS"),map.get("STATUS_CATEGORY")
+								,mapwtc.get("WO"),mapwtc.get("TASK_CARD"));
 							}
 					       finally 
 					       {   
