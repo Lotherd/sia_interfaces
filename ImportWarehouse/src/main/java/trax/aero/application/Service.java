@@ -23,6 +23,7 @@ import trax.aero.data.ImportWarehouseData;
 import trax.aero.interfaces.IImportWarehouseData;
 import trax.aero.logger.LogManager;
 import trax.aero.pojo.MT_TRAX_RCV_I46_4077_RES;
+import trax.aero.pojo.MT_TRAX_SND_I46_4077_REQ;
 import trax.aero.pojo.MaterialDetails;
 
 
@@ -84,6 +85,28 @@ public class Service {
     	   logger.info("finishing");
        }
 	   return Response.ok(exceuted,MediaType.APPLICATION_XML).build();
+	}
+	
+	@POST
+	@Path("/invokeRequest")
+	@Consumes(MediaType.APPLICATION_JSON )
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response invokeRequest(MT_TRAX_SND_I46_4077_REQ input)
+	{
+		try 
+        {   
+			logger.info("MaterialNumber: " +input.getMaterialNumber() );
+			data.invokeRequest(input); 			
+		}
+		catch(Exception e)
+		{
+			logger.severe(e.toString());
+		}
+       finally 
+       {   
+    	   logger.info("finishing");
+       }
+	   return Response.ok().build();
 	}
 	
 	@GET

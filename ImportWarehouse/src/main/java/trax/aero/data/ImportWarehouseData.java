@@ -885,5 +885,86 @@ public class ImportWarehouseData implements IImportWarehouseData {
 			
 			return line;
 		}
+
+
+		public void invokeRequest(MT_TRAX_SND_I46_4077_REQ o) {
+			String exceuted = "OK";
+			final String url = System.getProperty("ImportWarehouse_URL");
+			
+			try 
+	        {    	 
+				ImportPoster poster = new ImportPoster();
+						
+				boolean success = false;
+						
+				JAXBContext jc = JAXBContext.newInstance(MT_TRAX_SND_I46_4077_REQ.class);
+				Marshaller marshaller = jc.createMarshaller();
+				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+				StringWriter sw = new StringWriter();
+				marshaller.marshal(o, sw);
+						
+				logger.info("Ouput: " + sw.toString());
+						
+				success = poster.postImport(o, url);
 		
+				if(!success){
+					exceuted = "Unable to send Material: " +o.getMaterialNumber() + " to URL "+ url;
+					logger.severe(exceuted);
+					ImportWarehouseController.addError(exceuted);	
+				}else {
+							
+					MT_TRAX_RCV_I46_4077_RES input = null;
+					try{ 
+						
+						String body = poster.getBody();
+						StringReader sr = new StringReader(body);				
+						jc = JAXBContext.newInstance(MT_TRAX_RCV_I46_4077_RES.class);
+						Unmarshaller unmarshaller = jc.createUnmarshaller();
+						input = (MT_TRAX_RCV_I46_4077_RES) unmarshaller.unmarshal(sr);
+								
+								
+						jc = JAXBContext.newInstance(MT_TRAX_RCV_I46_4077_RES.class);
+						marshaller = jc.createMarshaller();
+						marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+						sw = new StringWriter();
+						marshaller.marshal(input, sw);
+								
+						logger.info("Input: " + sw.toString());
+								
+						for(MaterialDetails i : input.getMaterialDetails()) {
+							if(i.getMSGNBR().equalsIgnoreCase("53")) { 	 
+								exceuted = ProcessReqest(i);
+							}else {
+								exceuted = "PN: "+i.getPN() +" MSGNBR: " +i.getMSGNBR() + " Remarks: " + i.getNotesText();
+								ImportWarehouseController.addError(exceuted);
+							}	
+						}
+					     	if(!exceuted.equalsIgnoreCase("OK")) {
+					       		exceuted = "Issue found";
+					       		throw new Exception("Issue found");
+					       	}		
+						}
+						catch(Exception e)
+						{
+							logger.severe(e.toString());
+							ImportWarehouseController.sendEmailRest(input);
+						}
+				       finally 
+				       {   
+				    	   logger.info("finishing");
+				    	   exceuted = "OK";
+				       }
+					}
+					if(!exceuted.equalsIgnoreCase("OK"))
+					{
+						throw new Exception("Issue found");
+					}
+			}
+			catch(Exception e)
+			{
+				logger.severe(e.toString());
+				ImportWarehouseController.addError(e.toString());
+				ImportWarehouseController.sendEmailPOST();
+			}
+		}
 }

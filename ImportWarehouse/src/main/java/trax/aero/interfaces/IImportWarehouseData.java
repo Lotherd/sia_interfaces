@@ -31,6 +31,8 @@ public interface IImportWarehouseData {
 	
 	public void invokePOST();
 	
+	public void invokeRequest(MT_TRAX_SND_I46_4077_REQ i);
+	
 	public boolean lockAvailable(String notificationType);
 	
 	
