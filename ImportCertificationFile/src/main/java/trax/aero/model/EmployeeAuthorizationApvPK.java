@@ -12,9 +12,6 @@ public class EmployeeAuthorizationApvPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
-	@Column(name="AUTHORIZATION_CODE", insertable=false, updatable=false)
-	private String authorizationCode;
-
 	private String employee;
 
 	private String customer;
@@ -23,12 +20,7 @@ public class EmployeeAuthorizationApvPK implements Serializable {
 
 	public EmployeeAuthorizationApvPK() {
 	}
-	public String getAuthorizationCode() {
-		return this.authorizationCode;
-	}
-	public void setAuthorizationCode(String authorizationCode) {
-		this.authorizationCode = authorizationCode;
-	}
+	
 	public String getEmployee() {
 		return this.employee;
 	}
@@ -57,8 +49,7 @@ public class EmployeeAuthorizationApvPK implements Serializable {
 		}
 		EmployeeAuthorizationApvPK castOther = (EmployeeAuthorizationApvPK)other;
 		return 
-			this.authorizationCode.equals(castOther.authorizationCode)
-			&& this.employee.equals(castOther.employee)
+			this.employee.equals(castOther.employee)
 			&& this.customer.equals(castOther.customer)
 			&& this.company.equals(castOther.company);
 	}
@@ -66,7 +57,6 @@ public class EmployeeAuthorizationApvPK implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int hash = 17;
-		hash = hash * prime + this.authorizationCode.hashCode();
 		hash = hash * prime + this.employee.hashCode();
 		hash = hash * prime + this.customer.hashCode();
 		hash = hash * prime + this.company.hashCode();

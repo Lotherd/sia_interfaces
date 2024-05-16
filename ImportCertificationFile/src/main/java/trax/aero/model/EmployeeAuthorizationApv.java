@@ -70,10 +70,8 @@ public class EmployeeAuthorizationApv implements Serializable {
 
 	private String status;
 
-	//bi-directional many-to-one association to EmployeeAuthorization
-	@ManyToOne
-	@JoinColumn(name="AUTHORIZATION_CODE" , insertable=false, updatable=false)
-	private EmployeeAuthorization employeeAuthorization;
+	@Column(name="AUTHORIZATION_CODE")
+	private String authorizationCode;
 
 	public EmployeeAuthorizationApv() {
 	}
@@ -230,12 +228,14 @@ public class EmployeeAuthorizationApv implements Serializable {
 		this.status = status;
 	}
 
-	public EmployeeAuthorization getEmployeeAuthorization() {
-		return this.employeeAuthorization;
+	public String getAuthorizationCode() {
+		return authorizationCode;
 	}
 
-	public void setEmployeeAuthorization(EmployeeAuthorization employeeAuthorization) {
-		this.employeeAuthorization = employeeAuthorization;
+	public void setAuthorizationCode(String authorizationCode) {
+		this.authorizationCode = authorizationCode;
 	}
+
+	
 
 }

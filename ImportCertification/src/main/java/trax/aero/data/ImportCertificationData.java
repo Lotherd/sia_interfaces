@@ -3,24 +3,17 @@ package trax.aero.data;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.LockModeType;
-import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
@@ -30,19 +23,17 @@ import com.amazonaws.encryptionsdk.kms.KmsMasterKey;
 import com.amazonaws.encryptionsdk.kms.KmsMasterKeyProvider;
 
 import trax.aero.controller.ImportCertificationController;
-import trax.aero.exception.CustomizeHandledException;
 import trax.aero.interfaces.IImportCertificationData;
 import trax.aero.logger.LogManager;
 import trax.aero.model.BlobTable;
 import trax.aero.model.BlobTablePK;
+import trax.aero.model.EmployeeSkill;
 import trax.aero.model.InterfaceLockMaster;
 import trax.aero.model.RelationMaster;
 import trax.aero.pojo.STAFF;
 import trax.aero.pojo.STAFFMasterResponse;
 import trax.aero.pojo.STAFFRequest;
 import trax.aero.pojo.STAFFResponse;
-import trax.aero.utils.DataSourceClient;
-import trax.aero.utils.ErrorType;
 
 
 /*
@@ -57,6 +48,7 @@ public class ImportCertificationData implements IImportCertificationData {
 	
 	@PersistenceContext(unitName = "TraxStandaloneDS") private EntityManager em;
 	
+	ArrayList<String> Inactive = new ArrayList<>(Arrays.asList("Withdrawn","Suspension","Secondment","Resignation","Terminated","End of Contract Term","Retirement")); 
 	
 	String exceuted;
 	STAFFMasterResponse responseStaff = new STAFFMasterResponse();
@@ -151,7 +143,7 @@ public class ImportCertificationData implements IImportCertificationData {
 				return "Failed";
 				
 			}
-				
+			setEmployeeSkillLicense(input);	
 			employee.setModifiedBy("TRAX_IFACE");
 			employee.setModifiedDate(new Date());
 			if(input.getStaffStatus().equalsIgnoreCase("INACTIVE") && employee.getBlobNo() != null) {
@@ -218,6 +210,42 @@ public class ImportCertificationData implements IImportCertificationData {
 				.getSingleResult();
 		
 		return relationMaster;
+	}
+	
+	
+	private void setEmployeeSkillLicense(STAFFRequest e) {
+		List<EmployeeSkill> employeeSkills = null;
+			try {
+				employeeSkills = em.createQuery("SELECT e FROM EmployeeSkill e WHERE e.id.employee =: em ")
+						.setParameter("em", e.getStaffNumber())
+						.getResultList();
+				}catch(Exception e1){
+					logger.info("Employee: " +e.getStaffNumber() + " Does not contain any skills" );
+					return;
+				}
+				if(employeeSkills == null || employeeSkills.isEmpty()) {
+					return;
+				}
+				
+				for(EmployeeSkill employeeSkill : employeeSkills) {
+					if(employeeSkill.getId().getSkill().contains("AH") || 
+							employeeSkill.getId().getSkill().contains("LAE")) 
+					{
+						
+						employeeSkill.setModifiedBy("TRAX_IFACE");
+						employeeSkill.setModifiedDate(new Date());
+						if(Inactive.contains(e.getStaffStatus()) || 
+								e.getStaffStatus().equalsIgnoreCase("INACTIVE")) {
+							employeeSkill.setStatus("INACTIVE");
+						}else {
+							employeeSkill.setStatus("ACTIVE");
+						}		
+											
+						logger.info("UPDATING SKILL Skill: " + employeeSkill.getId().getSkill() + " Employee: " + employeeSkill.getId().getEmployee() );
+						insertData(employeeSkill);
+					}
+				}
+		
 	}
 	
 	
@@ -317,11 +345,11 @@ public class ImportCertificationData implements IImportCertificationData {
 				ImportCertificationController.addError("Can not import Cert: "+ input.getStaffNumber() +" as ERROR Staff Authorization Expiry Date");
 				return false;
 			}
-			if( input.getStamp() == null ) {
+			if( input.getStamp() == null && !input.getStaffStatus().equalsIgnoreCase("INACTIVE")  ) {
 				ImportCertificationController.addError("Can not import Cert: "+ input.getStaffNumber() +" as ERROR Stamp");
 				return false;
 			}
-			if( input.getSign() == null ) {
+			if( input.getSign() == null && !input.getStaffStatus().equalsIgnoreCase("INACTIVE") ) {
 				ImportCertificationController.addError("Can not import Cert: "+ input.getStaffNumber() +" as ERROR eSign");
 				return false;
 			}
@@ -351,7 +379,10 @@ public class ImportCertificationData implements IImportCertificationData {
 	private RelationMaster setAttachmentLink(RelationMaster employee, byte[] input,String cert, STAFFRequest staff ) {
 		boolean existBlob = false;
 		BlobTable blob = null;
-	    	
+	    	if(input == null) {
+	    		logger.info("SKIPPING");
+	    		return employee;
+	    	}
 			try 
 			{
 				blob = em.createQuery("SELECT b FROM BlobTable b where b.id.blobNo = :bl and b.blobDescription = :des", BlobTable.class)
@@ -420,10 +451,11 @@ public class ImportCertificationData implements IImportCertificationData {
 	            
     			return decryptResult.getResult();			      	
 	        } catch (Exception e) {
+	        	logger.severe("Cypter : " + ciphertext);
 	           logger.severe(e.toString());
 	           e.printStackTrace();
+	           throw e;
 	        }
-			return null;
 	}
 
 	 public STAFFMasterResponse getResponseStaff() {

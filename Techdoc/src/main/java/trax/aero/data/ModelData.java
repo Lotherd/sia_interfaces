@@ -447,6 +447,7 @@ public class ModelData {
 			
 			if(!existWoTaskCard) {
 				taskCard.setTaskCardNumberingSystem(new BigDecimal(getLine(new BigDecimal(wo),"task_card_numbering_system","wo_task_card","wo" )));
+				setWoNumber(taskCard.getId().getWo(), taskCard.getTaskCardNumberingSystem());
 			}
 			
 			
@@ -2051,12 +2052,31 @@ public class ModelData {
 			    return false;
 			}
 			
+			private void setWoNumber(long w, BigDecimal number ) {
+				
+				try 
+				{
+					Wo wo = em.createQuery("Select w From Wo w where w.id.wo =:work", Wo.class)
+							.setParameter("work", w)
+							.getSingleResult();
+					
+					wo.setTaskCardNumberingSystem(number);
+					logger.info("INSERTING WO: " + wo.getWo() + " Number: " + number.toString() );
+					insertData(wo, "wo", "wo");
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();		
+				}
+			}
+			
 			
 			public void setNumber(WoTaskCard cus) {
 				
-				cus.setTaskCardNumberingSystem(new BigDecimal(getLine(new BigDecimal(cus.getId().getWo()),"task_card_numbering_system","wo_task_card","wo" )));
+				//cus.setTaskCardNumberingSystem(new BigDecimal(getLine(new BigDecimal(cus.getId().getWo()),"task_card_numbering_system","wo_task_card","wo" )));
+				//setWoNumber(cus.getId().getWo(), cus.getTaskCardNumberingSystem());
 				
-				insertData(cus, "WoTaskCard", "cus");
+				//insertData(cus, "WoTaskCard", "cus");
 				
 			}
 			

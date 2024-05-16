@@ -32,6 +32,7 @@ import trax.aero.model.PnInterchangeable;
 import trax.aero.model.PnInventoryDetail;
 import trax.aero.model.PnMaster;
 import trax.aero.pojo.MT_TRAX_RCV_I46_4077_BATCH;
+import trax.aero.pojo.MT_TRAX_RCV_I46_4077_JSON;
 import trax.aero.pojo.MT_TRAX_RCV_I46_4077_RES;
 import trax.aero.pojo.MT_TRAX_SND_I46_4077_REQ;
 import trax.aero.pojo.MaterialDetails;
@@ -248,7 +249,7 @@ public class ImportWarehouseData implements IImportWarehouseData {
 	}
 	
 
-	public String ProcessReqest(MaterialDetails i) {
+	public String ProcessReqest(MaterialDetails i, boolean invokeRequest) {
 		
 		exceuted = "OK";
 		
@@ -289,6 +290,10 @@ public class ImportWarehouseData implements IImportWarehouseData {
 							.setParameter("create", "ISSUEIFACE")
 							.getSingleResult();
 					existPnInventoryDetail = true;
+				}
+				if(invokeRequest && !checkIfChange(i, pnindet)) {
+					logger.info("NO CHANGE PN INVENTORY DETAIL: " + pnindet.getPn() + " TRAX BATCH: " +pnindet.getBatch());
+					return exceuted;
 				}
 			}
 			catch(Exception e)
@@ -448,7 +453,10 @@ public class ImportWarehouseData implements IImportWarehouseData {
 
 		}else 
 		{
-			
+			if(invokeRequest) {
+				logger.warning("Can not insert/update PN: "+ i.getPN() +" as ERROR: input is null or does not have minimum values or PN does not exist");
+				return exceuted;
+			}
 			exceuted = "Can not insert/update PN: "+ i.getPN() +" as ERROR: input is null or does not have minimum values or PN does not exist";
 			logger.severe(exceuted);
 			ImportWarehouseController.addError(exceuted);
@@ -761,7 +769,7 @@ public class ImportWarehouseData implements IImportWarehouseData {
 								for(MaterialDetails i : input.getMaterialDetails()) {
 								
 									if(i.getMSGNBR().equalsIgnoreCase("53")) { 	 
-										exceuted = ProcessReqest(i);
+										exceuted = ProcessReqest(i,false);
 									}else {
 										exceuted = "PN: "+i.getPN() +" MSGNBR: " +i.getMSGNBR() + " Remarks: " + i.getNotesText();
 										ImportWarehouseController.addError(exceuted);
@@ -887,12 +895,15 @@ public class ImportWarehouseData implements IImportWarehouseData {
 		}
 
 
-		public void invokeRequest(MT_TRAX_SND_I46_4077_REQ o) {
+		public void invokeRequest(MT_TRAX_RCV_I46_4077_JSON json) {
 			String exceuted = "OK";
 			final String url = System.getProperty("ImportWarehouse_URL");
 			
 			try 
-	        {    	 
+	        {    	
+				MT_TRAX_SND_I46_4077_REQ o = new MT_TRAX_SND_I46_4077_REQ();
+				o.setMaterialNumber(json.getMaterialNumber());
+						
 				ImportPoster poster = new ImportPoster();
 						
 				boolean success = false;
@@ -909,8 +920,7 @@ public class ImportWarehouseData implements IImportWarehouseData {
 		
 				if(!success){
 					exceuted = "Unable to send Material: " +o.getMaterialNumber() + " to URL "+ url;
-					logger.severe(exceuted);
-					ImportWarehouseController.addError(exceuted);	
+					logger.severe(exceuted);	
 				}else {
 							
 					MT_TRAX_RCV_I46_4077_RES input = null;
@@ -933,10 +943,9 @@ public class ImportWarehouseData implements IImportWarehouseData {
 								
 						for(MaterialDetails i : input.getMaterialDetails()) {
 							if(i.getMSGNBR().equalsIgnoreCase("53")) { 	 
-								exceuted = ProcessReqest(i);
+								exceuted = ProcessReqest(i,true);
 							}else {
 								exceuted = "PN: "+i.getPN() +" MSGNBR: " +i.getMSGNBR() + " Remarks: " + i.getNotesText();
-								ImportWarehouseController.addError(exceuted);
 							}	
 						}
 					     	if(!exceuted.equalsIgnoreCase("OK")) {
@@ -947,7 +956,6 @@ public class ImportWarehouseData implements IImportWarehouseData {
 						catch(Exception e)
 						{
 							logger.severe(e.toString());
-							ImportWarehouseController.sendEmailRest(input);
 						}
 				       finally 
 				       {   
@@ -963,8 +971,17 @@ public class ImportWarehouseData implements IImportWarehouseData {
 			catch(Exception e)
 			{
 				logger.severe(e.toString());
-				ImportWarehouseController.addError(e.toString());
-				ImportWarehouseController.sendEmailPOST();
 			}
+		}
+		
+		
+		private boolean checkIfChange(MaterialDetails i, PnInventoryDetail pn) {
+			
+			 BigDecimal qty = new BigDecimal(i.getQTY());
+			
+			if( qty.compareTo( pn.getQtyAvailable()) == 0) {					
+				return false;
+			}
+			return true;	 
 		}
 }

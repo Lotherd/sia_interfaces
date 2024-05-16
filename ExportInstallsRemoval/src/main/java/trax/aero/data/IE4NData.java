@@ -382,6 +382,12 @@ public class IE4NData {
 							}else {
 								out.setPosition("");
 							}
+							if(out.getPosition() != null && !out.getPosition().isEmpty() && 
+									out.getPosition().length() > 4) {
+								out.setPosition(out.getPosition().substring(0,4)) ;
+								overRidePoistion(item, out.getPosition());
+							}
+							
 							if(rs1.getString(4) != null && !rs1.getString(4).isEmpty()) {
 								out.setQuantity(rs1.getString(4));
 							}else {
@@ -507,7 +513,30 @@ public class IE4NData {
 		 
 		 
 		 
-		 public void markTransaction(MT_TRAX_RCV_I43_4076_RES Inbound) throws Exception
+		 private void overRidePoistion(IE4N item, String position) throws Exception {
+			 String sqlPosition =
+						"UPDATE AC_PN_TRANSACTION_HISTORY SET POSITION  = ? WHERE TRANSACTION = ? AND TRANSACTION_ITEM = ?";
+			 PreparedStatement pstmt2 = null; 
+			 
+			
+			 try {
+				pstmt2 = con.prepareStatement(sqlPosition);
+				pstmt2.setString(1, position);
+				pstmt2.setString(2, item.getTransaction());
+				pstmt2.setString(3, item.getTransaction_Item());
+				pstmt2.executeQuery();
+			}catch (Exception e) {
+				IE4NController.addError(e.toString());
+				logger.severe(e.toString());
+		        exceuted = e.toString();
+		        throw new Exception("Issue found");
+			}finally {
+				if(pstmt2 != null && !pstmt2.isClosed())
+					pstmt2.close();
+			}
+		}
+
+		public void markTransaction(MT_TRAX_RCV_I43_4076_RES Inbound) throws Exception
 			{
 				//setting up variables
 				exceuted = "OK";
@@ -584,7 +613,7 @@ public class IE4NData {
 		            throw new Exception("Issue found");
 				}finally {
 					
-					if(pstmt3 != null && !pstmt3.isClosed())
+					if(pstmt2 != null && !pstmt2.isClosed())
 						pstmt2.close();
 					if(pstmt3 != null && !pstmt3.isClosed())
 						pstmt3.close();

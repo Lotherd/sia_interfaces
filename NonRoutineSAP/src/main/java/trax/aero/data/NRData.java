@@ -167,7 +167,8 @@ public class NRData implements INRData {
 						data.getOrder().setDateRequired(dateRequired);
 					}
 				}
-				if( card.getId().getPnSn() != null && !card.getId().getPnSn().isEmpty() && !card.getId().getPnSn().equalsIgnoreCase("                                   ")) {
+				if( card.getId().getPnSn() != null && !card.getId().getPnSn().isEmpty() && !card.getId().getPnSn().equalsIgnoreCase("                                   ")
+						 && checkPnCategory(data.getOrder().getPartNumber())) {
 					data.getOrder().setSerialNumber(card.getId().getPnSn());
 				}
 				
@@ -330,7 +331,8 @@ public class NRData implements INRData {
 							data.getOrder().setDateRequired(dateRequired);
 						}
 				}
-				if( card.getId().getPnSn() != null && !card.getId().getPnSn().isEmpty() && !card.getId().getPnSn().equalsIgnoreCase("                                   ")) {
+				if( card.getId().getPnSn() != null && !card.getId().getPnSn().isEmpty() && !card.getId().getPnSn().equalsIgnoreCase("                                   ")
+						&& checkPnCategory(data.getOrder().getPartNumber())) {
 					data.getOrder().setSerialNumber(card.getId().getPnSn());
 				}
 				if(card.getCorrosion() != null  && !card.getCorrosion().isEmpty() && card.getCorrosion().equalsIgnoreCase("CCS")) {
@@ -464,6 +466,8 @@ public class NRData implements INRData {
 	}
 	
 	
+	
+
 	
 
 	private void markSentFailed(DTTRAXI37I384068 data) {
@@ -813,14 +817,14 @@ public class NRData implements INRData {
 			}
 		}
 		
-		private String getPN(String PN) {
+		private PnMaster getPN(String PN) {
 			try
 			{
 				PnMaster pnMaster = em.createQuery("Select p From PnMaster p where p.id.pn = :partn", PnMaster.class)
 				.setParameter("partn", PN)
 				.getSingleResult();
 				
-				return pnMaster.getPn();
+				return pnMaster;
 			}
 			catch (Exception e)
 			{
@@ -968,6 +972,38 @@ public class NRData implements INRData {
 				return true;
 			}
 			
+		}
+		
+		private boolean checkPnCategory(String partNumber) {
+			String sql = "SELECT PN_TRANSACTION FROM SYSTEM_TRAN_CODE where SYSTEM_TRANSACTION = 'PNCATEGORY' AND SYSTEM_CODE = ?";
+			PnMaster pn = getPN(partNumber);
+			//
+			//("Serialized", "R"));
+			//("Consumable", "C"));
+			//("Kit", "K"));
+			//("Repairable", "P"));
+			
+			if(pn == null) {
+				return false;
+			}
+			try {
+		    	   
+		    	   Query query = em.createNativeQuery(sql);
+		    	   query.setParameter(1, pn.getCategory());  
+				
+					String pnTran = (String) query.getSingleResult();
+					 if(pnTran != null && !pnTran.isEmpty() && pnTran.equalsIgnoreCase("R")) { 	
+						 return true;
+					 }else {
+						 return false;
+					 }
+		        } catch (Exception e) {
+		        	e.printStackTrace();
+		        	logger.severe("Error getting PN Category.");
+		        	logger.severe(e.toString());
+		        	return false;
+		           // throw e;
+		        }		
 		}
 		
 		

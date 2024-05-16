@@ -152,6 +152,10 @@ public class ImportClockOnOffData {
 						
 						exceuted = e.getMessage();
 						logger.severe(exceuted);
+						if(exceuted.contains("Employee does not exist")) {
+							return exceuted; 
+						}
+						
 						isOkay = false;
 					}
 
@@ -747,7 +751,7 @@ public class ImportClockOnOffData {
 								t.setSecretWord(secWord);
 								t.setStatus("HOLD");
 								
-								t.setWorkAccomplished("Taskcard stopped through interfaces");
+								t.setWorkAccomplished(null);
 								
 								ObjectMapper Obj = new ObjectMapper();
 								String json;
@@ -806,7 +810,7 @@ public class ImportClockOnOffData {
 								}		
 								
 								
-								i.setWorkAccomplished("Taskcard stopped through interfaces");
+								i.setWorkAccomplished(null);
 								
 								ObjectMapper Obj = new ObjectMapper();
 								String json;

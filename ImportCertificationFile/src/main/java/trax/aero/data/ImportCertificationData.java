@@ -141,7 +141,7 @@ public class ImportCertificationData {
 	}
 		
 	
-	
+
 	private void setEmployeeSkillLicense(EmployeeLicense e) {
 		List<EmployeeSkill> employeeSkills = null;
 			try {
@@ -152,7 +152,7 @@ public class ImportCertificationData {
 					logger.info("Employee: " +e.getStaffNumber() + " Does not contain any skills" );
 					return;
 				}
-				if(employeeSkills == null && !employeeSkills.isEmpty()) {
+				if(employeeSkills == null || employeeSkills.isEmpty()) {
 					return;
 				}
 				
@@ -164,6 +164,11 @@ public class ImportCertificationData {
 					
 						employeeSkill.setModifiedBy("TRAX_IFACE");
 						employeeSkill.setModifiedDate(new Date());
+						if(Inactive.contains(e.getAuthorizationStatus())) {
+							employeeSkill.setStatus("INACTIVE");
+						}else {
+							employeeSkill.setStatus("ACTIVE");
+						}
 						
 						
 						employeeSkill.setLicense(e.getAuthorizationNumber());
@@ -225,8 +230,7 @@ public class ImportCertificationData {
 		
 		try
 		{
-			employeeAuthorizationApv = em.createQuery("SELECT e FROM EmployeeAuthorizationApv e WHERE e.id.authorizationCode = :auth AND  e.id.employee = :em AND e.id.customer = :cus AND e.id.company = :com", EmployeeAuthorizationApv.class)
-			.setParameter("auth", code)
+			employeeAuthorizationApv = em.createQuery("SELECT e FROM EmployeeAuthorizationApv e WHERE e.id.employee = :em AND e.id.customer = :cus AND e.id.company = :com", EmployeeAuthorizationApv.class)
 			.setParameter("em",e.getStaffNumber())
 			.setParameter("cus",cus)
 			.setParameter("com","SIAEC")
@@ -253,7 +257,7 @@ public class ImportCertificationData {
 		employeeAuthorizationApv.setModifiedBy("TRAX_IFACE");
 		employeeAuthorizationApv.setModifiedDate(new Date());
 		employeeAuthorizationApv.getId().setEmployee(e.getStaffNumber());
-		employeeAuthorizationApv.getId().setAuthorizationCode(code);
+		employeeAuthorizationApv.setAuthorizationCode(code);
 		employeeAuthorizationApv.getId().setCompany("SIAEC");
 		if(getCustomer(customer) != null) {
 			employeeAuthorizationApv.getId().setCustomer(getCustomer(customer));
@@ -266,7 +270,7 @@ public class ImportCertificationData {
 		}
 		
 		if(status != null && !status.isEmpty() && status.equalsIgnoreCase("NO") && getCustomer(customer) != null){
-			logger.info("DELETE EMPLOYEE AUTHORIZATION APV: " + employeeAuthorizationApv.getId().getAuthorizationCode() + " Employee: " +employeeAuthorizationApv.getId().getEmployee()
+			logger.info("DELETE EMPLOYEE AUTHORIZATION APV: " + employeeAuthorizationApv.getAuthorizationCode() + " Employee: " +employeeAuthorizationApv.getId().getEmployee()
 					+" Customer: "+ employeeAuthorizationApv.getId().getCustomer() + " Company: " + employeeAuthorizationApv.getId().getCompany());
 			deleteData(employeeAuthorizationApv);
 			return employeeAuthorizationApv;
@@ -279,7 +283,7 @@ public class ImportCertificationData {
 		
 		
 		if(insert) {
-			logger.info("INSERTING EMPLOYEE AUTHORIZATION APV AuthorizationCode: " + employeeAuthorizationApv.getId().getAuthorizationCode() + " Employee: " +employeeAuthorizationApv.getId().getEmployee()
+			logger.info("INSERTING EMPLOYEE AUTHORIZATION APV AuthorizationCode: " + employeeAuthorizationApv.getAuthorizationCode() + " Employee: " +employeeAuthorizationApv.getId().getEmployee()
 					+" Customer: "+ employeeAuthorizationApv.getId().getCustomer() + " Company: " + employeeAuthorizationApv.getId().getCompany());
 			insertData(employeeAuthorizationApv);
 		}

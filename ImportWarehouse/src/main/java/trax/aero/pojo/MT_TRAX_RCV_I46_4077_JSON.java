@@ -7,9 +7,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@XmlRootElement(name="MT_TRAX_SND_I46_4077_REQ", namespace="http://singaporeair.com/mro/TRAX")
-@XmlAccessorType(XmlAccessType.FIELD)
-public class MT_TRAX_SND_I46_4077_REQ {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class MT_TRAX_RCV_I46_4077_JSON {
 	
 	@XmlElement(name = "MaterialNumber")
 	private String MaterialNumber;
@@ -23,5 +22,4 @@ public class MT_TRAX_SND_I46_4077_REQ {
     {
         this.MaterialNumber = materialNumber;
     }
-	
 }

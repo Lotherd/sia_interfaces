@@ -132,7 +132,7 @@ public class Validation
 		if(!validate.equalsIgnoreCase("OK"))
 		{
 			logger.severe(validate);
-			throw new Exception("Error: " + ErrorType.BAD_REQUEST );
+			throw new Exception(validate );
 		}
 	}
 	

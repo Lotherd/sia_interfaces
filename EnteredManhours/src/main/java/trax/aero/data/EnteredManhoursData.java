@@ -20,12 +20,10 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.LockModeType;
 import javax.persistence.Persistence;
 import javax.swing.text.Document;
 import javax.swing.text.rtf.RTFEditorKit;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
 import trax.aero.controller.EnteredManhoursController;
@@ -41,8 +39,8 @@ import trax.aero.pojo.OpsLineEmail;
 import trax.aero.pojo.OrderAudit;
 import trax.aero.pojo.OrderREQ;
 import trax.aero.pojo.OrderRES;
-import trax.aero.utils.ErrorType;
 import trax.aero.utils.DataSourceClient;
+import trax.aero.utils.ErrorType;
 
 
 /*
@@ -288,7 +286,7 @@ public class EnteredManhoursData {
 			sqlTaskCard= sqlTaskCard + "  )WHERE ROWNUM <= ?";		
 		}
 		
-		String sqlItem = " SELECT OPS_NO,TASK_CARD_TEXT,MAN_REQUIRE,MAN_HOURS,TASK_CARD_ITEM,INSPECTOR_MAN_HOURS,DUAL_INSPECTOR_MAN_HOURS   FROM WO_TASK_CARD_ITEM WHERE WO = ? AND TASK_CARD = ? " + 
+		String sqlItem = " SELECT OPS_NO,TASK_CARD_TEXT,MAN_REQUIRE,(MAN_HOURS * MAN_REQUIRE) ,TASK_CARD_ITEM,(INSPECTOR_MAN_HOURS * INSPECTOR_MAN_REQUIRE ),(DUAL_INSPECTOR_MAN_HOURS * DUAL_INSPECTOR_MAN_REQUIRE)  FROM WO_TASK_CARD_ITEM WHERE WO = ? AND TASK_CARD = ? " + 
 				" AND TASK_CARD_PN = ? AND TASK_CARD_PN_SN = ? AND AC = ?";
 		
 		//EO = TASK CARD AND ORDER_NUMBER = WO 
@@ -488,7 +486,31 @@ public class EnteredManhoursData {
 							
 							InboundItem.setEnteredManHours(manHours);
 							
-							Inbound.getOperations().add(InboundItem);
+							boolean match = false;
+							for (OperationsREQ item : Inbound.getOperations()) {
+								if(item.getOperationNumber() != null && !item.getOperationNumber().isEmpty()
+									&& InboundItem.getOperationNumber() != null && !InboundItem.getOperationNumber().isEmpty()
+									&& item.getOperationNumber().equalsIgnoreCase(InboundItem.getOperationNumber())) {
+									
+									BigDecimal man = new BigDecimal(InboundItem.getEnteredManHours());
+									BigDecimal newMan = new BigDecimal( item.getEnteredManHours()).add(man);
+									item.setEnteredManHours(newMan.toString());
+									
+									if(InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty() && (item.getWork() != null &&  !item.getWork().isEmpty())) {
+										BigDecimal newWork = new BigDecimal(item.getWork()).add(new BigDecimal(InboundItem.getWork()));
+										item.setWork(newWork.toString());
+									}else if((InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty()) && (item.getWork() == null ||  item.getWork().isEmpty())){
+										item.setWork(InboundItem.getWork());
+									}
+									
+									match= true;									
+								}							
+							}
+							if(match) {
+								continue;
+							}else {
+								Inbound.getOperations().add(InboundItem);
+							}
 						}
 					}
 					if(rs2 != null && !rs2.isClosed())

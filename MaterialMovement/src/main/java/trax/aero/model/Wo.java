@@ -157,8 +157,6 @@ public class Wo implements Serializable {
 	@Column(name="INTERFACE_CREATED_DATE")
 	private Date interfaceCreatedDate;
 
-	@Column(name="INTERFACE_DATE")
-	private Date interfaceDate;
 
 	@Column(name="INTERFACE_MODIFIED_DATE")
 	private Date interfaceModifiedDate;
@@ -770,14 +768,6 @@ public class Wo implements Serializable {
 
 	public void setInterfaceCreatedDate(Date interfaceCreatedDate) {
 		this.interfaceCreatedDate = interfaceCreatedDate;
-	}
-
-	public Date getInterfaceDate() {
-		return this.interfaceDate;
-	}
-
-	public void setInterfaceDate(Date interfaceDate) {
-		this.interfaceDate = interfaceDate;
 	}
 
 	public Date getInterfaceModifiedDate() {

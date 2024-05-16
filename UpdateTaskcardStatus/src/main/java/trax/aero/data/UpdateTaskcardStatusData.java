@@ -189,7 +189,7 @@ public class UpdateTaskcardStatusData {
 		String sql =
 		"SELECT WTC.REFERENCE_TASK_CARD as Order_number,WTC.COMPLETED_ON as CompletedDate,PKG_INTERFACE.GETXMLNUMBERSTRING(wtc.completed_on_hour) as completedHour,"
 		+ "PKG_INTERFACE.GETXMLNUMBERSTRING(wtc.completed_on_minute) as completedMinute, WTC.STATUS as TRAXStatus,WTC.STATUS_CATEGORY  TRAXStatusCategory,WTC.REMARKS ReasonForTECO_reversal,"
-		+ "WTC.TASK_CARD TaskCard,WTC.WO,WTC.modified_by,WTC.modified_date FROM WO_TASK_CARD WTC WHERE WTC.INTERFACE_MODIFIED_DATE IS NOT NULL AND WTC.REFERENCE_TASK_CARD IS NOT NULL  AND WTC.STATUS IN ('OPEN','CLOSED' , 'CANCEL') AND (WTC.non_routine = 'N' OR WTC.non_routine = 'Y' OR WTC.non_routine IS NULL)";
+		+ "WTC.TASK_CARD TaskCard,WTC.WO,WTC.modified_by,WTC.modified_date FROM WO_TASK_CARD WTC WHERE WTC.INTERFACE_MODIFIED_DATE IS NOT NULL AND WTC.INTERFACE_TRANSFERRED_DATE IS NOT NULL AND WTC.REFERENCE_TASK_CARD IS NOT NULL  AND WTC.STATUS IN ('OPEN','CLOSED' , 'CANCEL') AND (WTC.non_routine = 'N' OR WTC.non_routine = 'Y' OR WTC.non_routine IS NULL)";
 		
 		if(MaxRecord != null && !MaxRecord.isEmpty()) {
 			sql=  "SELECT *	FROM ( " + sql;

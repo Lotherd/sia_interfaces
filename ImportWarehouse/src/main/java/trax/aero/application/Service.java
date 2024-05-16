@@ -22,6 +22,7 @@ import trax.aero.controller.ImportWarehouseController;
 import trax.aero.data.ImportWarehouseData;
 import trax.aero.interfaces.IImportWarehouseData;
 import trax.aero.logger.LogManager;
+import trax.aero.pojo.MT_TRAX_RCV_I46_4077_JSON;
 import trax.aero.pojo.MT_TRAX_RCV_I46_4077_RES;
 import trax.aero.pojo.MT_TRAX_SND_I46_4077_REQ;
 import trax.aero.pojo.MaterialDetails;
@@ -60,7 +61,7 @@ public class Service {
 				//data.lockTable("I46_REST");
 				for(MaterialDetails i :  input.getMaterialDetails()) {
 					String output = "OK";
-					output = data.ProcessReqest(i);
+					output = data.ProcessReqest(i,false);
 					if(!output.equalsIgnoreCase("OK")) {
 						exceuted = "Issue found";
 					}
@@ -91,7 +92,7 @@ public class Service {
 	@Path("/invokeRequest")
 	@Consumes(MediaType.APPLICATION_JSON )
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response invokeRequest(MT_TRAX_SND_I46_4077_REQ input)
+	public Response invokeRequest(MT_TRAX_RCV_I46_4077_JSON input)
 	{
 		try 
         {   

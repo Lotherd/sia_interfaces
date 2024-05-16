@@ -18,6 +18,7 @@ import javax.xml.bind.Unmarshaller;
 import trax.aero.controller.ImportWarehouseController;
 import trax.aero.model.InterfaceLockMaster;
 import trax.aero.pojo.MT_TRAX_RCV_I46_4077_BATCH;
+import trax.aero.pojo.MT_TRAX_RCV_I46_4077_JSON;
 import trax.aero.pojo.MT_TRAX_RCV_I46_4077_RES;
 import trax.aero.pojo.MT_TRAX_SND_I46_4077_REQ;
 import trax.aero.pojo.MaterialDetails;
@@ -27,11 +28,11 @@ public interface IImportWarehouseData {
 
 	public String ProcessReqestBatch(MT_TRAX_RCV_I46_4077_BATCH i);
 	
-	public String ProcessReqest(MaterialDetails i);
+	public String ProcessReqest(MaterialDetails i, boolean invokeRequest);
 	
 	public void invokePOST();
 	
-	public void invokeRequest(MT_TRAX_SND_I46_4077_REQ i);
+	public void invokeRequest(MT_TRAX_RCV_I46_4077_JSON i);
 	
 	public boolean lockAvailable(String notificationType);
 	

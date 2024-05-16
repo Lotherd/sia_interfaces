@@ -1,13 +1,8 @@
 package trax.aero.application;
 
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -15,26 +10,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-
-
-
-
-import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
 import trax.aero.controller.JobConfirmationController;
-
-
 import trax.aero.data.JobConfirmationData;
 import trax.aero.logger.LogManager;
-
-import trax.aero.pojo.MasterInbound;
 import trax.aero.pojo.MasterOutbound;
 
 
@@ -63,7 +46,13 @@ public class Service {
 			
 			logger.info("Input: " + sw.toString());
 			
-			if(request.getSuccess_errorLog().getIDOC_Status().equalsIgnoreCase("53")) {
+			boolean condition = request.getSuccess_errorLog().getIDOC_Status().equalsIgnoreCase("51") 
+					&& (request.getSuccess_errorLog().getStatusMessage().toLowerCase().contains("already being processed") 
+					|| request.getSuccess_errorLog().getStatusMessage().toLowerCase()
+					.contains("is locked by")) ;
+			
+			if(request.getSuccess_errorLog().getIDOC_Status().equalsIgnoreCase("53")
+					|| (condition)) {
 				data.markTransaction(request);
 			}else {
 				data.unMarkTransaction(request);

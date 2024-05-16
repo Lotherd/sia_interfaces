@@ -7,12 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -23,14 +17,11 @@ import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
-import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import trax.aero.controller.MaterialMovementController;
-import trax.aero.exception.CustomizeHandledException;
 import trax.aero.interfaces.IMaterialMovementData;
 import trax.aero.logger.LogManager;
 import trax.aero.model.BlobTable;
@@ -42,11 +33,10 @@ import trax.aero.model.PicklistHeader;
 import trax.aero.model.PnInventoryDetail;
 import trax.aero.model.PnInventoryHistory;
 import trax.aero.model.PnInventoryHistoryPK;
+import trax.aero.model.Wo;
 import trax.aero.model.WoTaskCard;
 import trax.aero.pojo.MaterialMovementMaster;
 import trax.aero.pojo.OpsLineEmail;
-import trax.aero.utils.DataSourceClient;
-import trax.aero.utils.ErrorType;
 import trax.aero.utils.SharePointPoster;
 
 
@@ -117,8 +107,8 @@ public class MaterialMovementData implements IMaterialMovementData {
 		PicklistDistribution picklistDistributionREQ = null;
 		
 		WoTaskCard woTaskCard = null;
-		
-		
+		Wo wo = null;
+
 		//check if object has min values
 		if(input != null  && checkMinValue(input)) 
 		{
@@ -138,6 +128,10 @@ public class MaterialMovementData implements IMaterialMovementData {
 					pnInventoryDetail = getPnInventoryDetail(input);
 					woTaskCard= getWoTaskCard(input);
 					
+					if(woTaskCard == null) {
+						wo = getWo(input);
+					}
+					
 					if(input.getRequisitionNumber() != null && input.getRequisitionItem() != null &&
 					!input.getRequisitionNumber().isEmpty() && !input.getRequisitionItem().isEmpty()) {
 						picklistHeader = getPicklistHeader(input);
@@ -154,6 +148,12 @@ public class MaterialMovementData implements IMaterialMovementData {
 						picklistHeader = getPicklistHeaderTaskCard(woTaskCard,input);
 						if(picklistHeader == null ) {
 							picklistHeader= getPicklistHeaderTaskCardFirtOne(woTaskCard, input);
+							if(picklistHeader == null ) {
+								picklistHeader = getPicklistHeaderWo(wo,input);
+								if(picklistHeader == null ) {
+									picklistHeader = getPicklistHeaderWoFirtOne(wo,input);			
+								}
+							}
 						}
 						
 						picklistDistributionREQ = getPicklistDistribution(picklistHeader, input,"REQUIRE",null );
@@ -190,10 +190,9 @@ public class MaterialMovementData implements IMaterialMovementData {
 				if(input.getMovementType().equalsIgnoreCase("261")) {
 				
 					logger.info("Inside 261");
-					BigDecimal qtyAvail = pnInventoryDetail.getQtyAvailable();
 					BigDecimal qtyReserv = pnInventoryDetail.getQtyReserved();
 					
-					if(picklistHeader.getModifiedBy().equalsIgnoreCase("TRAX_IFACE") || picklistHeader.getModifiedBy().equalsIgnoreCase("TRAXIFACE")) {
+					if(picklistHeader.getCreatedBy().equalsIgnoreCase("TRAX_IFACE") || picklistHeader.getCreatedBy().equalsIgnoreCase("TRAXIFACE")) {
 						logger.info("After first if");
 						if((new BigDecimal(input.getQuantity()).compareTo(picklistDistributionREQ.getQty()) <= 0) && picklistHeader.getStatus().equalsIgnoreCase("OPEN")) {
 							logger.info("After second if");
@@ -226,9 +225,11 @@ public class MaterialMovementData implements IMaterialMovementData {
 								picklistDistributionDIS.setStatus("ISSUED");
 								picklistHeader.setStatus("CLOSED");
 							}
-							
-							setPnInevtoryHistory(pnInventoryDetail,input,woTaskCard, "ISSUED",picklistDistributionDIS );
-								
+							if(woTaskCard != null) {
+								setPnInevtoryHistory(pnInventoryDetail,input,woTaskCard, "ISSUED",picklistDistributionDIS );
+							}else {
+								setPnInevtoryHistory(pnInventoryDetail,input,wo, "ISSUED",picklistDistributionDIS );
+							}
 						}else {
 							logger.info("Inside inner else");
 							exceuted = "Can not issue Material QTY: "+ input.getMaterial() +" as ERROR: QTY issued from PN inventory is greater than PN inventory QTY or QTY picked is greater than Picklist required or status is not open";
@@ -249,8 +250,7 @@ public class MaterialMovementData implements IMaterialMovementData {
 					}else {
 						logger.info("Inside outer else");
 						if((new BigDecimal(input.getQuantity()).compareTo(picklistDistributionREQ.getQty()) <= 0) && picklistHeader.getStatus().equalsIgnoreCase("OPEN")) {
-							//pnInventoryDetail.setQtyAvailable(qtySubPn);
-							//pnInventoryDetail.setQtyReserved(qtyAddPn);
+							
 							pnInventoryDetail.setQtyReserved(qtyReserv.subtract(new BigDecimal(input.getQuantity())));
 
 							logger.info("Inside outer else");
@@ -284,8 +284,11 @@ public class MaterialMovementData implements IMaterialMovementData {
 								picklistHeader.setStatus("CLOSED");
 							}
 							
-							setPnInevtoryHistory(pnInventoryDetail,input,woTaskCard, "ISSUED",picklistDistributionDIS );
-								
+							if(woTaskCard != null) {
+								setPnInevtoryHistory(pnInventoryDetail,input,woTaskCard, "ISSUED",picklistDistributionDIS );
+							}else {
+								setPnInevtoryHistory(pnInventoryDetail,input,wo, "ISSUED",picklistDistributionDIS );
+							}								
 						}else {
 							logger.info("Inside inner else");
 							exceuted = "Can not issue Material QTY: "+ input.getMaterial() +" as ERROR: QTY issued from PN inventory is greater than PN inventory QTY or QTY picked is greater than Picklist required or status is not open";
@@ -323,56 +326,31 @@ public class MaterialMovementData implements IMaterialMovementData {
 					
 					logger.info("ADD qty " + qtyAddPn.longValue());
 					logger.info("Sub qty " + qtySubPn.longValue());
-//					if((qtySubPickPicklistDIS).compareTo(new BigDecimal(0)) >= 0 && qtySubPn.compareTo(new BigDecimal(0)) > 0) 
-//					{
 						
-						logger.info("Inside if for qtySubPickPicklistDIS");
-//						if(qtySubPickPicklistDIS.compareTo(new BigDecimal(0)) == 0) {						
-//							picklistDistributionDIS.setQtyPicked(new BigDecimal(1));
-//							picklistDistributionDIS.setQty(new BigDecimal(1));
-//						}else {
-//							picklistDistributionDIS.setQtyPicked(qtySubPickPicklistDIS);
-//							picklistDistributionDIS.setQty(qtySubPicklistDIS);
-//						}
+					logger.info("Inside if for qtySubPickPicklistDIS");
 						
-						pnInventoryDetail.setQtyAvailable(qtyAddPn);
-//						pnInventoryDetail.setQtyReserved(qtySubPn);
-						setPnInevtoryHistory(pnInventoryDetail,input,woTaskCard, "RTS/WO", picklistDistributionDIS);
-						
-//					}
-//					else 
-//					{
-//						exceuted = "Can not Return Material QTY: "+ input.getMaterial() +" as ERROR: QTY return from picklist is greater than picklist QTY or Inventory reserved QTY";
-//						logger.severe(exceuted);
-//						MaterialMovementController.addError(exceuted);
-//						exceuted = "QTY PickList DIS: "+ picklistDistributionDIS.getQtyPicked() + " Retrun QTY: " + input.getQuantity() + " Inventory reserved QTY: " +pnInventoryDetail.getQtyReserved() ;
-//						logger.severe(exceuted);
-//						MaterialMovementController.addError(exceuted);
-//						return;
-//					}
-					
+					pnInventoryDetail.setQtyAvailable(qtyAddPn);
+					if(woTaskCard != null) {
+						setPnInevtoryHistory(pnInventoryDetail,input,woTaskCard, "RTS/WO",picklistDistributionDIS );
+					}else {
+						setPnInevtoryHistory(pnInventoryDetail,input,wo, "RTS/WO",picklistDistributionDIS );
+					}
 				}else {
 					exceuted = "Can not update Material QTY: "+ input.getMaterial() +" as ERROR: Movement type is not valid";
 					logger.severe(exceuted);
 					MaterialMovementController.addError(exceuted);
 				}
-				
-				
-				
-				
-				
-				
-				
-				if(input.getAttachedDocumentIDOC() != null) 
+								
+				if(input.getAttachedDocumentIDOC() != null ) 
 				{
-					
-					woTaskCard = setAttachedDocument(woTaskCard,input);
-					
+					if(woTaskCard != null) {
+						woTaskCard = setAttachedDocument(woTaskCard,input);	
+					}else if(wo != null){
+						wo = setAttachedDocument(wo,input);	
+					}
 				}
-				
 				if(input.getAttachmentLinkSharepointlink() != null ) 
-				{
-					
+				{	
 					byte[] file = getsharePointfile(new String(input.getAttachmentLinkSharepointlink(), StandardCharsets.UTF_8));
 					String fileName = new String(input.getAttachmentLinkSharepointlink(), StandardCharsets.UTF_8);
 					try {
@@ -381,10 +359,12 @@ public class MaterialMovementData implements IMaterialMovementData {
 					} catch (MalformedURLException e) {
 						
 					}
-					
-					
-					woTaskCard = setAttachmentLink(woTaskCard,input,file,fileName);	
-					
+					if(woTaskCard != null) {
+						woTaskCard = setAttachmentLink(woTaskCard,input,file,fileName);
+					}else if(wo != null){
+						wo = setAttachmentLink(wo,input,file,fileName);
+
+					}
 				}
 				
 				
@@ -411,6 +391,197 @@ public class MaterialMovementData implements IMaterialMovementData {
 	}
 	
 
+	
+
+
+
+	private Wo setAttachmentLink(Wo wo, MaterialMovementMaster input, byte[] file, String fileName) {
+		BlobTable blob = null;
+		if(file == null) {
+			try 
+			{
+				blob = em.createQuery("SELECT b FROM BlobTable b where b.id.blobNo = :bl and b.webLink = :link", BlobTable.class)
+						.setParameter("bl", wo.getBlobNo().longValue())
+						.setParameter("link", new String(input.getAttachmentLinkSharepointlink(), StandardCharsets.UTF_8))
+						.getSingleResult();
+			}
+			catch(Exception e)
+			{
+				//e.printStackTrace();
+				BlobTablePK pk = new BlobTablePK();
+				blob = new BlobTable();
+				blob.setCreatedDate(new Date());
+				blob.setCreatedBy("TRAX_IFACE");
+				blob.setId(pk);
+				
+				blob.setPrintFlag("YES");
+				blob.setBlobType("EXTLINK");
+				if(wo.getBlobNo() == null) {
+					try {
+						blob.getId().setBlobNo(((getTransactionNo("BLOB").longValue())));
+						wo.setBlobNo(new BigDecimal(blob.getId().getBlobNo()));
+					} catch (Exception e1) {
+					}
+				}else {
+					blob.getId().setBlobNo(wo.getBlobNo().longValue());
+				}
+				blob.getId().setBlobLine(getLine(wo.getBlobNo(),"BLOB_LINE","BLOB_TABLE","BLOB_NO" ));
+				
+			}
+			
+			
+			   
+			
+			blob.setModifiedBy("TRAX_IFACE");
+			blob.setModifiedDate(new Date());
+			blob.setWebLink(new String(input.getAttachmentLinkSharepointlink(), StandardCharsets.UTF_8));
+			blob.setBlobDescription(fileName);
+			blob.setCustomDescription("AttachmentLink");
+			
+			//blob.setDocType("LINK");
+			
+			
+			
+			logger.info("UPDATING wo:  WO: " + wo.getWo()  );
+			insertData(wo);
+			
+			logger.info("UPDATING blob: " + blob.getId().getBlobNo());
+			insertData(blob);
+		
+			return wo;
+
+		}else {
+			try 
+			{
+				blob = em.createQuery("SELECT b FROM BlobTable b where b.id.blobNo = :bl and b.blobDescription = :des and b.customDescription = :cus", BlobTable.class)
+						.setParameter("bl", wo.getBlobNo().longValue())
+						.setParameter("des",fileName )
+						.setParameter("cus","SHAREPOINT" )
+						.getSingleResult();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				BlobTablePK pk = new BlobTablePK();
+				blob = new BlobTable();
+				blob.setCreatedDate(new Date());
+				blob.setCreatedBy("TRAX_IFACE");
+				blob.setId(pk);
+				
+				blob.setPrintFlag("YES");
+				
+				if(wo.getBlobNo() == null) {
+					try {
+						blob.getId().setBlobNo(((getTransactionNo("BLOB").longValue())));
+						wo.setBlobNo(new BigDecimal(blob.getId().getBlobNo()));
+					} catch (Exception e1) {
+					}
+				}else {
+					blob.getId().setBlobNo(wo.getBlobNo().longValue());
+				}
+				
+				blob.getId().setBlobLine(getLine(wo.getBlobNo(),"BLOB_LINE","BLOB_TABLE","BLOB_NO" ));
+				
+				
+			}
+			
+			
+			blob.setDocType("SHAREPOINT");
+			
+			
+			blob.setModifiedBy("TRAX_IFACE");
+			blob.setModifiedDate(new Date());
+			blob.setBlobItem(file);
+			blob.setBlobDescription(fileName);
+			blob.setCustomDescription("SHAREPOINT");
+			
+			
+			
+			logger.info("UPDATING wo: WO: " + wo.getWo()  );
+			insertData(wo);
+			
+			logger.info("UPDATING blob: " + blob.getId().getBlobNo());
+			insertData(blob);
+		
+			return wo;
+		}
+	}
+
+
+
+	private Wo setAttachedDocument(Wo wo, MaterialMovementMaster input) {
+		BlobTable blob = null;
+		String filename = input.getMaterial()+ "_"+ input.getPlant() +"_IDOC.pdf";
+		
+		try 
+		{
+			blob = em.createQuery("SELECT b FROM BlobTable b where b.id.blobNo = :bl and b.blobDescription = :des", BlobTable.class)
+					.setParameter("bl", wo.getBlobNo().longValue())
+					.setParameter("des",filename )
+					.getSingleResult();
+			//existBlob = true;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			BlobTablePK pk = new BlobTablePK();
+			blob = new BlobTable();
+			blob.setCreatedDate(new Date());
+			blob.setCreatedBy("TRAX_IFACE");
+			blob.setId(pk);
+			
+			blob.setPrintFlag("YES");
+			
+			blob.getId().setBlobLine(getLine(wo.getBlobNo(),"BLOB_LINE","BLOB_TABLE","BLOB_NO" ));
+			
+			if(wo.getBlobNo() == null) {
+				try {
+					blob.getId().setBlobNo(((getTransactionNo("BLOB").longValue())));
+					wo.setBlobNo(new BigDecimal(blob.getId().getBlobNo()));
+				} catch (Exception e1) {
+				}
+			}else {
+				blob.getId().setBlobNo(wo.getBlobNo().longValue());
+			}
+		}
+		
+		
+		blob.setDocType("IDOC");
+		
+		
+		blob.setModifiedBy("TRAX_IFACE");
+		blob.setModifiedDate(new Date());
+		blob.setBlobItem(input.getAttachedDocumentIDOC());
+		blob.setBlobDescription(filename);
+		blob.setCustomDescription(filename);
+		
+		
+		
+		logger.info("UPDATING wo: WO: " + wo.getWo()  );
+		insertData(wo);
+		
+		logger.info("UPDATING blob: " + blob.getId().getBlobNo());
+		insertData(blob);
+	
+		return wo;
+	}
+
+
+
+	private Wo getWo(MaterialMovementMaster input) {
+		Wo wo = null;
+		try {
+			wo = em.createQuery("Select w From Wo w where w.refurbishmentOrder =:ord", Wo.class)
+					.setParameter("ord", input.getOrderNumber())
+					.getSingleResult();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return wo;
+	}
+
+
+
 	private BigDecimal getPnInevtoryHistoryIssue(PnInventoryDetail pnInventoryDetail, MaterialMovementMaster input,
 			WoTaskCard woTaskCard, String string, PicklistDistribution picklistDistributionDIS) {
 		
@@ -418,10 +589,9 @@ public class MaterialMovementData implements IMaterialMovementData {
 		
 		try {
 			List<PnInventoryHistory> pihs = em.createQuery("SELECT p FROM PnInventoryHistory p WHERE "
-					+ "p.wo = :woo and p.taskCard = :tas and p.orderNo = :pick and p.orderLine = :pickline "
+					+ " p.orderNo = :pick and p.orderLine = :pickline "
 					+ " and p.orderType = :pic and p.pn = :pnn")
-					.setParameter("woo", new BigDecimal(woTaskCard.getId().getWo()))
-					.setParameter("tas", woTaskCard.getId().getTaskCard())
+					
 					.setParameter("pick", new BigDecimal( picklistDistributionDIS.getId().getPicklist()))
 					.setParameter("pickline",new BigDecimal( picklistDistributionDIS.getId().getPicklistLine()))
 					.setParameter("pic","PICKLST")
@@ -493,15 +663,19 @@ public class MaterialMovementData implements IMaterialMovementData {
 				logger.info("Found WoTaskCard 3");
 				
 				}catch(Exception exc) {
-					woTaskCard = (WoTaskCard) em.createQuery("Select w from WoTaskCard w,Wo woo where "
-							+ "woo.refurbishmentOrder = :order and woo.wo = w.id.wo and woo.module = :mod and (w.nonRoutine is null or w.nonRoutine = :nr) ")
-							.setParameter("order", input.getOrderNumber())
-							.setParameter("mod", "SHOP")
-							.setParameter("nr", "N")
-							.setMaxResults(1)
-							.getSingleResult();
-					
-					logger.info("Found WoTaskCard 4");
+					try {
+						woTaskCard = (WoTaskCard) em.createQuery("Select w from WoTaskCard w,Wo woo where "
+								+ "woo.refurbishmentOrder = :order and woo.wo = w.id.wo and woo.module = :mod and (w.nonRoutine is null or w.nonRoutine <> :cu) ")
+								.setParameter("order", input.getOrderNumber())
+								.setParameter("mod", "SHOP")
+								.setParameter("cu", "S")
+								.setMaxResults(1)
+								.getSingleResult();
+						
+						logger.info("Found WoTaskCard 4");
+					}catch (Exception e4) {
+						return woTaskCard;
+					}
 				}
 			}
 		}
@@ -848,7 +1022,7 @@ public class MaterialMovementData implements IMaterialMovementData {
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 			BlobTablePK pk = new BlobTablePK();
 			blob = new BlobTable();
 			blob.setCreatedDate(new Date());
@@ -893,7 +1067,6 @@ public class MaterialMovementData implements IMaterialMovementData {
 	}
 	
 	private WoTaskCard setAttachmentLink(WoTaskCard woTaskCard, MaterialMovementMaster input, byte[] file, String fileName) {
-		boolean existBlob = false;
 		BlobTable blob = null;
 		if(file == null) {
 			try 
@@ -902,7 +1075,6 @@ public class MaterialMovementData implements IMaterialMovementData {
 						.setParameter("bl", woTaskCard.getBlobNo().longValue())
 						.setParameter("link", new String(input.getAttachmentLinkSharepointlink(), StandardCharsets.UTF_8))
 						.getSingleResult();
-				existBlob = true;
 			}
 			catch(Exception e)
 			{
@@ -957,7 +1129,6 @@ public class MaterialMovementData implements IMaterialMovementData {
 						.setParameter("des",fileName )
 						.setParameter("cus","SHAREPOINT" )
 						.getSingleResult();
-				existBlob = true;
 			}
 			catch(Exception e)
 			{
@@ -1030,11 +1201,13 @@ public class MaterialMovementData implements IMaterialMovementData {
 		pnInventoryHistory.setGoodsRcvdBatch(dumyRecord.getGoodsRcvdBatch());
 		pnInventoryHistory.getId().setBatch(dumyRecord.getBatch());
 		
-		
-		pnInventoryHistory.setWo(new BigDecimal(woTaskCard.getId().getWo()));
-		pnInventoryHistory.setTaskCard(woTaskCard.getId().getTaskCard());
-		pnInventoryHistory.setAc(woTaskCard.getId().getAc());
-		
+		try {
+			pnInventoryHistory.setWo(new BigDecimal(woTaskCard.getId().getWo()));
+			pnInventoryHistory.setTaskCard(woTaskCard.getId().getTaskCard());
+			pnInventoryHistory.setAc(woTaskCard.getId().getAc());
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 		if(transactionType.equalsIgnoreCase("RTS/WO")) {
 			pnInventoryHistory.setTransactionType("RTS/WO");
 			pnInventoryHistory.setQtyReturnStock(new BigDecimal(input.getQuantity()));
@@ -1074,7 +1247,72 @@ public class MaterialMovementData implements IMaterialMovementData {
 		return pnInventoryHistory;
 	}
 	
-
+	private PnInventoryHistory setPnInevtoryHistory(PnInventoryDetail pnInventoryDetail, MaterialMovementMaster input, Wo wo, String transactionType,PicklistDistribution pick) {
+		PnInventoryDetail dumyRecord = getPnInventoryDetailEmpty(pnInventoryDetail,input );
+		
+		
+		PnInventoryHistory pnInventoryHistory = null;
+			
+		pnInventoryHistory = new PnInventoryHistory();
+		PnInventoryHistoryPK pk = new PnInventoryHistoryPK();
+				
+		pnInventoryHistory.setCreatedDate(new Date());
+		pnInventoryHistory.setCreatedBy("TRAX_IFACE");
+		pnInventoryHistory.setId(pk);
+				
+		pnInventoryHistory.setModifiedBy("TRAX_IFACE");
+		pnInventoryHistory.setModifiedDate(new Date());
+			
+		pnInventoryHistory.setPn(dumyRecord.getPn());
+		pnInventoryHistory.setSn(dumyRecord.getSn());
+		pnInventoryHistory.setGoodsRcvdBatch(dumyRecord.getGoodsRcvdBatch());
+		pnInventoryHistory.getId().setBatch(dumyRecord.getBatch());
+		
+		try {
+			pnInventoryHistory.setWo(new BigDecimal(wo.getWo()));
+			pnInventoryHistory.setAc(wo.getAc());
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(transactionType.equalsIgnoreCase("RTS/WO")) {
+			pnInventoryHistory.setTransactionType("RTS/WO");
+			pnInventoryHistory.setQtyReturnStock(new BigDecimal(input.getQuantity()));
+		}else {
+			pnInventoryHistory.setTransactionType("ISSUED");
+			pnInventoryHistory.setIssuedTo("TRAX_IFACE");
+			pnInventoryHistory.setQtyReturnStock(new BigDecimal(0));
+		}
+		
+		
+		pnInventoryHistory.setOrderNo(new BigDecimal(pick.getId().getPicklist()));
+		pnInventoryHistory.setOrderLine(new BigDecimal(pick.getId().getPicklistLine()));
+		pnInventoryHistory.setOrderType("PICKLST");
+		pnInventoryHistory.setQty(new BigDecimal(input.getQuantity()));
+		
+		try {
+			pnInventoryHistory.getId().setTransactionNo(getTransactionNo("PNINVHIS").longValue());
+		} catch (Exception e) {
+		}
+		
+		
+		
+		
+		
+		pnInventoryHistory.setUnitCost(new BigDecimal(0));
+		pnInventoryHistory.setSecondaryCost(new BigDecimal(0));
+		pnInventoryHistory.setSecondaryCurrencyExchange(new BigDecimal(1));
+		pnInventoryHistory.setCurrencyExchangeRate(new BigDecimal(0));
+		
+		pnInventoryHistory.setNla("Y");
+		
+		pnInventoryHistory.setLocation(input.getPlant());
+		
+		logger.info("INSERTING pnInventoryHistory: " + input.getMaterial());
+		insertData(pnInventoryHistory);
+		
+		return pnInventoryHistory;
+		
+	}
 	
 	
 	private PnInventoryDetail getPnInventoryDetailEmpty(PnInventoryDetail pnInventoryDetail,MaterialMovementMaster input ) {
@@ -1332,6 +1570,62 @@ public class MaterialMovementData implements IMaterialMovementData {
 	}
 	return null;
 }	
+
+	
+	private PicklistHeader getPicklistHeaderWo(Wo wo, MaterialMovementMaster m) {
+		try
+		{	
+			List<PicklistHeader> picklistHeader = em.createQuery("SELECT p FROM PicklistHeader p WHERE p.wo = :woo ")
+					.setParameter("woo", new BigDecimal(wo.getWo()))
+					.getResultList();
+			
+			for(PicklistHeader p : picklistHeader) {
+				if(p.getPicklistDistributions() != null) {
+					for(PicklistDistribution d : p.getPicklistDistributions()) {
+						if(d.getId().getTransaction().equalsIgnoreCase("REQUIRE") 
+								&& d.getPn().equalsIgnoreCase(m.getMaterial())) {
+							logger.info("Found PicklistHeader TaskCard");	
+							return d.getPicklistHeader();
+						}
+					}
+				}				
+			}			
+		}
+		catch (Exception e)
+		{	
+			e.printStackTrace();
+			logger.info("PICKLIST NOT FOUND");
+		}
+		return null;
+	}
+	
+	private PicklistHeader getPicklistHeaderWoFirtOne(Wo wo, MaterialMovementMaster m) {
+		try
+		{	
+			List<PicklistHeader> picklistHeader = em.createQuery("SELECT p FROM PicklistHeader p WHERE p.wo = :woo ")
+					.setParameter("woo", new BigDecimal(wo.getWo()))
+					.getResultList();
+			logger.info("PICKLIST HEADER SIZE " +picklistHeader.size());
+			for(PicklistHeader p : picklistHeader) {
+				if(p.getPicklistDistributions() != null) {
+					for(PicklistDistribution d : p.getPicklistDistributions()) {
+						if(d.getId().getTransaction().equalsIgnoreCase("REQUIRE")  && 
+						(d.getStatus() != null && !d.getStatus().isEmpty() 
+						&& !d.getStatus().equalsIgnoreCase("CANCEL"))) {
+							logger.info("Found PicklistHeader TaskCard Firt One");	
+							return d.getPicklistHeader();
+						}
+					}
+				}	
+			}			
+		}
+		catch (Exception e)
+		{	
+			e.printStackTrace();
+			logger.info("PICKLIST NOT FOUND");
+		}
+		return null;
+	}
 	
 	
 	public boolean lockAvailable(String notificationType)

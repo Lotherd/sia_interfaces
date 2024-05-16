@@ -69,10 +69,6 @@ public class EmployeeAuthorization implements Serializable {
 
 	private String status;
 
-	//bi-directional many-to-one association to EmployeeAuthorizationApv
-	@OneToMany(mappedBy="employeeAuthorization")
-	private List<EmployeeAuthorizationApv> employeeAuthorizationApvs;
-
 	//bi-directional many-to-one association to EmployeeAuthPreReq
 	@OneToMany(mappedBy="employeeAuthorization")
 	private List<EmployeeAuthPreReq> employeeAuthPreReqs;
@@ -224,27 +220,11 @@ public class EmployeeAuthorization implements Serializable {
 		this.status = status;
 	}
 
-	public List<EmployeeAuthorizationApv> getEmployeeAuthorizationApvs() {
-		return this.employeeAuthorizationApvs;
-	}
+	
 
-	public void setEmployeeAuthorizationApvs(List<EmployeeAuthorizationApv> employeeAuthorizationApvs) {
-		this.employeeAuthorizationApvs = employeeAuthorizationApvs;
-	}
+	
 
-	public EmployeeAuthorizationApv addEmployeeAuthorizationApv(EmployeeAuthorizationApv employeeAuthorizationApv) {
-		getEmployeeAuthorizationApvs().add(employeeAuthorizationApv);
-		employeeAuthorizationApv.setEmployeeAuthorization(this);
-
-		return employeeAuthorizationApv;
-	}
-
-	public EmployeeAuthorizationApv removeEmployeeAuthorizationApv(EmployeeAuthorizationApv employeeAuthorizationApv) {
-		getEmployeeAuthorizationApvs().remove(employeeAuthorizationApv);
-		employeeAuthorizationApv.setEmployeeAuthorization(null);
-
-		return employeeAuthorizationApv;
-	}
+	
 
 	public List<EmployeeAuthPreReq> getEmployeeAuthPreReqs() {
 		return this.employeeAuthPreReqs;
