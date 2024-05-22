@@ -680,7 +680,11 @@ try {
 	public void acceptReq(DTTRAXI41ACK4067 reqs)
 	
 	{
-			if(reqs.getSuccessErrorLog() != null && reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53"))
+		boolean condition = reqs.getSuccessErrorLog() != null && reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("51")
+				&& ( reqs.getSuccessErrorLog().getStatusMessage().toLowerCase().contains("already being processed") 
+				|| reqs.getSuccessErrorLog().getStatusMessage().toLowerCase().contains("is locked by")) ;
+		
+			if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53") || (condition) ) )
 			{
 				logger.info("IDOCStatus 53");
 				for(Orders o : reqs.getOrders()) {

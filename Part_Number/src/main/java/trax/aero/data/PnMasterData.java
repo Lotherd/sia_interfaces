@@ -764,22 +764,29 @@ public class PnMasterData
 			logger.severe(e.toString());
 			return;
 		}
-		
-		for(AcMaster ac : ACs) {
-			synchronized (ac) {
-				String a = ac.getAc();
-				String p = pn.getPn();
-				insertEffectivityDistrabution(p, a);
+		try
+		{
+			for(AcMaster ac : ACs) {
+				synchronized (ac) {
+					String a = ac.getAc();
+					String p = pn.getPn();
+					insertEffectivityDistrabution(p, a);
+				}
 			}
-		}
-		
-		for(AcTypeSeriesMaster actypeaeries : AcTypeSeries) {
-			synchronized (actypeaeries) {
-				String t = actypeaeries.getId().getAcType();
-				String s = actypeaeries.getId().getAcSeries();
-				String p = pn.getPn();
-				insertEffectivityHeader(p, t,s);
+			
+			for(AcTypeSeriesMaster actypeaeries : AcTypeSeries) {
+				synchronized (actypeaeries) {
+					String t = actypeaeries.getId().getAcType();
+					String s = actypeaeries.getId().getAcSeries();
+					String p = pn.getPn();
+					insertEffectivityHeader(p, t,s);
+				}
 			}
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			logger.severe(e.toString());
+			return;
 		}
 		
 	}
