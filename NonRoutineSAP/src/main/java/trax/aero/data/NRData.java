@@ -221,6 +221,11 @@ public class NRData implements INRData {
 					data.getOrder().setOrderNumber(card.getReferenceTaskCard());
 				}	
 					
+				if(data.getOrder().getParentOrderNumber() != null && !data.getOrder().getParentOrderNumber().isEmpty()
+				&& (data.getOrder().getStatusCategory()  == null || data.getOrder().getStatusCategory().isEmpty() || !data.getOrder().getStatusCategory().equalsIgnoreCase("CCS"))) {
+					data.getOrder().setPartNumber(null);
+					data.getOrder().setSerialNumber(null);
+				}
 				
 				
 				//DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -385,6 +390,11 @@ public class NRData implements INRData {
 				//DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 				//if(card.getGeDueDate() != null)
 				//	data.getOrder().setDateRequired(df.format(card.getGeDueDate()));
+				if(data.getOrder().getParentOrderNumber() != null && !data.getOrder().getParentOrderNumber().isEmpty()
+						&& (data.getOrder().getStatusCategory()  == null || data.getOrder().getStatusCategory().isEmpty() || !data.getOrder().getStatusCategory().equalsIgnoreCase("CCS"))) {
+							data.getOrder().setPartNumber(null);
+							data.getOrder().setSerialNumber(null);
+				}
 				
 				data.getOrder().setTRAXNonRoutineNumber(card.getId().getTaskCard());
 				data.getOrder().setTRAXWO(String.valueOf(card.getId().getWo()));
@@ -524,7 +534,7 @@ public class NRData implements INRData {
 						nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
 						if(o.getComponent() !=null && !o.getComponent().isEmpty()) {
 							for(Component c : o.getComponent() ) {
-								insertComponent( c, nr);
+								//insertComponent( c, nr);
 							}
 						}
 						i++;
@@ -555,7 +565,7 @@ public class NRData implements INRData {
 						nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
 						if(o.getComponent() !=null && !o.getComponent().isEmpty()) {
 							for(Component c : o.getComponent() ) {
-								insertComponent( c, nr);
+								//insertComponent( c, nr);
 							}
 						}
 						i++;
@@ -592,7 +602,7 @@ public class NRData implements INRData {
 						nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
 						if(o.getComponent() !=null && !o.getComponent().isEmpty()) {
 							for(Component c : o.getComponent() ) {
-								insertComponent( c, nr);
+								//insertComponent( c, nr);
 							}
 						}
 						i++;

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -15,7 +14,6 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
@@ -65,7 +63,6 @@ import trax.aero.util.EmailSender;
 
 public class ModelData {
 	
-	long Picklong = 9999;
 	long Cuslong = 0001;
 	
 	EntityManagerFactory factory = null;
@@ -80,9 +77,6 @@ public class ModelData {
 	public String wo = "";
 	public String ac = "";
 	
-	private boolean area = false;
-	private boolean manhrs = false;
-	//public InterfaceLockMaster lock;
 	
 	public ArrayList<WoTaskCard> cusList = new ArrayList<WoTaskCard>();
 	
@@ -103,8 +97,6 @@ public class ModelData {
 		try
 		{
 			cus = "";
-			area = false;
-			manhrs = false;
 			
 			
 			List<ADDATTR> attributes = data.getEFFECTIVITY().getJOBCARD().getJOBI().getPLI().getADDATTR();
@@ -320,33 +312,8 @@ public class ModelData {
 				}
 			}
 				
-			/*
-			String modClass = filterADDATTR(attributes, "MOD_CLAS");
 			
-			String jobnbr = data.getEFFECTIVITY().getJOBCARD().getJOBNBR();
-			if(jobnbr != null && modClass != null)
-			{
-
-				if(modClass.equalsIgnoreCase(jobnbr) )
-					taskCard.setModNo(modClass);
-				else
-				{
-					taskCard.setModNo(jobnbr + " or " + modClass);
-				}
-			}
-			else if(jobnbr != null)
-			{
-				taskCard.setModNo(jobnbr);
-			}
-			else if(modClass != null)
-			{
-				taskCard.setModNo(modClass);
-			}
-			*/
 			
-			//if(data.getEFFECTIVITY().getJOBCARD().getJOBI().getPLI().getSKILL() != null)
-			//	taskCard.setSkill(data.getEFFECTIVITY().getJOBCARD().getJOBI().getPLI().getSKILL());
-
 			
 			String category = filterADDATTR(attributes, "ORDER-TYPE");
 			
@@ -362,16 +329,54 @@ public class ModelData {
 				return false;
 			}
 			
-			if(data.getEFFECTIVITY().getJOBCARD().getWPDATE() != null)
-			{
-				//taskCard.setScheduleStartDate(data.getEFFECTIVITY().getJOBCARD().getWPDATE())
-				Date date = new SimpleDateFormat("yyyyMMdd").parse(data.getEFFECTIVITY().getJOBCARD().getWPDATE());
-				
-				//taskCard.setScheduleStartDate(date);
-			}
+			String type =data.getEFFECTIVITY().getJOBCARD().getTYPE();
+			String priority = filterADDATTR(attributes, "PRIORITY");
 
+			if(type != null)
+				taskCard.setType(type);
+			if(priority != null)
+				taskCard.setPlanningPriority(priority);
 			
-			
+			if(type != null && priority != null) {
+				switch(type) {
+					case "MJC":
+						taskCard.setTaskCardCategory(type);
+						break;
+					case "SJC":
+						taskCard.setTaskCardCategory(type);
+						break;
+					case "CCS":
+						if(priority.equalsIgnoreCase("O/C"))
+							taskCard.setTaskCardCategory(type);
+						break;
+					case "MCS":
+						switch(priority) {
+							case "A":
+								taskCard.setTaskCardCategory("ADMAF");
+								break;
+							case "B":
+								taskCard.setTaskCardCategory("ALMAF");
+								break;
+							case "C":
+								taskCard.setTaskCardCategory("MAF");
+								break;	
+						}
+					    break;
+					case "SI":
+						switch(priority) {
+							case "1":
+								taskCard.setTaskCardCategory("ADSI");
+								break;
+							case "2":
+								taskCard.setTaskCardCategory("ALSI");
+								break;
+							case "3":
+								taskCard.setTaskCardCategory("SI");
+								break;	
+						}
+					    break;    
+				}
+			}
 			
 			String ref = data.getEFFECTIVITY().getJOBCARD().getWONBR();
 			if(wonbr != null)
@@ -385,7 +390,6 @@ public class ModelData {
 			
 			
 			
-			//item.setId(itemKey);
 			
 
 
@@ -425,7 +429,6 @@ public class ModelData {
 			itemComp.setModifiedDate(new Date());
 			
 			
-			//itemComp.setWoTaskCard(taskCard);
 			
 			taskCard.getWoTaskCardItems().remove(0);
 			
@@ -438,11 +441,67 @@ public class ModelData {
 				return true;
 			}
 			
-			if(getWoThirdParty(taskCard.getId().getWo()) ) {
+			if(getWoThirdParty(taskCard.getId().getWo())  && !getWoShop(woo)) {
 				processDataCUS(data, pdf, pdfBytes,taskCard);
-				//taskCard.setScheduleTaskCard(cus);
 			}else {
 				logger.info("WO: " + wo + " is not a Third Party WO");
+			}
+			
+			if(getWoShop(woo) && (pdf != null && pdfBytes != null)) {
+			
+					boolean existBlob = false;
+					BlobTable blob = null;
+				    	
+						try 
+						{
+							blob = em.createQuery("SELECT b FROM BlobTable b where b.id.blobNo = :bl and b.id.blobLine = :des", BlobTable.class)
+									.setParameter("bl", taskCard.getBlobNo().longValue())
+									.setParameter("li",new Long(1))
+									.getSingleResult();
+							existBlob = true;
+						}
+						catch(Exception e)
+						{
+							
+							BlobTablePK pk = new BlobTablePK();
+							blob = new BlobTable();
+							blob.setCreatedDate(new Date());
+							blob.setCreatedBy("TRAX_IFACE");
+							blob.setId(pk);
+							
+							blob.setPrintFlag("YES");
+							blob.setDocType("TASKCARD");
+							blob.getId().setBlobLine(1);
+						}
+						
+						
+						
+						blob.setModifiedBy("TRAX_IFACE");
+						blob.setModifiedDate(new Date());
+						blob.setBlobItem(pdfBytes);
+						blob.setBlobDescription(pdf);
+						blob.setCustomDescription(pdf);
+						
+						
+						
+						if(!existBlob && taskCard.getBlobNo() == null) {
+							try {
+								blob.getId().setBlobNo(((getTransactionNo("BLOB").longValue())));
+								taskCard.setBlobNo(new BigDecimal(blob.getId().getBlobNo()));
+							} catch (Exception e1) {
+								
+							}
+						}else if(taskCard.getBlobNo() != null){
+							blob.getId().setBlobNo(taskCard.getBlobNo().longValue());
+						}
+						
+						logger.info("INSERTING blob: " + blob.getId().getBlobNo() + " Line: " + blob.getId().getBlobLine());
+						if(!em.getTransaction().isActive())
+							em.getTransaction().begin();
+						
+						em.merge(blob);
+						em.getTransaction().commit();
+						//em.clear();
 			}
 			
 			if(!existWoTaskCard) {
@@ -721,7 +780,7 @@ public class ModelData {
 					return false;
 				}
 				
-				exhancedDate(taskCard,itemComp.getOpsNo());
+				exhancedData(taskCard,itemComp.getOpsNo());
 				
 				existWoTaskCard = false;
 				
@@ -1068,7 +1127,6 @@ public class ModelData {
 		
 		if(card.getArea() != null && !card.getArea().isEmpty()) {
 			woCard.setArea(card.getArea());
-			area = true;
 		}
 		woCard.setPhase(card.getPhase());
 		
@@ -1092,7 +1150,6 @@ public class ModelData {
 				
 				if(i.getManHours() != null) {
 					woCard.getWoTaskCardItems().get(0).setManHours(i.getManHours());
-					manhrs = true;
 				}
 				woCard.getWoTaskCardItems().get(0).setDuplicateInspection(i.getDuplicateInspection());
 				
@@ -1439,6 +1496,7 @@ public class ModelData {
 			private String findPicklistNumber(String reservationNumber, String resrvationItem) {
 				try
 				{	
+					@SuppressWarnings("unchecked")
 					ArrayList<PicklistDistribution>picklistdist = (ArrayList<PicklistDistribution>) em.createQuery("SELECT p FROM PicklistDistribution p where p.externalCustRes =:pi AND p.id.transaction =:tra AND p.id.distributionLine =:dl")
 							.setParameter("pi", reservationNumber)
 							.setParameter("tra", "DISTRIBU")
@@ -1595,15 +1653,6 @@ public class ModelData {
 						return false;
 					}
 					
-					String svo = "";
-					if(wonbr != null)
-					{
-						if(wonbr.length() > 4)
-						{
-							svo = (wonbr.substring(0, wonbr.length()- 4));
-							
-						}
-					}
 					
 					taskId = getCusId(Cuslong ,parentTaskCard );
 					
@@ -1813,9 +1862,6 @@ public class ModelData {
 						
 					
 					
-					//if(data.getEFFECTIVITY().getJOBCARD().getJOBI().getPLI().getSKILL() != null)
-					//	taskCard.setSkill(data.getEFFECTIVITY().getJOBCARD().getJOBI().getPLI().getSKILL());
-
 					
 					String category = filterADDATTR(attributes, "ORDER-TYPE");
 					
@@ -1831,12 +1877,53 @@ public class ModelData {
 						return false;
 					}
 					
-					if(data.getEFFECTIVITY().getJOBCARD().getWPDATE() != null)
-					{
-						//taskCard.setScheduleStartDate(data.getEFFECTIVITY().getJOBCARD().getWPDATE())
-						Date date = new SimpleDateFormat("yyyyMMdd").parse(data.getEFFECTIVITY().getJOBCARD().getWPDATE());
-						
-						//taskCard.setScheduleStartDate(date);
+					String type =data.getEFFECTIVITY().getJOBCARD().getTYPE();
+					String priority = filterADDATTR(attributes, "PRIORITY");
+
+					if(type != null)
+						taskCard.setType(type);
+					if(priority != null)
+						taskCard.setPlanningPriority(priority);
+					
+					if(type != null && priority != null) {
+						switch(type) {
+							case "MJC":
+								taskCard.setTaskCardCategory(type);
+								break;
+							case "SJC":
+								taskCard.setTaskCardCategory(type);
+								break;
+							case "CCS":
+								if(priority.equalsIgnoreCase("O/C"))
+									taskCard.setTaskCardCategory(type);
+								break;
+							case "MCS":
+								switch(priority) {
+									case "A":
+										taskCard.setTaskCardCategory("ADMAF");
+										break;
+									case "B":
+										taskCard.setTaskCardCategory("ALMAF");
+										break;
+									case "C":
+										taskCard.setTaskCardCategory("MAF");
+										break;	
+								}
+							    break;
+							case "SI":
+								switch(priority) {
+									case "1":
+										taskCard.setTaskCardCategory("ADSI");
+										break;
+									case "2":
+										taskCard.setTaskCardCategory("ALSI");
+										break;
+									case "3":
+										taskCard.setTaskCardCategory("SI");
+										break;	
+								}
+							    break;    
+						}
 					}
 
 					
@@ -2001,6 +2088,7 @@ public class ModelData {
 			            {
 			            	
 			            	try {
+			            	  @SuppressWarnings("unused")
 			            	  String found = (String) em.createNativeQuery(sql)
 			        			.setParameter(1, c)
 			        			.setParameter(2, parent.getId().getWo() )
@@ -2097,9 +2185,10 @@ public class ModelData {
 				return null;
 			}
 			
-			void exhancedDate(WoTaskCard woTaskCard, String ops){
+			@SuppressWarnings("unchecked")
+			private void exhancedData(WoTaskCard woTaskCard, String ops){
 				TaskCard card = null;
-				
+				boolean shopWo = false;
 				try
 				{
 					card = (TaskCard) this.em.createQuery("select t from TaskCard t where t.taskCard = :card")
@@ -2111,6 +2200,10 @@ public class ModelData {
 					logger.info("NO ENG TASK CARD FOUND");
 					return;
 				}
+				if(getWoShop(new BigDecimal( woTaskCard.getId().getWo()).toString())){
+					shopWo = true;
+				}
+				
 				//ITEM
 				if(card.getTaskCardItems() != null && !card.getTaskCardItems().isEmpty()) {
 					for(TaskCardItem item :card.getTaskCardItems()) {
@@ -2197,6 +2290,13 @@ public class ModelData {
 							i.setOpsNo(item.getOpsNo());
 							
 							i.setTaskCardText(item.getTaskCardText());
+							
+							//TODO ESD
+							//MAN_HOURS
+							//SKILL
+							//if(shopWo) {
+								
+							//}
 							
 							logger.info("INSERTING WoTaskCardItem: " + i.getId().getTaskCardItem() );
 							
@@ -2368,6 +2468,19 @@ public class ModelData {
 							insertData(e, "WoTaskCardExecution", "WoTaskCardExecution");
 						}
 					}
+				}
+				//TASK_CARD TODO ESD
+				//SUB_PHASE, BILLABLE_HOURS ,GATE, PHASE
+				if(shopWo) {
+				/*	
+					woTaskCard.setPhase(card.getPhase());
+					woTaskCard.setSubPhase(card.getSubPhase());
+					woTaskCard.setBillableHours(card.getBillableHours());
+					woTaskCard.setGate(card.getGate());
+					woTaskCard.setModifiedDate(new Date());
+					woTaskCard.setModifiedBy("TRAXIFACE");
+					insertData(woTaskCard, "WoTaskCard", "woTaskCard");
+				 */
 				}
 				
 			}
@@ -2541,5 +2654,32 @@ public class ModelData {
 				em.merge(lock);
 				em.getTransaction().commit();
 			}
+			
+			private Boolean getWoShop(String woString) {
+				logger.info("Checking WO");
+				try 
+				{
+					Wo wo = em.createQuery("Select w From Wo w where w.id.wo =:work", Wo.class)
+							.setParameter("work", Long.parseLong(woString))
+							.getSingleResult();
+					if(wo .getModule() != null && !wo.getModule().isEmpty() &&
+							wo.getModule().equalsIgnoreCase("SHOP") ) {
+						
+						logger.info("SHOP: " + wo.getModule());
+						
+						return true;
+					}else {
+						return false;
+					}
+				}
+				catch(Exception e)
+				{
+					logger.info("NO Production WO found");
+					e.printStackTrace();		
+				}
+			    return false;
+			}
+			
+			
 		
 }

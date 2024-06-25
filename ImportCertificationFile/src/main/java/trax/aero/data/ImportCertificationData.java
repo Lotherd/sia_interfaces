@@ -178,6 +178,9 @@ public class ImportCertificationData {
 						} catch (ParseException e1) {
 							
 						}
+						if(employeeSkill.getExpirationDate() !=null && employeeSkill.getExpirationDate().before(new Date())) {
+							employeeSkill.setStatus("INACTIVE");
+						}
 						
 						logger.info("UPDATING SKILL Skill: " + employeeSkill.getId().getSkill() + " Employee: " + employeeSkill.getId().getEmployee() );
 						insertData(employeeSkill);
@@ -345,6 +348,7 @@ public class ImportCertificationData {
 		
 		if(license.getExpireDate().before(new Date())) {
 			expire = true;
+			license.setStatus("INACTIVE");
 		}
 		
 		

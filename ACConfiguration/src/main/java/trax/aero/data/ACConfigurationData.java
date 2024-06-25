@@ -67,7 +67,7 @@ public class ACConfigurationData {
 		try
 		{
 			//TODO
-			wos = (List<Wo>) em.createQuery("select w from Wo w where w.scheduleStartDate = :date")
+			wos = (List<Wo>) em.createQuery("select w from Wo w where w.scheduleStartDate = :date and w.ac is not null")
 					.setParameter("date", date,TemporalType.DATE)
 					.getResultList();
 			
