@@ -67,7 +67,7 @@ public class ACConfigurationData {
 		try
 		{
 			//TODO
-			wos = (List<Wo>) em.createQuery("select w from Wo w where w.scheduleStartDate = :date and w.ac is not null")
+			wos = (List<Wo>) em.createQuery("select w from Wo w where TO_CHAR(w.scheduleStartDate, 'DD-MON-YYYY') = TO_CHAR(:date, 'DD-MON-YYYY') and w.ac is not null")
 					.setParameter("date", date,TemporalType.DATE)
 					.getResultList();
 			
@@ -77,11 +77,13 @@ public class ACConfigurationData {
 			logger.severe(e.getMessage() );
 		}
 		for(Wo w : wos) {
-			MT_TRAX_SND_I51_4072 out = new MT_TRAX_SND_I51_4072();
-			logger.info("WO: " + String.valueOf(w.getWo()) +" AC: "+ w.getAc() +" i:"+i);
-			out.setAircraftTailNumber(w.getAc());
-			SND.add(out);  
-			i++;
+			if(w.getAc() != null && !w.getAc().isEmpty() && !w.getAc().equalsIgnoreCase("          ") && !w.getModule().equalsIgnoreCase("SHOP")) {
+				MT_TRAX_SND_I51_4072 out = new MT_TRAX_SND_I51_4072();
+				logger.info("WO: " + String.valueOf(w.getWo()) +" AC: "+ w.getAc() +" i:"+i);
+				out.setAircraftTailNumber(w.getAc());
+				SND.add(out);  
+				i++;
+			}
 		}
 			
 		return SND;

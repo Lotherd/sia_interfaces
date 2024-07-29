@@ -49,6 +49,7 @@ public class EmailSender
 		catch (EmailException e) 
 		{
 			logger.severe(e.getMessage());
+			logger.severe(error);
 		}
 
 		

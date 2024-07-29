@@ -163,7 +163,7 @@ public class ModelData {
 			if(taskCard.getId() == null)
 				taskCard.setId(new WoTaskCardPK());
 			
-			taskCard.getId().setAc(data.getEFFECTIVITY().getREGNBR());
+			taskCard.getId().setAc("          ");
 			String pn = filterADDATTR(attributes, "COMP");
 			if(pn == null || pn.length() == 0)
 			{
@@ -171,7 +171,7 @@ public class ModelData {
 			}
 			else
 			{
-				taskCard.getId().setPn("                                   ");
+				taskCard.getId().setPn(pn);
 			}
 			
 			String sn = filterADDATTR(attributes, "SN");
@@ -181,7 +181,7 @@ public class ModelData {
 			}
 			else
 			{
-				taskCard.getId().setPnSn("                                   ");
+				taskCard.getId().setPnSn(sn);
 			}
 			
 			taskCard = assignValuesWO(taskId,taskCard,Long.parseLong(woo),taskCard.getId().getAc()
@@ -225,10 +225,10 @@ public class ModelData {
 			
 
 			
-			taskCard.getId().setAc(data.getEFFECTIVITY().getREGNBR());
+			taskCard.getId().setAc("          ");
 			taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 			
-			ac = taskCard.getId().getAc();
+			ac = data.getEFFECTIVITY().getREGNBR();
 			
 			
 			taskCard.getWoTaskCardItems().get(0).getId().setTaskCardPn(taskCard.getId().getPn());
@@ -1695,7 +1695,7 @@ public class ModelData {
 					
 				
 					
-					taskCard.getId().setAc(data.getEFFECTIVITY().getREGNBR());
+					taskCard.getId().setAc("          ");
 					taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 					
 					String pn = filterADDATTR(attributes, "COMP");
@@ -1706,7 +1706,7 @@ public class ModelData {
 					}
 					else
 					{
-						taskCard.getId().setPn("                                   ");
+						taskCard.getId().setPn(pn);
 						
 						
 					}
@@ -1721,7 +1721,7 @@ public class ModelData {
 					}
 					else
 					{
-						taskCard.getId().setPnSn("                                   ");
+						taskCard.getId().setPnSn(sn);
 					}
 					
 					taskCard.getWoTaskCardItems().get(0).getId().setTaskCardPnSn(taskCard.getId().getPnSn());
