@@ -206,6 +206,10 @@ public class TaskCardData {
 		String taskCardString = null,  DeletionIndicatorString = null;
 		String size = "";
 		
+		if(taskCards.getGroupNo().startsWith("MO") || taskCards.getGroupNo().startsWith("SI") ) {
+			taskCards.setTaskCard("S_"+taskCards.getTaskCard());
+		}
+		
 		
 		if(taskCards.getTaskCard() != null && taskCards.getGroupNo() != null && !(taskCards.getTaskCard().isEmpty() && taskCards.getGroupNo().isEmpty())) {
 			size  = taskCards.getTaskCard().concat("_" + taskCards.getGroupNo()+"_" +items.getItemNumber());
@@ -253,8 +257,11 @@ public class TaskCardData {
 				//EMRO fields to create basic object
 				taskCard.setTcSub(taskCardString);
 				taskCard.setTcAcType("ALL");
-				taskCard.setControlArea("E/C");
-				
+				//if(taskCard.getTaskCard().startsWith("S_")) {
+				//	taskCard.setControlArea("SHOP");
+				//}	else{
+					taskCard.setControlArea("E/C");
+				//}
 				try
 				{
 					String company = (String) this.em.createQuery("select p.profile from ProfileMaster p")
