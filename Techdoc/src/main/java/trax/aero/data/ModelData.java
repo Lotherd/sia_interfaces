@@ -330,7 +330,7 @@ public class ModelData {
 			}
 			
 			String type =data.getEFFECTIVITY().getJOBCARD().getTYPE();
-			String priority = filterADDATTR(attributes, "PRIORITY");
+			String priority = filterADDATTR(attributes, "MOD_CLAS");
 
 			if(type != null)
 				taskCard.setType(type);
