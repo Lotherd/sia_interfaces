@@ -2189,20 +2189,35 @@ public class ModelData {
 			private void exhancedData(WoTaskCard woTaskCard, String ops){
 				TaskCard card = null;
 				boolean shopWo = false;
+				String cardId = woTaskCard.getId().getTaskCard();
+				//ESD TODO
+				/*
+				if(getWoShop(new BigDecimal( woTaskCard.getId().getWo()).toString())){
+					shopWo = true;
+				    int iend = woTaskCard.getId().getTaskCard().indexOf("_");
+				    if (iend != -1) 
+			        {
+			           String cardString = cardId.substring(0 , iend); 
+			           cardString = "S_"+cardString;
+			           if(cardString.length() > 20){
+			        	   cardString = cardString.substring(0, 22);
+			               cardId = cardString + cardId.substring(iend, cardId.length());
+			           }
+			        }   
+				}
+				*/
 				try
 				{
 					card = (TaskCard) this.em.createQuery("select t from TaskCard t where t.taskCard = :card")
-							.setParameter("card", woTaskCard.getId().getTaskCard())
+							.setParameter("card", cardId)
 							.getSingleResult();
 				}
 				catch(Exception e)
 				{
-					logger.info("NO ENG TASK CARD FOUND");
+					logger.info("NO ENG TASK CARD FOUND " + cardId);
 					return;
 				}
-				if(getWoShop(new BigDecimal( woTaskCard.getId().getWo()).toString())){
-					shopWo = true;
-				}
+				
 				
 				//ITEM
 				if(card.getTaskCardItems() != null && !card.getTaskCardItems().isEmpty()) {
@@ -2472,7 +2487,7 @@ public class ModelData {
 				//TASK_CARD TODO ESD
 				//SUB_PHASE, BILLABLE_HOURS ,GATE, PHASE
 				if(shopWo) {
-				/*	
+					/*
 					woTaskCard.setPhase(card.getPhase());
 					woTaskCard.setSubPhase(card.getSubPhase());
 					woTaskCard.setBillableHours(card.getBillableHours());
@@ -2480,7 +2495,7 @@ public class ModelData {
 					woTaskCard.setModifiedDate(new Date());
 					woTaskCard.setModifiedBy("TRAXIFACE");
 					insertData(woTaskCard, "WoTaskCard", "woTaskCard");
-				 */
+					*/
 				}
 				
 			}
