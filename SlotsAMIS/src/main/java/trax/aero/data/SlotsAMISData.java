@@ -162,7 +162,7 @@ public class SlotsAMISData {
 						
 						//EMRO fields to create basic object
 
-						wo.setGlCompany("SIAEC");
+						wo.setGlCompany(System.getProperty("profile_company"));
 						wo.setOrderType("W/O");
 						wo.setModule("PRODUCTION");
 						wo.setPaperChecked("NO");

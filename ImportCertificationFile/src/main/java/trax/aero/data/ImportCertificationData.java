@@ -236,7 +236,7 @@ public class ImportCertificationData {
 			employeeAuthorizationApv = em.createQuery("SELECT e FROM EmployeeAuthorizationApv e WHERE e.id.employee = :em AND e.id.customer = :cus AND e.id.company = :com", EmployeeAuthorizationApv.class)
 			.setParameter("em",e.getStaffNumber())
 			.setParameter("cus",cus)
-			.setParameter("com","SIAEC")
+			.setParameter("com",System.getProperty("profile_company"))
 			.getSingleResult();
 		}
 		catch (Exception ex)
@@ -261,7 +261,7 @@ public class ImportCertificationData {
 		employeeAuthorizationApv.setModifiedDate(new Date());
 		employeeAuthorizationApv.getId().setEmployee(e.getStaffNumber());
 		employeeAuthorizationApv.setAuthorizationCode(code);
-		employeeAuthorizationApv.getId().setCompany("SIAEC");
+		employeeAuthorizationApv.getId().setCompany(System.getProperty("profile_company"));
 		if(getCustomer(customer) != null) {
 			employeeAuthorizationApv.getId().setCustomer(getCustomer(customer));
 		}else {

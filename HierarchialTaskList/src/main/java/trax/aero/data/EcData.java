@@ -131,8 +131,7 @@ public class EcData
 		
 		try
 		{
-			String company = (String) this.em.createQuery("select p.profile from ProfileMaster p")
-					.getSingleResult();
+			String company = System.getProperty("profile_company");
 			ec.setEoCompany(company);
 		}
 		catch(Exception e)

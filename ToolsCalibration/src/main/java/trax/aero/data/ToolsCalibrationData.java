@@ -145,8 +145,7 @@ public class ToolsCalibrationData implements IToolsCalibrationData {
 				pnInventoryDetail.setInventoryType("MAINTENANCE");	
 				try
 				{
-					String company = (String) this.em.createQuery("select p.profile from ProfileMaster p")
-							.getSingleResult();
+					String company = System.getProperty("profile_company");
 					pnInventoryDetail.setGlCompany(company);
 				}
 				catch(Exception e1) {
