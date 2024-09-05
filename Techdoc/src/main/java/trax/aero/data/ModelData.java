@@ -18,6 +18,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 import trax.aero.logger.LogManager;
@@ -164,7 +165,7 @@ public class ModelData {
 				taskCard.setId(new WoTaskCardPK());
 			
 			taskCard.getId().setAc("          ");
-			String pn = filterADDATTR(attributes, "COMP");
+			String pn = filterADDATTR(attributes, "PART_NO2");
 			if(pn == null || pn.length() == 0)
 			{
 				taskCard.getId().setPn("                                   ");
@@ -384,7 +385,9 @@ public class ModelData {
 				if(wonbr.length() > 4)
 				{
 					ref = (wonbr.substring(0, wonbr.length()- 4));
-					taskCard.setReferenceTaskCard(ref);
+					if(!getWoShop(new BigDecimal( taskCard.getId().getWo()).toString())){
+						taskCard.setReferenceTaskCard(ref);
+					}	
 				}
 			}
 			
@@ -1580,11 +1583,22 @@ public class ModelData {
 			private String getPN(String PN) {
 				try
 				{
+					if(PN.length() > 18) {
+						logger.warning(" PN " + PN  + " LENGHT " +PN.length());
+						PN = StringUtils.substringBefore(PN, ":");						
+						List<PnMaster> pnMasters = em.createQuery("Select p From PnMaster p where p.id.pn LIKE :partn||'%'", PnMaster.class)
+								.setParameter("partn", PN)
+								.getResultList();
+								
+								return pnMasters.get(0).getPn();
+					}else {
+					
 					PnMaster pnMaster = em.createQuery("Select p From PnMaster p where p.id.pn = :partn", PnMaster.class)
 					.setParameter("partn", PN)
 					.getSingleResult();
 					
 					return pnMaster.getPn();
+					}
 				}
 				catch (Exception e)
 				{
@@ -1935,7 +1949,9 @@ public class ModelData {
 						if(wonbr.length() > 4)
 						{
 							ref = (wonbr.substring(0, wonbr.length()- 4));
-							taskCard.setReferenceTaskCard(ref);
+							if(!getWoShop(new BigDecimal( taskCard.getId().getWo()).toString())){
+								taskCard.setReferenceTaskCard(ref);
+							}
 						}
 					}
 					
@@ -2191,7 +2207,7 @@ public class ModelData {
 				boolean shopWo = false;
 				String cardId = woTaskCard.getId().getTaskCard();
 				//ESD TODO
-				/*
+				
 				if(getWoShop(new BigDecimal( woTaskCard.getId().getWo()).toString())){
 					shopWo = true;
 				    int iend = woTaskCard.getId().getTaskCard().indexOf("_");
@@ -2205,7 +2221,7 @@ public class ModelData {
 			           }
 			        }   
 				}
-				*/
+				
 				try
 				{
 					card = (TaskCard) this.em.createQuery("select t from TaskCard t where t.taskCard = :card")
@@ -2487,7 +2503,7 @@ public class ModelData {
 				//TASK_CARD TODO ESD
 				//SUB_PHASE, BILLABLE_HOURS ,GATE, PHASE
 				if(shopWo) {
-					/*
+					
 					woTaskCard.setPhase(card.getPhase());
 					woTaskCard.setSubPhase(card.getSubPhase());
 					woTaskCard.setBillableHours(card.getBillableHours());
@@ -2495,7 +2511,7 @@ public class ModelData {
 					woTaskCard.setModifiedDate(new Date());
 					woTaskCard.setModifiedBy("TRAXIFACE");
 					insertData(woTaskCard, "WoTaskCard", "woTaskCard");
-					*/
+					
 				}
 				
 			}

@@ -206,7 +206,7 @@ public class TaskCardData {
 		String taskCardString = null,  DeletionIndicatorString = null;
 		String size = "";
 		
-		if(taskCards.getGroupNo().startsWith("MO") || taskCards.getGroupNo().startsWith("SI") ) {
+		if(taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI") ) {
 			taskCards.setTaskCard("S_"+taskCards.getTaskCard());
 		}
 		
