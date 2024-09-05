@@ -257,11 +257,11 @@ public class TaskCardData {
 				//EMRO fields to create basic object
 				taskCard.setTcSub(taskCardString);
 				taskCard.setTcAcType("ALL");
-				//if(taskCard.getTaskCard().startsWith("S_")) {
-				//	taskCard.setControlArea("SHOP");
-				//}	else{
+				if(taskCard.getTaskCard().startsWith("S_")) {
+					taskCard.setControlArea("SHOP");
+				}	else{
 					taskCard.setControlArea("E/C");
-				//}
+				}
 				try
 				{
 					String company = System.getProperty("profile_company");
