@@ -182,6 +182,7 @@ public class TaskCardData {
 		}
 		catch (Exception e) 
         {
+			e.printStackTrace();
 			TaskCardController.addError(e.toString());
 			logger.severe(e.toString());
             em.getTransaction().rollback();
@@ -257,11 +258,8 @@ public class TaskCardData {
 				//EMRO fields to create basic object
 				taskCard.setTcSub(taskCardString);
 				taskCard.setTcAcType("ALL");
-				if(taskCard.getTaskCard().startsWith("S_")) {
-					taskCard.setControlArea("SHOP");
-				}	else{
-					taskCard.setControlArea("E/C");
-				}
+				taskCard.setControlArea("E/C");
+				
 				try
 				{
 					String company = System.getProperty("profile_company");
@@ -308,7 +306,9 @@ public class TaskCardData {
 			
 			
 			taskCard.setTaskCard(taskCardString);
-			
+			if(taskCard.getTaskCard().startsWith("S_")) {
+				taskCard.setControlArea("SHOP");
+			}
 			taskCard.setModifiedBy("TRAX_IFACE");
 			taskCard.setModifiedDate(new Date());
 			
