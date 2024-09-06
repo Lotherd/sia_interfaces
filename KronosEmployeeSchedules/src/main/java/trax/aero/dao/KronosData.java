@@ -153,6 +153,7 @@ public class KronosData {
 				    	worker.setSched(sched);
 				    	worker.setWork(true);
 				    	scheduledServ.execute(worker);
+				    	Thread.sleep(500);
 					}
 					
 					scheduledServ.shutdown();
