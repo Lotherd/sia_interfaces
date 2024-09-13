@@ -172,7 +172,14 @@ public class ModelData {
 			}
 			else
 			{
-				taskCard.getId().setPn(pn);
+				if(getPN(pn) != null) {
+					taskCard.getId().setPn(getPN(pn));
+				}else {
+					error = error.concat("TaskCard: " +taskId + " WO: " +woo+" ,Error Inserting WoTaskCard "+  System.lineSeparator() + "PN does not exist" +
+							 System.lineSeparator() +  System.lineSeparator());
+					
+					return false;
+				}
 			}
 			
 			String sn = filterADDATTR(attributes, "SN");
@@ -634,6 +641,8 @@ public class ModelData {
 									error = error.concat("TaskCard: " +taskCardId + " WO: " +woo +" ,PN " + mat.getMPNNUMBER() +  " does not exist in Pn Master" +
 											 System.lineSeparator() +  System.lineSeparator());
 									continue;
+								}else {
+									mat.setMPNNUMBER(getPN(mat.getMPNNUMBER()));
 								}
 								
 								WoTaskCardPnPK pnKey = new WoTaskCardPnPK();
@@ -713,6 +722,8 @@ public class ModelData {
 								error = error.concat("TaskCard: " +taskCardId + " WO: " +woo +" ,PN " + tool.getPRTNUMBER() +  " does not exist in Pn Master" +
 										 System.lineSeparator() +  System.lineSeparator());
 								continue;
+							}else{
+								tool.setPRTNUMBER(getPN(tool.getPRTNUMBER()));
 							}
 							
 							WoTaskCardPnPK pnKey = new WoTaskCardPnPK();
@@ -1069,16 +1080,32 @@ public class ModelData {
 	{
 		TaskCard card = null;
 		
+		if(getWoShop(new BigDecimal( woCard.getId().getWo()).toString())){
+		    int iend = woCard.getId().getTaskCard().indexOf("_");
+		    if (iend != -1) 
+	        {
+	           String cardString = taskCard.substring(0 , iend); 
+	           cardString = "S_"+cardString;
+	           if(cardString.length() > 20){
+	        	   cardString = cardString.substring(0, 22);
+	        	   taskCard = cardString + taskCard.substring(iend, taskCard.length());
+	           }else {
+	        	   taskCard = "S_"+taskCard;
+	           }
+	        }   
+		}
+		
 		try
 		{
 			card = (TaskCard) this.em.createQuery("select t from TaskCard t where t.taskCard = :card")
 					.setParameter("card", taskCard)
 					.getSingleResult();
+			logger.info("ENG TASK CARD FOUND: " + taskCard);
 		}
 		catch(Exception e)
 		{
 			//e.printStackTrace();
-			logger.info("NO ENG TASK CARD FOUND");
+			logger.info("NO ENG TASK CARD FOUND: " + taskCard);
 			return woCard;
 		}
 		
@@ -1585,9 +1612,10 @@ public class ModelData {
 				{
 					if(PN.length() > 18) {
 						logger.warning(" PN " + PN  + " LENGHT " +PN.length());
-						PN = StringUtils.substringBefore(PN, ":");						
+						String tempPN = StringUtils.substringBefore(PN, ":");
+						tempPN = tempPN + ":";
 						List<PnMaster> pnMasters = em.createQuery("Select p From PnMaster p where p.id.pn LIKE :partn||'%'", PnMaster.class)
-								.setParameter("partn", PN)
+								.setParameter("partn", tempPN)
 								.getResultList();
 								
 								return pnMasters.get(0).getPn();
@@ -1602,9 +1630,19 @@ public class ModelData {
 				}
 				catch (Exception e)
 				{
-					
+					try {
+						String tempPN = StringUtils.substringBefore(PN, ":");
+						tempPN = tempPN + ":";
+						logger.warning(" PN " + PN  + " DOES NOT EXIST DOING WILDCARD SEARCH " +tempPN);
+						List<PnMaster> pnMasters = em.createQuery("Select p From PnMaster p where p.id.pn LIKE :partn||'%'", PnMaster.class)
+								.setParameter("partn", tempPN)
+								.getResultList();
+								
+						return pnMasters.get(0).getPn();
+					}catch (Exception e1) {
+						return null;
+					}
 				}
-				return null;
 			}
 			
 			
@@ -2218,6 +2256,8 @@ public class ModelData {
 			           if(cardString.length() > 20){
 			        	   cardString = cardString.substring(0, 22);
 			               cardId = cardString + cardId.substring(iend, cardId.length());
+			           }else {
+			        	   cardId = "S_"+cardId;
 			           }
 			        }   
 				}
@@ -2227,10 +2267,13 @@ public class ModelData {
 					card = (TaskCard) this.em.createQuery("select t from TaskCard t where t.taskCard = :card")
 							.setParameter("card", cardId)
 							.getSingleResult();
+					logger.info("ENG TASK CARD FOUND: " + cardId);
+
 				}
 				catch(Exception e)
 				{
-					logger.info("NO ENG TASK CARD FOUND " + cardId);
+					logger.info("NO ENG TASK CARD FOUND:" + cardId);
+					emailer.sendEmail("Task card : " + cardId,true);
 					return;
 				}
 				
@@ -2686,7 +2729,7 @@ public class ModelData {
 				em.getTransaction().commit();
 			}
 			
-			private Boolean getWoShop(String woString) {
+			public Boolean getWoShop(String woString) {
 				logger.info("Checking WO");
 				try 
 				{

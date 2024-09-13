@@ -30,7 +30,7 @@ public class TaskCardController {
 		errors=errors.concat(error + System.lineSeparator()+ System.lineSeparator());
 	}
 	
-	public static void sendEmail(File file)
+	public static void sendEmail(File file, boolean shop)
 	{
 		try
 		{
@@ -38,7 +38,14 @@ public class TaskCardController {
 			String host = System.getProperty("fromHost");
 			String port = System.getProperty("fromPort");
 			String toEmail = System.getProperty("TaskCard_toEmail");
-	        ArrayList<String>  emailsList = new ArrayList<String>(Arrays.asList(toEmail.split(",")));
+			String shoptoEmail = System.getProperty("TaskCard_SHOP_toEmail");
+			ArrayList<String>  emailsList = null;
+			
+			if(shop) {
+				 emailsList = new ArrayList<String>(Arrays.asList(shoptoEmail.split(",")));
+			}else {
+				 emailsList = new ArrayList<String>(Arrays.asList(toEmail.split(",")));
+			}
 			Email email = new SimpleEmail();
 			email.setHostName(host);
 			email.setSmtpPort(Integer.valueOf(port));
@@ -70,7 +77,7 @@ public class TaskCardController {
 	}
 	
 	
-	public static void sendEmailSent(ArrayList<String> tasks)
+	public static void sendEmailSent(ArrayList<String> tasks, boolean shop)
 	{
 		try
 		{
@@ -85,8 +92,15 @@ public class TaskCardController {
 			String host = System.getProperty("fromHost");
 			String port = System.getProperty("fromPort");
 			String toEmail = System.getProperty("TaskCard_toEmail");
-	        ArrayList<String>  emailsList = new ArrayList<String>(Arrays.asList(toEmail.split(",")));
-			Email email = new SimpleEmail();
+			String shoptoEmail = System.getProperty("TaskCard_SHOP_toEmail");
+			ArrayList<String>  emailsList = null;
+			
+			if(shop) {
+				 emailsList = new ArrayList<String>(Arrays.asList(shoptoEmail.split(",")));
+			}else {
+				 emailsList = new ArrayList<String>(Arrays.asList(toEmail.split(",")));
+			}
+	        Email email = new SimpleEmail();
 			email.setHostName(host);
 			email.setSmtpPort(Integer.valueOf(port));
 			email.setFrom(fromEmail);

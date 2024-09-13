@@ -115,6 +115,7 @@ public class RunAble implements Runnable {
 			{
 				logger.info("Checking file " + inputFiles[i].toString());
 				File file = new File(inputFiles[i].toString());
+				boolean shopFail = false;
 				try
 				{					
 					JAXBContext jc = JAXBContext.newInstance(TaskCardMaster.class);
@@ -162,18 +163,31 @@ public class RunAble implements Runnable {
 				   
 				   taskCardMasterFailure.setTaskCards(new ArrayList<TaskCards>(taskCardsArrayFailure));
 				   if(!tasklist.isEmpty()){
-					   TaskCardController.sendEmailSent(new ArrayList<String>(tasklist));
+					   boolean shop = false;
+					   for(String t: tasklist) {
+						   if(t.contains(" S_")) {
+							   shop = true;
+						   }
+					   }
+					   TaskCardController.sendEmailSent(new ArrayList<String>(tasklist),shop);
 				   }
 				   if(!taskCardMasterFailure.getTaskCards().isEmpty()){
 				    	exectued = insertFileFailed(taskCardMasterFailure,"FAILURE_",fileName);
+				    	for( TaskCards t: taskCardMasterFailure.getTaskCards()) {
+							if(t.getCategory().equalsIgnoreCase("MCS") || 
+								t.getCategory().equalsIgnoreCase("SI") ) {
+								   shopFail = true;
+							 }
+						}
 				    	taskCardMasterFailure = null;
 				    	throw new Exception("Failed TaskCards are in File " + exectued);
+				    	
 				   }
 				}
 				catch(Exception e)
 				{
 					TaskCardController.addError(e.toString());
-					TaskCardController.sendEmail(file);
+					TaskCardController.sendEmail(file,shopFail);
 					//insertFile(file,"FAILURE_");
 					logger.info(e.getMessage());
 				}					
