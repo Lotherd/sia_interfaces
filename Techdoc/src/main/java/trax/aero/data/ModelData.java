@@ -224,8 +224,13 @@ public class ModelData {
 			}
 			
 
-			
-			taskCard.getId().setAc("          ");
+				
+			if(taskCard.getId().getPn().equalsIgnoreCase("                                   ")
+				&& taskCard.getId().getPnSn().equalsIgnoreCase("                                   ")) {
+				taskCard.getId().setAc(data.getEFFECTIVITY().getREGNBR());
+			}else {
+				taskCard.getId().setAc("          ");
+			}
 			taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 			
 			ac = data.getEFFECTIVITY().getREGNBR();
