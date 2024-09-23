@@ -176,7 +176,8 @@ public class TaskCardData {
 					}
 					if(!exceuted.equalsIgnoreCase("OK")) {
 						exceuted = "ERROR";
-					}else if(newExist) {
+					}
+					if(newExist) {
 						tasklist = "TaskCard name: "  + taskCard.getTaskCard() + " Group Number: " +taskCards.getGroupNo() + " Task SAP: " +taskCards.getTaskCard();
 					}
 		}
@@ -207,7 +208,8 @@ public class TaskCardData {
 		String taskCardString = null,  DeletionIndicatorString = null;
 		String size = "";
 		
-		if(taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI") ) {
+		if((taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI"))
+			&& 	!taskCards.getTaskCard().startsWith("S_")) {
 			taskCards.setTaskCard("S_"+taskCards.getTaskCard());
 		}
 		
