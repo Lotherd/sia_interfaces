@@ -439,11 +439,13 @@ public class ModelData {
 			
 			
 			if(taskCard.getStatus() !=null && !taskCard.getStatus().isEmpty() 
-			&& !taskCard.getStatus().equalsIgnoreCase("OPEN")) {
-				logger.info("TaskCard: " + taskCard.getId().getTaskCard() + 
-						" Status is not OPEN " 
-						+ " Status: " +taskCard.getStatus() );
-				return true;
+					&& !taskCard.getStatus().equalsIgnoreCase("OPEN")
+					&& taskCard.getStatus().equalsIgnoreCase("CANCEL")) {
+						logger.info("TaskCard: " + taskCard.getId().getTaskCard() + 
+								" Status is not OPEN " 
+								+ " Status: " +taskCard.getStatus() );
+						//return true;
+						taskCard.setStatus("OPEN");
 			}
 			
 			if(getWoThirdParty(taskCard.getId().getWo())  && !getWoShop(woo)) {
@@ -1947,7 +1949,15 @@ public class ModelData {
 					
 					
 					//item.setId(itemKey);
-					
+					if(taskCard.getStatus() !=null && !taskCard.getStatus().isEmpty() 
+							&& !taskCard.getStatus().equalsIgnoreCase("OPEN")
+							&& taskCard.getStatus().equalsIgnoreCase("CANCEL")) {
+								logger.info("TaskCard: " + taskCard.getId().getTaskCard() + 
+										" Status is not OPEN " 
+										+ " Status: " +taskCard.getStatus() );
+								//return true;
+								taskCard.setStatus("OPEN");
+					}
 					
 
 					
