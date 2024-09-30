@@ -198,7 +198,7 @@ public class TaskCardsIngestionData {
 		ArrayList<MT_TRAX_RCV_I87_RES> list = new ArrayList<MT_TRAX_RCV_I87_RES>();
 	
 		String sqlTaskCard ="SELECT wtc.pn_sn,wtc.pn,wtc.task_card_description,wtc.MPD,wtc.revision,wtc.priority,wtc.TASK_CARD_NUMBERING_SYSTEM,wtc.task_card,wtc.wo,wtc.mod_no,wtc.MRB\r\n" + 
-				"FROM WO_TASK_CARD wtc WHERE  wtc.INTERFACE_SAP_TRANSFER_DATE is null AND (wtc.non_routine = 'N' OR wtc.non_routine is null ) AND wtc.wo IN ( select w.wo from wo w where w.wo_category like '%" +party3 +"')";
+				"FROM WO_TASK_CARD wtc WHERE  wtc.INTERFACE_SAP_TRANSFER_DATE is null AND (wtc.non_routine = 'N' OR wtc.non_routine is null ) AND wtc.wo IN ( select w.wo from wo w where w.wo_category like '%" +party3 +"' and w.rfo_no is null)";
 		String sqlTaskCardItem ="select task_card_text from wo_task_card_item wtci where wtci.wo = ? and wtci.task_card = ? and wtci.task_card_item = '1' and rownum <= 1";
 		String sqlwork ="select pn,qty,hours,minutes from wo_actuals wa where wa.wo = ? and wa.task_card = ? and wa.task_card_item = '1' and rownum <= 1";
 		//logger.info(sqlTaskCard);
