@@ -183,7 +183,12 @@ public class ModelData {
 			{
 				taskCard.getId().setPnSn(sn);
 			}
-			
+			if(taskCard.getId().getPn().equalsIgnoreCase("                                   ")
+					&& taskCard.getId().getPnSn().equalsIgnoreCase("                                   ")) {
+					taskCard.getId().setAc(data.getEFFECTIVITY().getREGNBR());
+				}else {
+					taskCard.getId().setAc("          ");
+				}
 			taskCard = assignValuesWO(taskId,taskCard,Long.parseLong(woo),taskCard.getId().getAc()
 					,taskCard.getId().getPn(),taskCard.getId().getPnSn());
 			
@@ -1702,7 +1707,7 @@ public class ModelData {
 					
 				
 					
-					taskCard.getId().setAc("          ");
+					taskCard.getId().setAc(parentTaskCard.getId().getAc());
 					taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 					
 					String pn = filterADDATTR(attributes, "COMP");
