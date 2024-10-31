@@ -333,7 +333,7 @@ public class IE4NData {
 						"PKG_INTERFACE.GETXMLNUMBERSTRING(APTH.TRANSACTION_HOUR) AS HOUR,\r\n" + 
 						"PKG_INTERFACE.GETXMLNUMBERSTRING(APTH.TRANSACTION_MINUTE) AS MINUTE,\r\n" + 
 						"APTH.TRANSACTION_TYPE,\r\n" +
-						"(SELECT WTC.REFERENCE_TASK_CARD FROM WO_TASK_CARD WTC WHERE WTC.TASK_CARD = APTH.TASK_CARD AND APTH.WO = WTC.WO and APTH.PN = WTC.PN AND APTH.SN = WTC.pn_SN) AS ORDER_NUMBER,\r\n"+
+						"(SELECT WTC.REFERENCE_TASK_CARD FROM WO_TASK_CARD WTC WHERE WTC.TASK_CARD = APTH.TASK_CARD AND APTH.WO = WTC.WO and NVL(APTH.PN,'                                   ') = WTC.PN AND NVL(APTH.SN,'                                   ') = WTC.pn_SN) AS ORDER_NUMBER,\r\n"+
 						"(SELECT PID.FUNCTIONAL_LOCATION FROM PN_INVENTORY_DETAIL PID WHERE APTH.PN = PID.PN AND APTH.SN = PID.SN AND APTH.BATCH =  PID.BATCH ) as fun_loc,"+
 						"APTH.IE4N_FORCE_INSTALL\r\n"+
 						"FROM\r\n" + 
@@ -374,9 +374,12 @@ public class IE4NData {
 							}
 							out.setMaterial_Number(pn);
 							
-							
-							out.setSerial_Number(rs1.getString(2));
-							
+							if( rs1.getString(2) != null && !rs1.getString(2).isEmpty()
+									&& !rs1.getString(2).equalsIgnoreCase("                                   ")) {
+								out.setSerial_Number(rs1.getString(2));
+							}else {
+								out.setSerial_Number("");
+							}
 							if(rs1.getString(3) != null && !rs1.getString(3).isEmpty()) {
 								out.setPosition(rs1.getString(3));
 							}else {

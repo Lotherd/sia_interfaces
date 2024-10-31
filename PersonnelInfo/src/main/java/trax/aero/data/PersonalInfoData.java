@@ -92,7 +92,7 @@ public class PersonalInfoData {
 				employee.setTrainingInstructor("NO");
 				employee.setAllowIssueTo("NO");
 				employee.setDrugTestingMaxDays(new BigDecimal(0));
-				
+				employee.setSection(null);
 				
 				
 			}
