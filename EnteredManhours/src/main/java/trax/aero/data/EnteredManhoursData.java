@@ -235,48 +235,49 @@ public class EnteredManhoursData {
 		
 		String sqlTaskCard =
 		"SELECT\r\n" + 
-		"    reference_task_card,\r\n" + 
-		"    task_card_description,\r\n" + 
-		"    priority,\r\n" + 
-		"    wo,\r\n" + 
-		"    task_card,\r\n" + 
-		"    status,\r\n" + 
-		"    (\r\n" + 
-		"        SELECT\r\n" + 
-		"            w.refurbishment_order\r\n" + 
-		"        FROM\r\n" + 
-		"            wo w\r\n" + 
-		"        WHERE\r\n" + 
-		"                w.wo = wo_task_card.wo\r\n" + 
-		"            AND w.module = 'SHOP'\r\n" + 
-		"            AND wo_task_card.interface_flag IS NOT NULL\r\n" + 
-		"            AND ( wo_task_card.non_routine = 'N'\r\n" + 
-		"                  OR wo_task_card.non_routine IS NULL )\r\n" + 
-		"    ) AS rfo,\r\n" + 
-		"    pn,\r\n" + 
-		"    pn_sn,\r\n" + 
-		"    ac\r\n" + 
-		"FROM\r\n" + 
-		"    wo_task_card\r\n" + 
-		"WHERE\r\n" + 
-		"    interface_transferred_date IS NULL\r\n" + 
-		"    AND ( reference_task_card IS NOT NULL\r\n" + 
-		"          OR 1 = (\r\n" + 
-		"        SELECT\r\n" + 
-		"            COUNT(*)\r\n" + 
-		"        FROM\r\n" + 
-		"            wo w\r\n" + 
-		"        WHERE\r\n" + 
-		"                w.wo = wo_task_card.wo\r\n" + 
-		"            AND w.module = 'SHOP'\r\n" + 
-		"            AND wo_task_card.interface_flag IS NOT NULL\r\n" + 
-		"            AND w.refurbishment_order IS NOT NULL\r\n" + 
-		"            AND ( wo_task_card.non_routine = 'N'\r\n" + 
-		"                  OR wo_task_card.non_routine IS NULL )\r\n" + 
-		"    ) )\r\n" + 
-		"    AND ( non_routine = 'N'\r\n" + 
-		"          OR non_routine = 'Y'\r\n" + 
-		"          OR non_routine IS NULL )";
+		"		    reference_task_card,\r\n" + 
+		"		    task_card_description,\r\n" + 
+		"		    priority,\r\n" + 
+		"		    wo,\r\n" + 
+		"		    task_card,\r\n" + 
+		"		    status,\r\n" + 
+		"		    (\r\n" + 
+		"		        SELECT\r\n" + 
+		"		            w.refurbishment_order\r\n" + 
+		"		        FROM\r\n" + 
+		"		            wo w\r\n" + 
+		"		        WHERE\r\n" + 
+		"		                w.wo = wo_task_card.wo\r\n" + 
+		"		            AND w.module = 'SHOP'\r\n" + 
+		"		            AND wo_task_card.interface_flag IS NOT NULL\r\n" + 
+		"		            AND ( wo_task_card.non_routine = 'N'\r\n" + 
+		"		                  OR wo_task_card.non_routine IS NULL )\r\n" + 
+		"		    ) AS rfo,\r\n" + 
+		"		    pn,\r\n" + 
+		"		    pn_sn,\r\n" + 
+		"		    ac\r\n" + 
+		"		FROM\r\n" + 
+		"		    wo_task_card\r\n" + 
+		"		WHERE\r\n" + 
+		"		    interface_transferred_date IS NULL\r\n" + 
+		"		    AND ( reference_task_card IS NOT NULL\r\n" + 
+		"		          OR 1 = (\r\n" + 
+		"		        SELECT\r\n" + 
+		"		            COUNT(*)\r\n" + 
+		"		        FROM\r\n" + 
+		"		            wo w\r\n" + 
+		"		        WHERE\r\n" + 
+		"		                w.wo = wo_task_card.wo\r\n" + 
+		"		            AND w.module = 'SHOP'\r\n" + 
+		"		            AND wo_task_card.interface_flag IS NOT NULL\r\n" + 
+		"		            AND w.refurbishment_order IS NOT NULL\r\n" + 
+		"		            AND ( wo_task_card.non_routine = 'N'\r\n" + 
+		"		                  OR wo_task_card.non_routine IS NULL )\r\n" + 
+		"		    ) )\r\n" + 
+		"		    AND ( non_routine = 'N'\r\n" + 
+		"		          OR non_routine = 'Y'\r\n" + 
+		"		          OR non_routine IS NULL )\r\n" + 
+		"            AND ( 1 = (SELECT COUNT(*) FROM wo w WHERE w.wo = wo_task_card.wo AND w.rfo_no IS NULL))";
 		
 		if(MaxRecord != null && !MaxRecord.isEmpty()) {
 			sqlTaskCard=  "SELECT *	FROM (" + sqlTaskCard;
