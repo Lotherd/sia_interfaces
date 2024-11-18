@@ -532,10 +532,10 @@ public class NRData implements INRData {
 					}
 					int i = 0; 
 					for(Operation o : header.getOperation()) {
-						if(getTranConfigFlag("CONFIGURATION", "NROPSNO").equalsIgnoreCase("N")) {
+						if(getTranConfigFlag("CONFIGURATION", "TCTCNROPSNO").equalsIgnoreCase("N")) {
 							nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
 						}else {
-							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("NROPSNO"));
+							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("TCNROPSNO"));
 						}
 						i++;
 					}
@@ -562,10 +562,10 @@ public class NRData implements INRData {
 						Collections.sort(nr.getWoTaskCardItems());
 					}
 					for(Operation o : header.getOperation()) {
-						if(getTranConfigFlag("CONFIGURATION", "NROPSNO").equalsIgnoreCase("N")) {
+						if(getTranConfigFlag("CONFIGURATION", "TCNROPSNO").equalsIgnoreCase("N")) {
 							nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
 						}else {
-							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("NROPSNO"));
+							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("TCNROPSNO"));
 						}
 						i++;
 					}
@@ -598,10 +598,10 @@ public class NRData implements INRData {
 						Collections.sort(nr.getWoTaskCardItems());
 					}
 					for(Operation o : header.getOperation()) {
-						if(getTranConfigFlag("CONFIGURATION", "NROPSNO").equalsIgnoreCase("N")) {
+						if(getTranConfigFlag("CONFIGURATION", "TCNROPSNO").equalsIgnoreCase("N")) {
 							nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
 						}else {
-							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("NROPSNO"));
+							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("TCNROPSNO"));
 						}
 						i++;
 					}
