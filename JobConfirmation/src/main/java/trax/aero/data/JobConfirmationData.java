@@ -277,30 +277,43 @@ public class JobConfirmationData {
 					"    ) )";
 			
 			String sqlItem = "SELECT\r\n" + 
-					"    wtci.ops_no                                   AS operation_number,\r\n" + 
-					"    wtci.work_accomplished                        AS confirmation_text,\r\n" + 
-					"    dbms_lob.substr(wtci.task_card_text, 4000, 1) AS defect_text,\r\n" + 
-					"    wtci.status                                   AS stat,\r\n" + 
-					"    (\r\n" + 
-					"        SELECT\r\n" + 
-					"            COUNT(wtci.task_card_item) AS count\r\n" + 
-					"        FROM\r\n" + 
-					"            wo_task_card_item wtci\r\n" + 
-					"        WHERE\r\n" + 
-					"                wtci.wo = ?\r\n" + 
-					"            AND wtci.task_card = ?\r\n" + 
-					"            AND wtci.task_card_pn_sn = ?\r\n" + 
-					"            AND wtci.ac = ?\r\n" + 
-					"            AND wtci.task_card_pn = ?\r\n" + 
-					"    )                                             AS count\r\n" + 
-					"FROM\r\n" + 
-					"    wo_task_card_item wtci\r\n" + 
-					"WHERE\r\n" + 
-					"        wtci.wo = ?\r\n" + 
-					"    AND wtci.task_card = ?\r\n" + 
-					"    AND wtci.task_card_pn_sn = ?\r\n" + 
-					"    AND wtci.ac = ?\r\n" + 
-					"    AND wtci.task_card_pn = ? ";
+					"					    wtci_out.ops_no                                   AS operation_number,\r\n" + 
+					"					   (select \r\n" + 
+					"                            wtciwc_in.work_accomplished \r\n" + 
+					"                        from \r\n" + 
+					"                            wo_task_card_item_wrk_acmplshd wtciwc_in\r\n" + 
+					"                        where \r\n" + 
+					"                            wtciwc_in.wo = wtci_out.wo \r\n" + 
+					"                            and wtciwc_in.task_card =  wtci_out.task_card\r\n" + 
+					"                            and wtciwc_in.task_card_item =  wtci_out.task_card_item\r\n" + 
+					"                            and wtciwc_in.task_card_pn_sn =  wtci_out.task_card_pn_sn\r\n" + 
+					"                            and wtciwc_in.ac = wtci_out.ac\r\n" + 
+					"					        and wtciwc_in.task_card_pn = wtci_out.task_card_pn\r\n" + 
+					"                        order by \r\n" + 
+					"                            work_accomplished_line desc \r\n" + 
+					"                        FETCH FIRST 1 ROWS ONLY)                       AS confirmation_text,\r\n" + 
+					"					    dbms_lob.substr(wtci_out.task_card_text, 4000, 1) AS defect_text,\r\n" + 
+					"					    wtci_out.status                                   AS stat,\r\n" + 
+					"					    (\r\n" + 
+					"					        SELECT\r\n" + 
+					"					            COUNT(wtci_in.task_card_item) AS count\r\n" + 
+					"					        FROM\r\n" + 
+					"					            wo_task_card_item wtci_in\r\n" + 
+					"					        WHERE\r\n" + 
+					"					                wtci_in.wo = wtci_out.wo\r\n" + 
+					"					            AND wtci_in.task_card = wtci_out.task_card\r\n" + 
+					"					            AND wtci_in.task_card_pn_sn = wtci_out.task_card_pn_sn\r\n" + 
+					"					            AND wtci_in.ac = wtci_out.ac\r\n" + 
+					"					            AND wtci_in.task_card_pn =  wtci_out.task_card_pn\r\n" + 
+					"					    )                                             AS count\r\n" + 
+					"					FROM\r\n" + 
+					"					    wo_task_card_item wtci_out\r\n" + 
+					"					WHERE\r\n" + 
+					"					        wtci_out.wo = ?\r\n" + 
+					"					    AND wtci_out.task_card = ?\r\n" + 
+					"					    AND wtci_out.task_card_pn_sn = ?\r\n" + 
+					"					    AND wtci_out.ac = ?\r\n" + 
+					"					    AND wtci_out.task_card_pn = ? ";
 			
 			
 			
@@ -673,7 +686,7 @@ public class JobConfirmationData {
 						else {
 							Inbound.setConfirmation_text("");
 						}
-						
+						 
 						
 						//ITEM
 						
@@ -684,11 +697,6 @@ public class JobConfirmationData {
 						pstmt2.setString(4, rs1.getNString(22));
 						pstmt2.setString(5, rs1.getNString(20));
 						
-						pstmt2.setString(6, rs1.getNString(15));
-						pstmt2.setString(7, rs1.getNString(13));
-						pstmt2.setString(8, rs1.getNString(21));
-						pstmt2.setString(9, rs1.getNString(22));
-						pstmt2.setString(10, rs1.getNString(20));
 						
 						rs2 = pstmt2.executeQuery();
 						
@@ -714,6 +722,13 @@ public class JobConfirmationData {
 									Inbound2.setOperation_number("");
 								}
 								
+								if(rs2.getString(2) != null && !rs2.getNString(2).isEmpty()) {
+									String text = rs2.getNString(2).replaceAll("\\p{Cntrl}", ""); 
+									text = text.replaceAll("\u0019", "");
+									text =text.replaceAll(xml10pattern, "");
+									Inbound2.setConfirmation_text(text);
+									
+								}
 								
 								
 								if(rs2.getString(3) != null && !rs2.getNString(3).isEmpty()) {
