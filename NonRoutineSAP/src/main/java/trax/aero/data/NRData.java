@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -531,11 +532,10 @@ public class NRData implements INRData {
 					}
 					int i = 0; 
 					for(Operation o : header.getOperation()) {
-						nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
-						if(o.getComponent() !=null && !o.getComponent().isEmpty()) {
-							for(Component c : o.getComponent() ) {
-								//insertComponent( c, nr);
-							}
+						if(getTranConfigFlag("CONFIGURATION", "NROPSNO").equalsIgnoreCase("N")) {
+							nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
+						}else {
+							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("NROPSNO"));
 						}
 						i++;
 					}
@@ -562,11 +562,10 @@ public class NRData implements INRData {
 						Collections.sort(nr.getWoTaskCardItems());
 					}
 					for(Operation o : header.getOperation()) {
-						nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
-						if(o.getComponent() !=null && !o.getComponent().isEmpty()) {
-							for(Component c : o.getComponent() ) {
-								//insertComponent( c, nr);
-							}
+						if(getTranConfigFlag("CONFIGURATION", "NROPSNO").equalsIgnoreCase("N")) {
+							nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
+						}else {
+							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("NROPSNO"));
 						}
 						i++;
 					}
@@ -599,11 +598,10 @@ public class NRData implements INRData {
 						Collections.sort(nr.getWoTaskCardItems());
 					}
 					for(Operation o : header.getOperation()) {
-						nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
-						if(o.getComponent() !=null && !o.getComponent().isEmpty()) {
-							for(Component c : o.getComponent() ) {
-								//insertComponent( c, nr);
-							}
+						if(getTranConfigFlag("CONFIGURATION", "NROPSNO").equalsIgnoreCase("N")) {
+							nr.getWoTaskCardItems().get(i).setOpsNo(o.getOperationActivityNumber());
+						}else {
+							nr.getWoTaskCardItems().get(i).setOpsNo(getConfigOther("NROPSNO"));
 						}
 						i++;
 					}
@@ -615,205 +613,7 @@ public class NRData implements INRData {
 	
 	
 	
-	// insert PICKLIST
-		private void insertComponent( Component component, WoTaskCard wotaskcard) {
-					
-					//setting up variables
-					PicklistHeader picklistheader = null;
-					//Boolean exist = false;
-					PicklistDistribution picklistdistdistribu = null;
-					PicklistDistribution picklistdistrequire = null;
-					
-					//check if object has min values
-					if(component.getReservationNumber() != null && !component.getReservationNumber().isEmpty() && component.getReservationItem()!= null && !component.getReservationItem().isEmpty() && component.getMaterialNumber()!= null && !component.getMaterialNumber().isEmpty() &&  null != getPN(component.getMaterialNumber())) 
-					{
-						
-						String pickNumber = findPicklistNumber(component.getReservationNumber(),component.getReservationItem());
-						
-						try 
-						{
-							picklistheader = em.createQuery("SELECT p FROM PicklistHeader p where p.id.picklist =:pick", PicklistHeader.class)
-									.setParameter("pick", Long.valueOf(pickNumber))
-									.getSingleResult();
-						}
-						catch(Exception e)
-						{
-							picklistheader = new PicklistHeader();
-							picklistheader.setCreatedBy("TRAX_IFACE");
-							picklistheader.setCreatedDate(new Date());
-						
-							
-							//EMRO fields to create basic object
-							picklistheader.setInventoryType("MAINTENANCE");
-							picklistheader.setBypassRouting("Y");
-							picklistheader.setBuildKit("NO");
-							picklistheader.setNoOfPrint(new BigDecimal(1));
-							picklistheader.setRequireHour(new BigDecimal(0));
-							picklistheader.setRequireMinute(new BigDecimal(0));
-							picklistheader.setBinTransfer("N");
-							picklistheader.setStatus("OPEN");
-							picklistheader.setLocation(component.getPlant());
-							picklistheader.setRequireOn(new Date());
-							picklistheader.setRequireHour(new BigDecimal(0));
-							picklistheader.setRequireMinute(new BigDecimal(0));
-							
-							try {
-								//picklistheader.setPicklist(getPickList(getCon(), Picklong));
-								picklistheader.setPicklist(getTransactionNo("PICKLIST").longValue());
-							} catch (Exception e1) {
-								logger.severe(e1.toString());
-							}
-						}
-						picklistheader.setModifiedDate(new Date());
-						picklistheader.setModifiedBy("TRAX_IFACE");
-						
-						
-						picklistheader.setWo(new BigDecimal(wotaskcard.getId().getWo()));
-						picklistheader.setTaskCard(wotaskcard.getId().getTaskCard());
-						picklistheader.setTaskCardPn(wotaskcard.getId().getPn());
-						picklistheader.setTaskCardSn(wotaskcard.getId().getPnSn());
-						
-						
-						String line = component.getReservationItem().replaceAll("0+$", "");
-						line = line.replaceFirst("^0+(?!$)", "");
-						Long l = Long.parseLong(line);
-						
-						
-						picklistdistdistribu = fillPicklistDistribution(picklistdistdistribu, component, "DISTRIBU","2", picklistheader.getPicklist(),l.longValue() );
-						picklistdistrequire = fillPicklistDistribution(picklistdistrequire, component,"REQUIRE","0" ,picklistheader.getPicklist(),l.longValue());
-						
-						picklistdistdistribu.setTaskCard(wotaskcard.getId().getTaskCard());
-						picklistdistrequire.setTaskCard(wotaskcard.getId().getTaskCard());
-						picklistdistdistribu.setStatus("OPEN");
-						picklistdistrequire.setStatus("OPEN");
-						
-						
-						if(component.getQuantity() !=null && !component.getQuantity().isEmpty()) {
-							try 
-							{
-								picklistdistdistribu.setQty(new BigDecimal(component.getQuantity().trim()));
-								picklistdistrequire.setQty(new BigDecimal(component.getQuantity().trim()));
-								picklistdistdistribu.setQtyPicked(new BigDecimal(component.getQuantity().trim()));
-								picklistdistrequire.setQtyPicked(new BigDecimal(1));
-							}
-							catch(NumberFormatException e)
-							{
-								logger.severe("Can not insert/update Material ReservationNumber: "+ component.getReservationNumber() +" Material: " +component.getMaterialNumber()+" ERROR: Quantity");
-								error = error.concat("Can not insert/update Material ReservationNumber: "+ component.getReservationNumber() +" Material: " +component.getMaterialNumber()+ " ERROR: Quantity");
-								return ;
-							}
-							
-						}
-						
-						
-						
-						logger.info("INSERTING picklist header: " + picklistheader.getPicklist() );
-						insertData(picklistheader,"picklist header",String.valueOf(picklistheader.getPicklist()) );
-						
-						logger.info("INSERTING picklist dist: " + picklistdistdistribu.getId().getTransaction()  );
-						insertData(picklistdistdistribu,"picklist dist distribu",String.valueOf(picklistheader.getPicklist()));
-						
-						logger.info("INSERTING picklist require: " + picklistdistrequire.getId().getTransaction() );
-						insertData(picklistdistrequire,"picklist dist require",String.valueOf(picklistheader.getPicklist()) );
-						
-						
-					}else 
-					{
-						
-					}
-				}
-	
-		private String findPicklistNumber(String reservationNumber, String resrvationItem) {
-			try
-			{	
-				ArrayList<PicklistDistribution>picklistdist = (ArrayList<PicklistDistribution>) em.createQuery("SELECT p FROM PicklistDistribution p where p.externalCustRes =:pi AND p.id.transaction =:tra AND p.id.distributionLine =:dl")
-						.setParameter("pi", reservationNumber)
-						.setParameter("tra", "DISTRIBU")
-						.setParameter("dl",new Long(2) )
-						.getResultList();
-				return String.valueOf(picklistdist.get(0).getId().getPicklist());
-			}
-			catch (Exception e)
-			{	
-				logger.info("PICKLIST NOT FOUND");
-				//logger.severe(e.toString());
-			}
-			return null;
-		}
-		
-		
-		
-		
-		
-		private PicklistDistribution fillPicklistDistribution(PicklistDistribution picklistdist ,  Component mat , String transaction, String DistributionLine, long l, long line) {
-			
-			try 
-			{
-				picklistdist = em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pi AND p.id.picklistLine =:li AND p.id.transaction =:tra AND p.id.distributionLine =:dl", PicklistDistribution.class)
-						.setParameter("pi", l)
-						.setParameter("li", line)
-						.setParameter("tra", transaction)
-						.setParameter("dl", DistributionLine)
-						.getSingleResult();
-				//exist = true;
-			}
-			catch(Exception e)
-			{
-				//EMRO fields to create basic object
-				PicklistDistributionPK pk = new PicklistDistributionPK();
-				picklistdist = new PicklistDistribution();
-				picklistdist.setId(pk);
-				picklistdist.setCreatedBy("TRAX_IFACE");
-				picklistdist.setCreatedDate(new Date());
-				picklistdist.setQtyPicked(new BigDecimal(1));
-				picklistdist.setStatus("OPEN");
-			}
-			picklistdist.setModifiedDate(new Date());
-			picklistdist.setModifiedBy("TRAX_IFACE");
-			
-			picklistdist.setExternalCustRes(mat.getReservationNumber());
-			picklistdist.setExternalCustResItem(mat.getReservationItem());
-			picklistdist.getId().setPicklist(l );
-			picklistdist.getId().setPicklistLine(line);
-			picklistdist.getId().setDistributionLine(new Long(DistributionLine));
-			picklistdist.getId().setTransaction(transaction);
-			
-			String pn = mat.getMaterialNumber();
-			
-			
-			
-			pn = pn.replaceAll("\"", "IN");
-			pn = pn.replaceAll("'", "FT");
-			if(!pn.contains(":"))
-			{
-				pn = pn.concat(":UPLOAD");
-			}
-			
-			picklistdist.setPn(pn);
-			
-			return picklistdist;
-			
-		}
-		
-		private BigDecimal getTransactionNo(String code)
-		{		
-			try
-			{
-				BigDecimal acctBal = (BigDecimal) em.createNativeQuery("SELECT pkg_application_function.config_number ( ? ) "
-						+ " FROM DUAL ").setParameter(1, code).getSingleResult();
-							
-				return acctBal;			
-			}
-			catch (Exception e) 
-			{
-				logger.severe("An unexpected error occurred getting the sequence. " + "\nmessage: " + e.toString());
-			}
-			
-			return null;
-			
-		}
-		
-		private <T> void insertData( T data, String type, String name) 
+	private <T> void insertData( T data, String type, String name) 
 		{
 			try 
 			{	
@@ -1015,6 +815,46 @@ public class NRData implements INRData {
 		           // throw e;
 		        }		
 		}
+		
+		
+		public String getTranConfigFlag(String systemTransaction,
+				String systemCode) 
+		{
+			String flag = null;
+			try
+			{
+
+				flag = (String) em.createNativeQuery("SELECT CONFIG_FLAG FROM SYSTEM_TRAN_CONFIG WHERE SYSTEM_TRANSACTION = ? AND SYSTEM_CODE = ?")
+						.setParameter(1, systemTransaction)
+						.setParameter(2, systemCode)
+						.getSingleResult();
+
+
+				if (flag == null || flag.length() <= 0)
+					return "N";
+				else
+					return flag;
+
+
+			} catch (final Exception e)
+			{
+				return "N";
+			} 
+
+		}
+		
+		public  String getConfigOther(String param) {
+	        String result = "";
+	        try {
+	           Query query = this.em.createNativeQuery(
+	                    "select \"PKG_APPLICATION_FUNCTION\".CONFIG_OTHER('"+param+"') as result from dual");
+	            result = (String)(query).getSingleResult();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return result;
+	    }
 		
 		
 		public void lockTable(String notificationType)
