@@ -251,11 +251,11 @@ public class RunAble implements Runnable {
 		    	   Worker worker = new Worker(data);
 		    	   worker.setInput(house);
 		    	   scheduledServ.execute(worker);
-		    	   	    	   
 		       }
 		      
 		       scheduledServ.shutdown();
-		       scheduledServ.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);	        			        
+		       scheduledServ.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);	
+		       data.getEm().flush();
 			   String fileName = file.getName(); 
 			   
 	   

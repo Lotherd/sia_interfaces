@@ -11,6 +11,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.persistence.EntityManager;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -26,6 +27,8 @@ import trax.aero.utils.ImportPoster;
 
 public interface IImportWarehouseData {
 
+	public EntityManager getEm();
+	
 	public String ProcessReqestBatch(MT_TRAX_RCV_I46_4077_BATCH i);
 	
 	public String ProcessReqest(MaterialDetails i, boolean invokeRequest);

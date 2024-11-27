@@ -54,7 +54,9 @@ public class ImportWarehouseData implements IImportWarehouseData {
 	
 	
 
-	
+	public EntityManager getEm() {
+		return em;
+	}
 
 	public String ProcessReqestBatch(MT_TRAX_RCV_I46_4077_BATCH i) {
 		
@@ -224,12 +226,13 @@ public class ImportWarehouseData implements IImportWarehouseData {
 		
 			
 			logger.info("INSERTING PN INVENTORY DETAIL: " + pnindet.getPn() + " BATCH: " + pnindet.getBatch());
-			insertData(pnindet);
-			
+			//insertData(pnindet);
+			em.merge(pnindet);
 			if(i.getNotesText() != null && !i.getNotesText().isEmpty()) {
 				
 				logger.info("INSERTING NOTEPAD: " + notepad.getId().getNotes());
-				insertData(notepad);
+				//insertData(notepad);
+				em.merge(pnindet);
 			}
 
 		}else 
@@ -632,7 +635,7 @@ public class ImportWarehouseData implements IImportWarehouseData {
 			{
 				
 			}
-			return null;
+			return " ";
 		}
 	
 	
