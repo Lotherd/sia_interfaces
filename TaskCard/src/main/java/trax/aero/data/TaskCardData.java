@@ -437,6 +437,7 @@ public class TaskCardData {
 				
 			if(items.getItemText() != null && !items.getItemText().isEmpty()) 
 			{
+				items.setItemText( items.getItemText().replaceAll("[‘’‚‛‹›′]", "\'").replaceAll("[“”„‟″‴»«]", "\""));
 				taskCardItem.setTaskCardText(items.getItemText());
 			}
 				
@@ -457,6 +458,7 @@ public class TaskCardData {
 					i.setModifiedDate(new Date());
 					if(items.getItemText() != null && !items.getItemText().isEmpty()) 
 					{
+						items.setItemText( items.getItemText().replaceAll("[‘’‚‛‹›′]", "\'").replaceAll("[“”„‟″‴»«]", "\""));
 						i.setTaskCardText(items.getItemText());
 					}
 					logger.info("UPDATING TaskCard item Ops No: " + i.getOpsNo() + " ,Item Number:" + i.getId().getTaskCardItem() + " ,Task Card: " + i.getId().getTaskCard());
