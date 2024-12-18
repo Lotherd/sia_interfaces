@@ -130,4 +130,101 @@ public class Service {
 	   return Response.ok(group,MediaType.APPLICATION_JSON).build();
 	}
 	
+	
+	@GET
+	@Path("/setLocation")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response setLocation(@QueryParam("costCenter") String costCenter, @QueryParam("location") String location )
+	{
+		
+		
+		String exceuted = "OK";
+		logger.info("Input: costCenter: " +costCenter+" location: "+location);                          
+		try 
+        {    		 
+			factory = Persistence.createEntityManagerFactory("ImportDS");
+			PersonalInfoData data = new PersonalInfoData(factory);
+        	exceuted = data.setLocation(costCenter,location);
+		}
+		catch(Exception e)
+		{
+			logger.severe(e.toString());
+			exceuted = e.toString();
+			PersonalInfoController.addError(e.toString());
+			PersonalInfoController.sendEmailService(exceuted);
+		}
+       finally 
+       {   
+    	   
+    	   logger.info("finishing");
+       }
+	   return Response.ok(exceuted,MediaType.TEXT_PLAIN).build();
+	}
+	
+	@GET
+	@Path("/deleteLocation")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response deleteLocation(@QueryParam("costCenter") String costCenter, @QueryParam("location") String location  )
+	{
+		
+		logger.info("Input: costCenter: " +costCenter+" location: "+location);         
+		String exceuted = "OK";
+		                              
+		try 
+        {    	
+			factory = Persistence.createEntityManagerFactory("ImportDS");
+			PersonalInfoData data = new PersonalInfoData(factory);
+        	data.deleteLocation(costCenter,location);
+		}
+		catch(Exception e)
+		{
+			logger.severe(e.toString());
+			exceuted = e.toString();
+			PersonalInfoController.addError(e.toString());
+			PersonalInfoController.sendEmailService(exceuted);
+		}
+       finally 
+       {   
+    	  
+    	   logger.info("finishing");
+       }
+	   return Response.ok(exceuted,MediaType.TEXT_PLAIN).build();
+	}
+	
+	@GET
+	@Path("/getLocation")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getLocation(@QueryParam("costCenter") String costCenter, @QueryParam("location") String location  )
+	{
+		
+		logger.info("Input: costCenter: " +costCenter+" location: "+location);         
+		String exceuted = "OK";
+		
+		String group = null;
+		                              
+		try 
+        {   
+			factory = Persistence.createEntityManagerFactory("ImportDS");
+			PersonalInfoData data = new PersonalInfoData(factory);
+			group = data.getLocation(costCenter);
+        	if(group == null ) {
+        		exceuted = "Issue found";
+        		throw new Exception("Issue found");
+        	}
+		}
+		catch(Exception e)
+		{
+			PersonalInfoController.addError(e.toString());
+			PersonalInfoController.sendEmailService(exceuted);
+		}
+       finally 
+       {   
+    	   
+    	   logger.info("finishing");
+       }
+		
+		
+	   return Response.ok(group,MediaType.TEXT_PLAIN).build();
+	}
+	
 }

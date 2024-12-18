@@ -35,6 +35,7 @@ import trax.aero.model.JobCostCenterMasterPK;
 import trax.aero.model.RelationMaster;
 import trax.aero.model.RelationMasterPK;
 import trax.aero.model.SecurityHeader;
+import trax.aero.model.SiteLocationMaster;
 import trax.aero.model.SystemTranCode;
 import trax.aero.model.SystemTranCodePK;
 import trax.aero.pojo.EmployeeInfo;
@@ -115,8 +116,12 @@ public class PersonalInfoData {
 			
 			employee.setFirstName(encryptValue(e.getFirstName().toUpperCase()));
 			employee.setLastName(encryptValue(e.getLastName().toUpperCase()));
-			employee.setRelatedLocation(e.getLocation().toUpperCase());
 			
+			if(getLocation(e.getCostCenter()) != null) {
+				employee.setRelatedLocation(getLocation(e.getCostCenter()));
+			}else {
+				employee.setRelatedLocation(e.getLocation().toUpperCase());
+			}
 			setCode("DEPARTMENT", e.getDepartmentCode().toUpperCase(),e.getDepartment());
 			employee.setDepartment(e.getDepartmentCode().toUpperCase());
 			
@@ -756,6 +761,44 @@ public class PersonalInfoData {
 			//em.lock(lock, LockModeType.NONE);
 			em.merge(lock);
 			em.getTransaction().commit();
+		}
+		
+		
+		public String setLocation(String costCenter, String location) {
+			SiteLocationMaster siteLocationMaster = null;
+			
+				siteLocationMaster = em.find(SiteLocationMaster.class, costCenter);
+				if(siteLocationMaster == null) {
+					siteLocationMaster = new SiteLocationMaster();
+					siteLocationMaster.setCostCentre(costCenter);
+					siteLocationMaster.setLocation(location);
+					
+				}
+				logger.info("INSERTING cost Center: " + siteLocationMaster.getCostCentre());
+				insertData(siteLocationMaster);
+			return siteLocationMaster.getLocation();
+			
+		}
+
+		public void deleteLocation(String costCenter, String location) {
+			 			
+			SiteLocationMaster siteLocationMaster = em.find(SiteLocationMaster.class, costCenter);
+				
+			logger.info("DELETE cost Center: " + siteLocationMaster.getCostCentre());
+			deleteData(siteLocationMaster);
+
+		}
+
+		public String getLocation(String costCenter) {
+
+			SiteLocationMaster siteLocationMaster = null;
+			siteLocationMaster = em.find(SiteLocationMaster.class, costCenter);
+			if(siteLocationMaster == null) {
+				logger.info("No Location found Cost Center:" + costCenter);
+				return null;				
+			}
+			logger.info("Found Location: " + siteLocationMaster.getLocation());
+			return siteLocationMaster.getLocation();
 		}
 		
 }
