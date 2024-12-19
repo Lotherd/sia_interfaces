@@ -251,6 +251,7 @@ public class RunAble implements Runnable {
 		    	   Worker worker = new Worker(data);
 		    	   worker.setInput(house);
 		    	   scheduledServ.execute(worker);
+		    	   Thread.sleep(100);
 		       }
 		      
 		       scheduledServ.shutdown();
