@@ -182,9 +182,9 @@ public class PersonalInfoData {
 			
 			logger.info("INSERTING EMPLOYEE: " + employee.getId().getRelationCode());
 			insertData(employee);
-			
-			insertSkills(employee,getSkills(e.getJobRole(), e.getCostCenter()));
-			
+			if(!e.getCompany().equalsIgnoreCase("SIA")) {
+				insertSkills(employee,getSkills(e.getJobRole(), e.getCostCenter()));
+			}
 
 		}else 
 		{
