@@ -495,8 +495,8 @@ public class EnteredManhoursData {
 									&& InboundItem.getOperationNumber() != null && !InboundItem.getOperationNumber().isEmpty()
 									&& item.getOperationNumber().equalsIgnoreCase(InboundItem.getOperationNumber())) {
 									
-									BigDecimal man = new BigDecimal(InboundItem.getEnteredManHours());
-									BigDecimal newMan = new BigDecimal( item.getEnteredManHours()).add(man);
+									//BigDecimal man = new BigDecimal(InboundItem.getEnteredManHours());
+									//BigDecimal newMan = new BigDecimal( item.getEnteredManHours()).add(man);
 									//item.setEnteredManHours(newMan.toString());
 									
 									if(InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty() && (item.getWork() != null &&  !item.getWork().isEmpty())) {
