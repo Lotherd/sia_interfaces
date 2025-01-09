@@ -234,29 +234,23 @@ public class RunAble implements Runnable {
 				
 				 
 				 
-				int scheduledPoolSize = 4;
-				if(System.getProperty("Thread_Count") != null && !System.getProperty("Thread_Count").isEmpty()) {
-					scheduledPoolSize = Integer.parseInt(System.getProperty("Thread_Count"));
-				}
-				logger.info("Creating default Scheduled Executor Service [poolSize =" + String.valueOf(scheduledPoolSize) + "]");
-				ScheduledExecutorService scheduledServ = Executors.newScheduledThreadPool(scheduledPoolSize);
-								
-				//logger.info("DELETING INVENTORY RECORDS");
-				//data.deleteAllInventoryRecords();
 				
 				logger.info(String.valueOf(warehouses.size()));
 		       for(MT_TRAX_RCV_I46_4077_BATCH house: warehouses) {
-		    	   
-		    	   exectued = "OK";
-		    	   Worker worker = new Worker(data);
-		    	   worker.setInput(house);
-		    	   scheduledServ.execute(worker);
-		    	   Thread.sleep(100);
+		    	   try {
+						String ouput = data.ProcessReqestBatch(house);
+			    	if(ouput == null || !ouput.equalsIgnoreCase("OK")) {
+			    		warehousesFailure.add(house); 
+			    	}
+				}
+				catch(Exception e)
+				{	
+					e.printStackTrace();
+					logger.severe(e.toString());
+				}
 		       }
 		      
-		       scheduledServ.shutdown();
-		       scheduledServ.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);	
-		       data.getEm().flush();
+		      
 			   String fileName = file.getName(); 
 			   
 	   

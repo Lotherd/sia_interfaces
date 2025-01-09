@@ -225,13 +225,13 @@ public class ImportWarehouseData implements IImportWarehouseData {
 		
 			
 			logger.info("INSERTING PN INVENTORY DETAIL: " + pnindet.getPn() + " BATCH: " + pnindet.getBatch());
-			//insertData(pnindet);
-			em.merge(pnindet);
+			insertData(pnindet);
+			//em.merge(pnindet);
 			if(i.getNotesText() != null && !i.getNotesText().isEmpty()) {
 				
 				logger.info("INSERTING NOTEPAD: " + notepad.getId().getNotes());
-				//insertData(notepad);
-				em.merge(pnindet);
+				insertData(notepad);
+				//em.merge(pnindet);
 			}
 
 		}else 
