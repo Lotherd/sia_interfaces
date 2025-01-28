@@ -244,7 +244,16 @@ public class MaterialMovementData implements IMaterialMovementData {
 							
 							picklistDistributionREQ.setStatus("CANCEL");
 							picklistDistributionDIS.setStatus("CANCEL");
-							picklistHeader.setStatus("CANCEL");
+							boolean headStatus = true;
+							for(PicklistDistribution pd : picklistHeader.getPicklistDistributions()) {
+								if(!pd.getStatus().equalsIgnoreCase("CANCEL") && 
+									pd.getId().getPicklistLine() != picklistDistributionDIS.getId().getPicklist()) {
+									headStatus = false;
+								}
+							}
+							if(headStatus) {
+								picklistHeader.setStatus("CANCEL");
+							}
 							
 						}
 					}else {
@@ -303,8 +312,17 @@ public class MaterialMovementData implements IMaterialMovementData {
 							
 							picklistDistributionREQ.setStatus("CANCEL");
 							picklistDistributionDIS.setStatus("CANCEL");
-							picklistHeader.setStatus("CANCEL");
 							
+							boolean headStatus = true;
+							for(PicklistDistribution pd : picklistHeader.getPicklistDistributions()) {
+								if(!pd.getStatus().equalsIgnoreCase("CANCEL") && 
+									pd.getId().getPicklistLine() != picklistDistributionDIS.getId().getPicklist()) {
+									headStatus = false;
+								}
+							}
+							if(headStatus) {
+								picklistHeader.setStatus("CANCEL");
+							}
 						}
 					}
 					

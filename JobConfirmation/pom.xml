@@ -66,12 +66,7 @@
 		<!-- https://mvnrepository.com/artifact/javax.ws.rs/javax.ws.rs-api -->
 
 
-<!-- https://mvnrepository.com/artifact/org.apache.axis2/axis2-integration -->
-<dependency>
-    <groupId>org.apache.axis2</groupId>
-    <artifactId>axis2-integration</artifactId>
-    <version>1.5.4</version>
-</dependency>
+
 
 
 
@@ -102,12 +97,7 @@
 </dependency>
 
 
-<!-- https://mvnrepository.com/artifact/org.apache.axis/axis -->
-<dependency>
-    <groupId>org.apache.axis</groupId>
-    <artifactId>axis</artifactId>
-    <version>1.4</version>
-</dependency>
+
 
 
 <dependency>

@@ -296,7 +296,7 @@ public class EnteredManhoursData {
 				"AND INTA.TRANSACTION_METHOD = 'DELETE' AND INTA.TRANSACTION_OBJECT = 'TRAX_84_ITEM_XML' AND INTA.MESSAGE_WAS_SENT = 'N'" ;
 		
 		
-		String sqlWork = " SELECT REPORTED_HOURS, REPORTED_MINUTES FROM WO_ACTUALS WHERE TASK_CARD  = ? AND WO = ? AND (TASK_CARD_ITEM = ? OR TASK_CARD_ITEM = 0) AND TRASACTION_CATEGORY = 'LABOR'  ";
+		String sqlWork = " SELECT SUM( REPORTED_HOURS), SUM(  REPORTED_MINUTES) FROM WO_ACTUALS WHERE TASK_CARD  = ? AND WO = ?  AND TRASACTION_CATEGORY = 'LABOR'  ";
 		
 		//EO = TASK CARD AND ORDER_NUMBER = WO 
 		String sqlTaskAudit = "SELECT INTD.xml_document,INTA.TRANSACTION  FROM INTERFACE_AUDIT INTA, INTERFACE_DATA INTD \r\n" + 
@@ -453,7 +453,6 @@ public class EnteredManhoursData {
 							
 							pstmt3.setString(1, Inbound.getTaskCard());
 							pstmt3.setString(2, Inbound.getWO());
-							pstmt3.setString(3, InboundItem.getTRAXItemNumber());
 							
 							rs3 = pstmt3.executeQuery();
 
@@ -484,8 +483,12 @@ public class EnteredManhoursData {
 							}
 							manHours=manHours.replaceAll("hh", hour);
 							manHours=manHours.replaceAll("mm", minute);
+							if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
+								InboundItem.setEnteredManHours(manHours);
+							}else {
+								InboundItem.setEnteredManHours("");
+							}
 							
-							InboundItem.setEnteredManHours(manHours);
 							
 							boolean match = false;
 							for (OperationsREQ item : Inbound.getOperations()) {
@@ -493,9 +496,9 @@ public class EnteredManhoursData {
 									&& InboundItem.getOperationNumber() != null && !InboundItem.getOperationNumber().isEmpty()
 									&& item.getOperationNumber().equalsIgnoreCase(InboundItem.getOperationNumber())) {
 									
-									BigDecimal man = new BigDecimal(InboundItem.getEnteredManHours());
-									BigDecimal newMan = new BigDecimal( item.getEnteredManHours()).add(man);
-									item.setEnteredManHours(newMan.toString());
+									//BigDecimal man = new BigDecimal(InboundItem.getEnteredManHours());
+									//BigDecimal newMan = new BigDecimal( item.getEnteredManHours()).add(man);
+									//item.setEnteredManHours(newMan.toString());
 									
 									if(InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty() && (item.getWork() != null &&  !item.getWork().isEmpty())) {
 										BigDecimal newWork = new BigDecimal(item.getWork()).add(new BigDecimal(InboundItem.getWork()));
@@ -594,7 +597,6 @@ public class EnteredManhoursData {
 							
 							pstmt3.setString(1, Inbound.getTaskCard());
 							pstmt3.setString(2, Inbound.getWO());
-							pstmt3.setString(3, InboundItem.getTRAXItemNumber());
 							
 							rs3 = pstmt3.executeQuery();
 
@@ -626,8 +628,11 @@ public class EnteredManhoursData {
 							manHours=manHours.replaceAll("hh", hour);
 							manHours=manHours.replaceAll("mm", minute);
 							
-							InboundItem.setEnteredManHours(manHours);
-							
+							if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
+								InboundItem.setEnteredManHours(manHours);
+							}else {
+								InboundItem.setEnteredManHours("");
+							}							
 							Inbound.getOperations().add(InboundItem);
 						}
 					}
@@ -784,7 +789,6 @@ public class EnteredManhoursData {
 							
 							pstmt3.setString(1, Inbound.getTaskCard());
 							pstmt3.setString(2, Inbound.getWO());
-							pstmt3.setString(3, InboundItem.getTRAXItemNumber());
 							
 							rs3 = pstmt3.executeQuery();
 
@@ -816,8 +820,11 @@ public class EnteredManhoursData {
 							manHours=manHours.replaceAll("hh", hour);
 							manHours=manHours.replaceAll("mm", minute);
 							
-							InboundItem.setEnteredManHours(manHours);
-							
+							if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
+								InboundItem.setEnteredManHours(manHours);
+							}else {
+								InboundItem.setEnteredManHours("");
+							}							
 							Inbound.getOperations().add(InboundItem);
 						}
 					}

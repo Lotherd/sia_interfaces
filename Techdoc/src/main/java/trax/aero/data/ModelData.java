@@ -191,7 +191,12 @@ public class ModelData {
 			{
 				taskCard.getId().setPnSn(sn);
 			}
-			
+			if(taskCard.getId().getPn().equalsIgnoreCase("                                   ")
+					&& taskCard.getId().getPnSn().equalsIgnoreCase("                                   ")) {
+					taskCard.getId().setAc(data.getEFFECTIVITY().getREGNBR());
+				}else {
+					taskCard.getId().setAc("          ");
+				}
 			taskCard = assignValuesWO(taskId,taskCard,Long.parseLong(woo),taskCard.getId().getAc()
 					,taskCard.getId().getPn(),taskCard.getId().getPnSn());
 			
@@ -232,8 +237,13 @@ public class ModelData {
 			}
 			
 
-			
-			taskCard.getId().setAc("          ");
+				
+			if(taskCard.getId().getPn().equalsIgnoreCase("                                   ")
+				&& taskCard.getId().getPnSn().equalsIgnoreCase("                                   ")) {
+				taskCard.getId().setAc(data.getEFFECTIVITY().getREGNBR());
+			}else {
+				taskCard.getId().setAc("          ");
+			}
 			taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 			
 			ac = data.getEFFECTIVITY().getREGNBR();
@@ -444,11 +454,13 @@ public class ModelData {
 			
 			
 			if(taskCard.getStatus() !=null && !taskCard.getStatus().isEmpty() 
-			&& !taskCard.getStatus().equalsIgnoreCase("OPEN")) {
-				logger.info("TaskCard: " + taskCard.getId().getTaskCard() + 
-						" Status is not OPEN " 
-						+ " Status: " +taskCard.getStatus() );
-				return true;
+					&& !taskCard.getStatus().equalsIgnoreCase("OPEN")
+					&& taskCard.getStatus().equalsIgnoreCase("CANCEL")) {
+						logger.info("TaskCard: " + taskCard.getId().getTaskCard() + 
+								" Status is not OPEN " 
+								+ " Status: " +taskCard.getStatus() );
+						//return true;
+						taskCard.setStatus("OPEN");
 			}
 			
 			if(getWoThirdParty(taskCard.getId().getWo())  && !getWoShop(woo)) {
@@ -1747,7 +1759,7 @@ public class ModelData {
 					
 				
 					
-					taskCard.getId().setAc("          ");
+					taskCard.getId().setAc(parentTaskCard.getId().getAc());
 					taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 					
 					String pn = filterADDATTR(attributes, "COMP");
@@ -1996,7 +2008,15 @@ public class ModelData {
 					
 					
 					//item.setId(itemKey);
-					
+					if(taskCard.getStatus() !=null && !taskCard.getStatus().isEmpty() 
+							&& !taskCard.getStatus().equalsIgnoreCase("OPEN")
+							&& taskCard.getStatus().equalsIgnoreCase("CANCEL")) {
+								logger.info("TaskCard: " + taskCard.getId().getTaskCard() + 
+										" Status is not OPEN " 
+										+ " Status: " +taskCard.getStatus() );
+								//return true;
+								taskCard.setStatus("OPEN");
+					}
 					
 
 					

@@ -92,7 +92,7 @@ public class PersonalInfoData {
 				employee.setTrainingInstructor("NO");
 				employee.setAllowIssueTo("NO");
 				employee.setDrugTestingMaxDays(new BigDecimal(0));
-				
+				employee.setSection(null);
 				
 				
 			}
@@ -115,8 +115,9 @@ public class PersonalInfoData {
 			
 			employee.setFirstName(encryptValue(e.getFirstName().toUpperCase()));
 			employee.setLastName(encryptValue(e.getLastName().toUpperCase()));
-			employee.setRelatedLocation(e.getLocation().toUpperCase());
 			
+			employee.setRelatedLocation(e.getLocation().toUpperCase());
+
 			setCode("DEPARTMENT", e.getDepartmentCode().toUpperCase(),e.getDepartment());
 			employee.setDepartment(e.getDepartmentCode().toUpperCase());
 			
@@ -177,9 +178,9 @@ public class PersonalInfoData {
 			
 			logger.info("INSERTING EMPLOYEE: " + employee.getId().getRelationCode());
 			insertData(employee);
-			
-			insertSkills(employee,getSkills(e.getJobRole(), e.getCostCenter()));
-			
+			if(!e.getCompany().equalsIgnoreCase("SIA")) {
+				insertSkills(employee,getSkills(e.getJobRole(), e.getCostCenter()));
+			}
 
 		}else 
 		{
@@ -757,5 +758,7 @@ public class PersonalInfoData {
 			em.merge(lock);
 			em.getTransaction().commit();
 		}
+		
+		
 		
 }
