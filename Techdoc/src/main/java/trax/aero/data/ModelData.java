@@ -18,6 +18,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 import trax.aero.logger.LogManager;
@@ -164,14 +165,21 @@ public class ModelData {
 				taskCard.setId(new WoTaskCardPK());
 			
 			taskCard.getId().setAc("          ");
-			String pn = filterADDATTR(attributes, "COMP");
+			String pn = filterADDATTR(attributes, "PART_NO2");
 			if(pn == null || pn.length() == 0)
 			{
 				taskCard.getId().setPn("                                   ");
 			}
 			else
 			{
-				taskCard.getId().setPn(pn);
+				if(getPN(pn) != null) {
+					taskCard.getId().setPn(getPN(pn));
+				}else {
+					error = error.concat("TaskCard: " +taskId + " WO: " +woo+" ,Error Inserting WoTaskCard "+  System.lineSeparator() + "PN does not exist" +
+							 System.lineSeparator() +  System.lineSeparator());
+					
+					return false;
+				}
 			}
 			
 			String sn = filterADDATTR(attributes, "SN");
@@ -394,7 +402,9 @@ public class ModelData {
 				if(wonbr.length() > 4)
 				{
 					ref = (wonbr.substring(0, wonbr.length()- 4));
-					taskCard.setReferenceTaskCard(ref);
+					if(!getWoShop(new BigDecimal( taskCard.getId().getWo()).toString())){
+						taskCard.setReferenceTaskCard(ref);
+					}	
 				}
 			}
 			
@@ -643,6 +653,8 @@ public class ModelData {
 									error = error.concat("TaskCard: " +taskCardId + " WO: " +woo +" ,PN " + mat.getMPNNUMBER() +  " does not exist in Pn Master" +
 											 System.lineSeparator() +  System.lineSeparator());
 									continue;
+								}else {
+									mat.setMPNNUMBER(getPN(mat.getMPNNUMBER()));
 								}
 								
 								WoTaskCardPnPK pnKey = new WoTaskCardPnPK();
@@ -722,6 +734,8 @@ public class ModelData {
 								error = error.concat("TaskCard: " +taskCardId + " WO: " +woo +" ,PN " + tool.getPRTNUMBER() +  " does not exist in Pn Master" +
 										 System.lineSeparator() +  System.lineSeparator());
 								continue;
+							}else{
+								tool.setPRTNUMBER(getPN(tool.getPRTNUMBER()));
 							}
 							
 							WoTaskCardPnPK pnKey = new WoTaskCardPnPK();
@@ -1078,16 +1092,32 @@ public class ModelData {
 	{
 		TaskCard card = null;
 		
+		if(getWoShop(new BigDecimal( woCard.getId().getWo()).toString())){
+		    int iend = woCard.getId().getTaskCard().indexOf("_");
+		    if (iend != -1) 
+	        {
+	           String cardString = taskCard.substring(0 , iend); 
+	           cardString = "S_"+cardString;
+	           if(cardString.length() > 20){
+	        	   cardString = cardString.substring(0, 22);
+	        	   taskCard = cardString + taskCard.substring(iend, taskCard.length());
+	           }else {
+	        	   taskCard = "S_"+taskCard;
+	           }
+	        }   
+		}
+		
 		try
 		{
 			card = (TaskCard) this.em.createQuery("select t from TaskCard t where t.taskCard = :card")
 					.setParameter("card", taskCard)
 					.getSingleResult();
+			logger.info("ENG TASK CARD FOUND: " + taskCard);
 		}
 		catch(Exception e)
 		{
 			//e.printStackTrace();
-			logger.info("NO ENG TASK CARD FOUND");
+			logger.info("NO ENG TASK CARD FOUND: " + taskCard);
 			return woCard;
 		}
 		
@@ -1592,17 +1622,39 @@ public class ModelData {
 			private String getPN(String PN) {
 				try
 				{
+					if(PN.length() > 18) {
+						logger.warning(" PN " + PN  + " LENGHT " +PN.length());
+						String tempPN = StringUtils.substringBefore(PN, ":");
+						tempPN = tempPN + ":";
+						List<PnMaster> pnMasters = em.createQuery("Select p From PnMaster p where p.id.pn LIKE :partn||'%'", PnMaster.class)
+								.setParameter("partn", tempPN)
+								.getResultList();
+								
+								return pnMasters.get(0).getPn();
+					}else {
+					
 					PnMaster pnMaster = em.createQuery("Select p From PnMaster p where p.id.pn = :partn", PnMaster.class)
 					.setParameter("partn", PN)
 					.getSingleResult();
 					
 					return pnMaster.getPn();
+					}
 				}
 				catch (Exception e)
 				{
-					
+					try {
+						String tempPN = StringUtils.substringBefore(PN, ":");
+						tempPN = tempPN + ":";
+						logger.warning(" PN " + PN  + " DOES NOT EXIST DOING WILDCARD SEARCH " +tempPN);
+						List<PnMaster> pnMasters = em.createQuery("Select p From PnMaster p where p.id.pn LIKE :partn||'%'", PnMaster.class)
+								.setParameter("partn", tempPN)
+								.getResultList();
+								
+						return pnMasters.get(0).getPn();
+					}catch (Exception e1) {
+						return null;
+					}
 				}
-				return null;
 			}
 			
 			
@@ -1947,7 +1999,9 @@ public class ModelData {
 						if(wonbr.length() > 4)
 						{
 							ref = (wonbr.substring(0, wonbr.length()- 4));
-							taskCard.setReferenceTaskCard(ref);
+							if(!getWoShop(new BigDecimal( taskCard.getId().getWo()).toString())){
+								taskCard.setReferenceTaskCard(ref);
+							}
 						}
 					}
 					
@@ -2209,20 +2263,40 @@ public class ModelData {
 			private void exhancedData(WoTaskCard woTaskCard, String ops){
 				TaskCard card = null;
 				boolean shopWo = false;
+				String cardId = woTaskCard.getId().getTaskCard();
+				//ESD TODO
+				
+				if(getWoShop(new BigDecimal( woTaskCard.getId().getWo()).toString())){
+					shopWo = true;
+				    int iend = woTaskCard.getId().getTaskCard().indexOf("_");
+				    if (iend != -1) 
+			        {
+			           String cardString = cardId.substring(0 , iend); 
+			           cardString = "S_"+cardString;
+			           if(cardString.length() > 20){
+			        	   cardString = cardString.substring(0, 22);
+			               cardId = cardString + cardId.substring(iend, cardId.length());
+			           }else {
+			        	   cardId = "S_"+cardId;
+			           }
+			        }   
+				}
+				
 				try
 				{
 					card = (TaskCard) this.em.createQuery("select t from TaskCard t where t.taskCard = :card")
-							.setParameter("card", woTaskCard.getId().getTaskCard())
+							.setParameter("card", cardId)
 							.getSingleResult();
+					logger.info("ENG TASK CARD FOUND: " + cardId);
+
 				}
 				catch(Exception e)
 				{
-					logger.info("NO ENG TASK CARD FOUND");
+					logger.info("NO ENG TASK CARD FOUND:" + cardId);
+					emailer.sendEmail("Task card : " + cardId,true);
 					return;
 				}
-				if(getWoShop(new BigDecimal( woTaskCard.getId().getWo()).toString())){
-					shopWo = true;
-				}
+				
 				
 				//ITEM
 				if(card.getTaskCardItems() != null && !card.getTaskCardItems().isEmpty()) {
@@ -2492,7 +2566,7 @@ public class ModelData {
 				//TASK_CARD TODO ESD
 				//SUB_PHASE, BILLABLE_HOURS ,GATE, PHASE
 				if(shopWo) {
-				/*	
+					
 					woTaskCard.setPhase(card.getPhase());
 					woTaskCard.setSubPhase(card.getSubPhase());
 					woTaskCard.setBillableHours(card.getBillableHours());
@@ -2500,7 +2574,7 @@ public class ModelData {
 					woTaskCard.setModifiedDate(new Date());
 					woTaskCard.setModifiedBy("TRAXIFACE");
 					insertData(woTaskCard, "WoTaskCard", "woTaskCard");
-				 */
+					
 				}
 				
 			}
@@ -2675,7 +2749,7 @@ public class ModelData {
 				em.getTransaction().commit();
 			}
 			
-			private Boolean getWoShop(String woString) {
+			public Boolean getWoShop(String woString) {
 				logger.info("Checking WO");
 				try 
 				{

@@ -176,12 +176,14 @@ public class TaskCardData {
 					}
 					if(!exceuted.equalsIgnoreCase("OK")) {
 						exceuted = "ERROR";
-					}else if(newExist) {
+					}
+					if(newExist) {
 						tasklist = "TaskCard name: "  + taskCard.getTaskCard() + " Group Number: " +taskCards.getGroupNo() + " Task SAP: " +taskCards.getTaskCard();
 					}
 		}
 		catch (Exception e) 
         {
+			e.printStackTrace();
 			TaskCardController.addError(e.toString());
 			logger.severe(e.toString());
             em.getTransaction().rollback();
@@ -206,7 +208,8 @@ public class TaskCardData {
 		String taskCardString = null,  DeletionIndicatorString = null;
 		String size = "";
 		
-		if(taskCards.getGroupNo().startsWith("MO") || taskCards.getGroupNo().startsWith("SI") ) {
+		if((taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI"))
+			&& 	!taskCards.getTaskCard().startsWith("S_")) {
 			taskCards.setTaskCard("S_"+taskCards.getTaskCard());
 		}
 		
@@ -257,15 +260,14 @@ public class TaskCardData {
 				//EMRO fields to create basic object
 				taskCard.setTcSub(taskCardString);
 				taskCard.setTcAcType("ALL");
-				//if(taskCard.getTaskCard().startsWith("S_")) {
-				//	taskCard.setControlArea("SHOP");
-				//}	else{
+				if(taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI") ) {
+					taskCard.setControlArea("SHOP");
+				}else {	
 					taskCard.setControlArea("E/C");
-				//}
+				}
 				try
 				{
-					String company = (String) this.em.createQuery("select p.profile from ProfileMaster p")
-							.getSingleResult();
+					String company = System.getProperty("profile_company");
 					taskCard.setTcCompany(company);
 				}
 				catch(Exception e1) {
@@ -309,7 +311,9 @@ public class TaskCardData {
 			
 			
 			taskCard.setTaskCard(taskCardString);
-			
+			if(taskCard.getTaskCard().startsWith("S_")) {
+				taskCard.setControlArea("SHOP");
+			}
 			taskCard.setModifiedBy("TRAX_IFACE");
 			taskCard.setModifiedDate(new Date());
 			

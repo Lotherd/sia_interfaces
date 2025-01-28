@@ -199,7 +199,11 @@ public class TimerExecutor implements Runnable {
 							
 							if(errors.length() > 0)
 							{
-								data.emailer.sendEmail(errors,data.wo, data.ac);
+								if(data.getWoShop(data.wo)) {
+									data.emailer.sendEmail(errors,data.wo, data.ac,true);
+								}else {
+									data.emailer.sendEmail(errors,data.wo, data.ac,false);
+								}
 								errors = "";
 							}
 							try {

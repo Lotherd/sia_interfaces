@@ -439,7 +439,7 @@ public class ImportClockOnOffData {
 			private void addEmployeeAttendanceLog(Punch pci, String location, String site) throws Exception
 			{
 				PreparedStatement ps = null;
-					
+				PreparedStatement ps1 = null;
 				try
 				{	
 					String q =  " insert into employee_attendance_log(transaction_no, transaction_type, employee, start_time, created_by, created_date, location, site, start_date, type_off, \"GROUP\")" + 
@@ -467,6 +467,22 @@ public class ImportClockOnOffData {
 
 					ps.executeUpdate();
 					
+					// TODO if clock OUT THEN UPDATE THE BOTH LOG RECORDS WITH END TIME 
+					if("OUT".equalsIgnoreCase(pci.getPunchtype()))
+					{
+						q ="  UPDATE EMPLOYEE_ATTENDANCE_LOG ELA SET ELA.END_DATE = ?, ELA.END_TIME = ? " + 
+							"WHERE ELA.EMPLOYEE = ? AND ELA.TRANSACTION_NO IN (SELECT ELA1.TRANSACTION_NO FROM EMPLOYEE_ATTENDANCE_LOG ELA1 WHERE ELA1.EMPLOYEE = ELA.EMPLOYEE " + 
+							"AND ELA1.LOCATION = ? AND ELA1.SITE = ? and ELA1.TYPE_OFF IN ('OUT','IN') ORDER BY ELA1.CREATED_DATE DESC FETCH FIRST 2 ROWS ONLY) ";
+						
+						ps1 = con.prepareStatement(q); 
+						ps1.setDate(1, new java.sql.Date(punchDate.getMillis()));
+						ps1.setDate(2, new java.sql.Date(punchDateTime.getMillis()));
+						ps1.setString(3,  pci.getEmployeeid());	
+						ps1.setString(4, location != null? location: "");
+						ps1.setString(5,  site != null? site: "");				
+						ps1.executeUpdate();
+					}
+					
 					logger.info("The punche has been created with values: employee = " + pci.getEmployeeid() + "; punch type = " + pci.getPunchtype() + "; punch date = " + pci.getPunchdatetime() + "; location = " + location + "; site = " + site);
 				}
 				catch (SQLException sqle) 
@@ -490,6 +506,8 @@ public class ImportClockOnOffData {
 					{
 						if(ps != null && !ps.isClosed())
 							ps.close();
+						if(ps1 != null && !ps1.isClosed())
+							ps1.close();
 					} 
 					catch (SQLException e) 
 					{ 

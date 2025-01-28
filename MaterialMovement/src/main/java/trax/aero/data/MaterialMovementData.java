@@ -1373,8 +1373,7 @@ public class MaterialMovementData implements IMaterialMovementData {
 				pid.setInventoryType("MAINTENANCE");	
 				try
 				{
-					String company = (String) this.em.createQuery("select p.profile from ProfileMaster p")
-							.getSingleResult();
+					String company = System.getProperty("profile_company");
 					pid.setGlCompany(company);
 				}
 				catch(Exception e1) {

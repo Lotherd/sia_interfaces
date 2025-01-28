@@ -817,7 +817,7 @@ public class WoTaskCard implements Serializable {
 	private String zonal;
 
 	//ESD  TODO
-	/*
+	
 	private String gate;
 
 	@Column(name="SUB_PHASE")
@@ -825,7 +825,7 @@ public class WoTaskCard implements Serializable {
 	
 	@Column(name="BILLABLE_HOURS")
 	private String billableHours;
-	*/
+	
 	
 	//bi-directional many-to-one association to Wo
 	@ManyToOne
@@ -3315,7 +3315,7 @@ public class WoTaskCard implements Serializable {
 		return woTaskCardCustomer;
 	}
 
-	/*
+	
 	public String getGate() {
 		return gate;
 	}
@@ -3339,6 +3339,6 @@ public class WoTaskCard implements Serializable {
 	public void setBillableHours(String billableHours) {
 		this.billableHours = billableHours;
 	}
-	*/
+	
 
 }

@@ -29,7 +29,8 @@ public class Worker implements Runnable {
 				String ouput = data.insertTaskCard(input);
 	    	if(ouput == null || !ouput.equalsIgnoreCase("OK")) {
 	    		RunAble.taskCardsArrayFailure.add(input); 
-	    	}else if(data.newExist) {
+	    	}
+	    	if(data.newExist) {
 	    		RunAble.tasklist.add(data.getTaskList());
 	    	}
 		}

@@ -464,7 +464,7 @@ public class TaskCard implements Serializable {
 	private String zonal;
 	
 	//ESD  TODO
-	/*
+	
 	private String gate;
 
 	@Column(name="SUB_PHASE")
@@ -472,7 +472,7 @@ public class TaskCard implements Serializable {
 		
 	@Column(name="BILLABLE_HOURS")
 	private String billableHours;
-*/
+
 
 	//bi-directional many-to-one association to TaskCardItem
 	@OneToMany(mappedBy="taskCardBean")
@@ -1842,7 +1842,7 @@ public class TaskCard implements Serializable {
 		this.taskCardExecution = taskCardExecution;
 	}
 
-	/*
+	
 	public String getGate() {
 		return gate;
 	}
@@ -1866,6 +1866,6 @@ public class TaskCard implements Serializable {
 	public void setBillableHours(String billableHours) {
 		this.billableHours = billableHours;
 	}
-	*/
+	
 
 }

@@ -119,7 +119,7 @@ public class ACData implements IACData {
 					AcMaster.setAcOwnershipControl("MANAGED");
 					
 					AcMaster.setServiceDate(new Date());
-					AcMaster.setGlCompany("SIAEC");
+					AcMaster.setGlCompany(System.getProperty("profile_company"));
 					//AcMaster.setGlCompany("TRAX");
 				}
 				
