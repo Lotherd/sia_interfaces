@@ -25,7 +25,6 @@
 		<class>trax.aero.model.JobCostCenterMasterPK</class>
 		<class>trax.aero.model.InterfaceLockMaster</class>
 		<class>trax.aero.model.SecurityHeader</class>
-		<class>trax.aero.model.SiteLocationMaster</class>
 		<shared-cache-mode>NONE</shared-cache-mode>
 		<properties>
 			<property name="hibernate.dialect"
