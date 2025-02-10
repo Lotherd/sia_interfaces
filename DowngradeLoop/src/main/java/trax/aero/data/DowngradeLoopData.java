@@ -127,7 +127,7 @@ public class DowngradeLoopData {
 			
 			
 			String sql = 
-			"SELECT w.refurbishment_order FROM WO w where w.INTERFACE_SAP_TRANSFER_DATE IS NULL AND w.refurbishment_order IS NOT NULL AND w.MODULE = 'SHOP'";
+			"SELECT w.refurbishment_order FROM WO w where w.INTERFACE_SAP_TRANSFER_DATE IS NULL AND w.INTERFACE_SAP_D_TRANSFER_FLAG IS NULL AND w.refurbishment_order IS NOT NULL AND w.MODULE = 'SHOP'";
 
 			if((MaxRecord != null && !MaxRecord.isEmpty())) {
 				sql= sql + " AND ROWNUM <= ?";		
@@ -135,6 +135,7 @@ public class DowngradeLoopData {
 			
 			
 			PreparedStatement pstmt1 = null;
+			PreparedStatement pstmtFlag = null;
 			ResultSet rs1 = null;
 			try 
 			{
@@ -160,6 +161,14 @@ public class DowngradeLoopData {
 						}
 						requests.add(request);	
 						
+						String updateFlag = 
+			                    "UPDATE WO SET INTERFACE_SAP_D_TRANSFER_FLAG = 'Y' " +
+			                    "WHERE refurbishment_order = ? AND MODULE = 'SHOP'";
+			                
+			                pstmtFlag = con.prepareStatement(updateFlag);
+			                pstmtFlag.setString(1, rs1.getString(1));
+			                pstmtFlag.executeUpdate();
+						
 					}
 				}
 				
@@ -176,6 +185,8 @@ public class DowngradeLoopData {
 					rs1.close();
 				if(pstmt1 != null && !pstmt1.isClosed())
 					pstmt1.close();
+				 if (pstmtFlag != null && !pstmtFlag.isClosed())
+			            pstmtFlag.close();
 			}
 			
 			return requests;
