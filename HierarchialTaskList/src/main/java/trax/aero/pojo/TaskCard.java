@@ -1,5 +1,7 @@
 package trax.aero.pojo;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,8 +18,11 @@ public class TaskCard
 	@XmlElement(name = "TaskCard")
 	private String taskCard;
 	
-	@XmlElement(name = "DeletionIndicator")
-	private String excl;
+	@XmlElements({
+	    @XmlElement(name = "DeletionIndicator", type = String.class),
+	    @XmlElement(name = "ExclusionIndicator", type = String.class)
+	})
+	private List<String> excl;
 
 	public String getGroupNo() {
 		return groupNo;
@@ -43,11 +48,11 @@ public class TaskCard
 		this.taskCard = taskCard;
 	}
 
-	public String getExcl() {
+	public List<String> getExcl() {
 		return excl;
 	}
 
-	public void setExcl(String excl) {
+	public void setExcl(List<String> excl) {
 		this.excl = excl;
 	}
 	
