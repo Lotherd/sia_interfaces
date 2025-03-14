@@ -354,7 +354,7 @@ public class ImportClockOnOffData {
 					
 					ps.executeUpdate();
 					
-					logger.info("The punches has been removed...");
+					logger.info("Current employee attendance records have been removed for employee: " + pci.getEmployeeid());
 				}
 				catch (SQLException sqle) 
 				{
@@ -440,12 +440,36 @@ public class ImportClockOnOffData {
 			{
 				PreparedStatement ps = null;
 				PreparedStatement ps1 = null;
-				try
-				{	
+				PreparedStatement checkDuplicates = null;
+			    
+			    try
+			    {   
+			       
+			        String checkQuery = "SELECT COUNT(*) FROM employee_attendance_log " +
+			                           "WHERE employee = ? AND type_off = ? " +
+			                           "AND TRUNC(start_time) = TRUNC(?) " +
+			                           "AND ABS(TO_NUMBER(TO_CHAR(start_time, 'HH24MISS')) - TO_NUMBER(TO_CHAR(?, 'HH24MISS'))) < 1000"; 
+			                           
+			        DateTime punchDateTime = new DateTime(pci.getPunchdatetime());
+			        
+			        checkDuplicates = con.prepareStatement(checkQuery);
+			        checkDuplicates.setString(1, pci.getEmployeeid());
+			        checkDuplicates.setString(2, pci.getPunchtype());
+			        checkDuplicates.setDate(3, new java.sql.Date(punchDateTime.getMillis()));
+			        checkDuplicates.setDate(4, new java.sql.Date(punchDateTime.getMillis()));
+			        
+			        ResultSet rs = checkDuplicates.executeQuery();
+			        if (rs.next() && rs.getInt(1) > 0) {
+			            logger.info("Skipping duplicate punch record for employee: " + pci.getEmployeeid() + 
+			                       ", type: " + pci.getPunchtype() + 
+			                       ", time: " + pci.getPunchdatetime());
+			            return; 
+			        }
+	
 					String q =  " insert into employee_attendance_log(transaction_no, transaction_type, employee, start_time, created_by, created_date, location, site, start_date, type_off, \"GROUP\")" + 
 							 	" values( ?, ?, ?, ?, ?, sysdate, ?, ?, ?, ?, 'testGroup') ";
 					
-					DateTime punchDateTime = new DateTime(pci.getPunchdatetime());
+					//DateTime punchDateTime = new DateTime(pci.getPunchdatetime());
 					
 					//Extracting the Date from the DateTime
 					SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -504,6 +528,8 @@ public class ImportClockOnOffData {
 				{
 					try 
 					{
+						if(checkDuplicates != null && !checkDuplicates.isClosed())
+			                checkDuplicates.close();
 						if(ps != null && !ps.isClosed())
 							ps.close();
 						if(ps1 != null && !ps1.isClosed())
@@ -661,37 +687,73 @@ public class ImportClockOnOffData {
 					punch.setEmployeeid(item.getStaffNo());
 				}
 				
-				if(item.getMsgType() != null && !item.getMsgType().isEmpty() && "ClockIn".equalsIgnoreCase(item.getMsgType())) {
-					
-					
-					try {
-						date = formatter.parse(item.getClkInTime());
-						target = formatter1.format(date);
-						date = formatter1.parse(target);
-						punch.setPunchdatetime(date);
-					} catch (ParseException e) {
-						
-					}
-					
-					
-					
-					punch.setPunchtype("IN");
-				}
-				
-				if(item.getMsgType() != null && !item.getMsgType().isEmpty() && "ClockOut".equalsIgnoreCase(item.getMsgType())) {
-					try {
-						date = formatter.parse(item.getClkOutTime());
-						target = formatter1.format(date);
-						date = formatter1.parse(target);
-						punch.setPunchdatetime(date);
-					} catch (ParseException e) {
-					
-					}
-					
-					punch.setPunchtype("OUT");
-				}
-				
-				return punch;
+				if(item.getMsgType() != null && !item.getMsgType().isEmpty()) {
+			        if("ClockIn".equalsIgnoreCase(item.getMsgType())) {
+			            try {
+			               
+			                if(item.getClkInTime() != null && !item.getClkInTime().isEmpty()) {
+			                    try {
+			                        date = formatter.parse(item.getClkInTime());
+			                    } catch (ParseException e) {
+			                
+			                        try {
+			                            date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(item.getClkInTime());
+			                        } catch (ParseException e2) {
+			                            logger.warning("Could not parse clock in time: " + item.getClkInTime() + ". Using current time.");
+			                            date = new Date(); 
+			                        }
+			                    }
+			                    target = formatter1.format(date);
+			                    date = formatter1.parse(target);
+			                    punch.setPunchdatetime(date);
+			                } else {
+			                    punch.setPunchdatetime(new Date()); 
+			                }
+			                
+			                punch.setPunchtype("IN");
+			            } catch (Exception e) {
+			                logger.severe("Error processing ClockIn time: " + e.getMessage());
+			                throw new Exception("Error processing ClockIn time: " + e.getMessage());
+			            }
+			        } else if("ClockOut".equalsIgnoreCase(item.getMsgType())) {
+			            try {
+			               
+			                if(item.getClkOutTime() != null && !item.getClkOutTime().isEmpty()) {
+			                    try {
+			                        date = formatter.parse(item.getClkOutTime());
+			                    } catch (ParseException e) {
+			                     
+			                        try {
+			                            date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(item.getClkOutTime());
+			                        } catch (ParseException e2) {
+			                            logger.warning("Could not parse clock out time: " + item.getClkOutTime() + ". Using current time.");
+			                            date = new Date(); 
+			                        }
+			                    }
+			                    target = formatter1.format(date);
+			                    date = formatter1.parse(target);
+			                    punch.setPunchdatetime(date);
+			                } else {
+			                    punch.setPunchdatetime(new Date()); 
+			                }
+			                
+			                punch.setPunchtype("OUT");
+			            } catch (Exception e) {
+			                logger.severe("Error processing ClockOut time: " + e.getMessage());
+			                throw new Exception("Error processing ClockOut time: " + e.getMessage());
+			            }
+			        } else {
+			            logger.warning("Unknown message type: " + item.getMsgType() + ". Default to IN.");
+			            punch.setPunchtype("IN");
+			            punch.setPunchdatetime(new Date());
+			        }
+			    } else {
+			        logger.warning("No message type specified. Default to IN.");
+			        punch.setPunchtype("IN");
+			        punch.setPunchdatetime(new Date());
+			    }
+			    
+			    return punch;
 			}
 			
 			
