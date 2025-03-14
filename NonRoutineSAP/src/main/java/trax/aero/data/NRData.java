@@ -100,7 +100,7 @@ public class NRData implements INRData {
 		{
 			
 			
-			cards =  em.createQuery("Select w from WoTaskCard w where w.createdDate >= :date and w.nonRoutine = :nr and w.interfaceSyncDate is null and ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
+			cards =  em.createQuery("Select w from WoTaskCard w, WO r where w.id.wo = r.wo and r.rfo_no is null and w.createdDate >= :date and w.nonRoutine = :nr and w.interfaceSyncDate is null and ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
 				.setParameter("date", cal.getTime())
 				.setParameter("nr", "Y")
 				.setParameter("flag", "S")
@@ -294,7 +294,7 @@ public class NRData implements INRData {
 		{
 			
 			
-			updates = this.em.createQuery("Select w from WoTaskCard w where w.interfaceSyncDate IS NOT NULL and w.nonRoutine = :nr and  ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
+			updates = this.em.createQuery("Select w from WoTaskCard w, WO r where w.id.wo = r.wo and r.rfo_no is null and w.interfaceSyncDate IS NOT NULL and w.nonRoutine = :nr and  ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
 					.setParameter("nr", "Y")
 					.setParameter("flag", "S")
 					.getResultList();
@@ -646,7 +646,7 @@ public class NRData implements INRData {
 		
 		private Boolean getWoShop(String w) {
 			   logger.info("Checking WO " + w);
-			   String sql = "SELECT R.MODULE FROM WO R WHERE R.WO = ?";
+			   String sql = "SELECT R.MODULE FROM WO R WHERE R.WO = ? and RFO_NO is null";
 		       
 		       try {
 		    	   
