@@ -131,12 +131,13 @@ public class EcData
 		
 		try
 		{
+			logger.info("VALUE OF profile_company: " + System.getProperty("profile_company"));
 			String company = System.getProperty("profile_company");
 			ec.setEoCompany(company);
 		}
 		catch(Exception e)
 		{
-
+			logger.info("VALUE OF profile_company: " + System.getProperty("profile_company"));
 			error = error.concat("Error Inserting EC " + data.getEc() + System.lineSeparator() + "Company could not be found" +
 					 System.lineSeparator() +  System.lineSeparator());
 			
