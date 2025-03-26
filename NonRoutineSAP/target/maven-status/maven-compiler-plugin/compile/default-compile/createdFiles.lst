@@ -33,3 +33,4 @@ trax\aero\start\StartProcess.class
 trax\aero\model\WoTaskCardPn.class
 trax\aero\service\ServiceManager.class
 trax\aero\data\NRData.class
+trax\aero\model\WO.class

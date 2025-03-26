@@ -35,6 +35,7 @@
 		<class>trax.aero.model.PicklistDistributionPK</class>
 		<class>trax.aero.model.PicklistHeader</class>
 		<class>trax.aero.model.PnMaster</class>	
+		<class>trax.aero.model.WO</class>
         <shared-cache-mode>NONE</shared-cache-mode>
 		<properties>
 			<property name="hibernate.dialect"

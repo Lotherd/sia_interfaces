@@ -36,6 +36,7 @@ import trax.aero.model.PicklistDistributionPK;
 import trax.aero.model.PicklistHeader;
 import trax.aero.model.PnMaster;
 import trax.aero.model.WoTaskCard;
+import trax.aero.model.WO;
 import trax.aero.model.WoTaskCardItem;
 import trax.aero.pojo.ApplicatonMessage;
 import trax.aero.pojo.Component;
@@ -100,7 +101,7 @@ public class NRData implements INRData {
 		{
 			
 			
-			cards =  em.createQuery("Select w from WoTaskCard w, WO r where w.id.wo = r.wo and r.rfo_no is null and w.createdDate >= :date and w.nonRoutine = :nr and w.interfaceSyncDate is null and ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
+			cards =  em.createQuery("Select w from WoTaskCard w, WO r where w.id.wo = r.wo and r.rfoNo is null and w.createdDate >= :date and w.nonRoutine = :nr and w.interfaceSyncDate is null and ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
 				.setParameter("date", cal.getTime())
 				.setParameter("nr", "Y")
 				.setParameter("flag", "S")
@@ -294,7 +295,7 @@ public class NRData implements INRData {
 		{
 			
 			
-			updates = this.em.createQuery("Select w from WoTaskCard w, WO r where w.id.wo = r.wo and r.rfo_no is null and w.interfaceSyncDate IS NOT NULL and w.nonRoutine = :nr and  ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
+			updates = this.em.createQuery("Select w from WoTaskCard w, WO r where w.id.wo = r.wo and r.rfoNo is null and w.interfaceSyncDate IS NOT NULL and w.nonRoutine = :nr and  ( w.interfaceSyncFlag != :flag or w.interfaceSyncFlag is null) ")
 					.setParameter("nr", "Y")
 					.setParameter("flag", "S")
 					.getResultList();

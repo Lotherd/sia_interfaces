@@ -17,6 +17,7 @@ C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\log
 C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\model\WoTaskCardPn.java
 C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\model\WoTaskCard.java
 C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\model\WoTaskCardItemPK.java
+C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\model\WO.java
 C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\pojo\SuccessErrorlog.java
 C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\service\NRServices.java
 C:\.SINGAPORE\BitBUCKET\sia_interfaces\NonRoutineSAP\src\main\java\trax\aero\pojo\OrderLongText.java
