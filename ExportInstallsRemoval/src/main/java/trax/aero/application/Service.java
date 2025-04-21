@@ -96,7 +96,10 @@ public class Service {
         	
         	if(exceuted == null || !exceuted.equalsIgnoreCase("OK")) {
         		//exceuted = "Issue found";
-        		throw new Exception("Issue found");
+        		 ResponseBuilder R = Response.serverError().status(Response.Status.BAD_REQUEST);
+        		 R.entity(exceuted); 
+        		 R.type(MediaType.TEXT_PLAIN_TYPE);
+        		 return R.build();
         	}else {
         		exceuted = fianl;
         	}
