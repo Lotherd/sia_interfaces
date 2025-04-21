@@ -1507,22 +1507,48 @@ public class MaterialMovementData implements IMaterialMovementData {
 	private PicklistHeader getPicklistHeaderRev(MaterialMovementMaster input) {
 		try
 		{	
-			ArrayList<PicklistDistribution>picklistdist = (ArrayList<PicklistDistribution>) em.createQuery("SELECT p FROM PicklistDistribution p where p.externalCustRes =:pi AND p.externalCustResItem =:it AND p.id.transaction =:tra AND p.id.distributionLine =:dl")
+			logger.info("Searching for PicklistHeader with reservation: " + input.getReservationNumber() + 
+                    ", item: " + input.getReservationItem());
+
+			 List<PicklistDistribution> picklistdist = (ArrayList<PicklistDistribution>) em.createQuery("SELECT p FROM PicklistDistribution p where p.externalCustRes =:pi AND p.externalCustResItem =:it AND p.id.transaction =:tra AND p.id.distributionLine =:dl")
 					.setParameter("pi", input.getReservationNumber())
 					.setParameter("it", input.getReservationItem())
 					.setParameter("tra", "REQUIRE")
 					.setParameter("dl",new Long(0) )
 					.getResultList();
-			logger.info("Found PicklistHeader Rev");
 			
-			return picklistdist.get(0).getPicklistHeader();
+					if (picklistdist != null && !picklistdist.isEmpty()) {
+						logger.info("Found PicklistHeader via reservation info");
+						return picklistdist.get(0).getPicklistHeader();
+					}else {
+						
+						logger.info("No PicklistHeader found with standard query, trying alternative");
+						
+						
+						List<PicklistDistribution> altPicklistDist = em.createQuery("SELECT p FROM PicklistDistribution p " +
+								"WHERE p.pn = :material AND p.status = :status AND p.id.transaction = :tra")
+								.setParameter("material", input.getMaterial())
+								.setParameter("status", "OPEN")
+								.setParameter("tra", "REQUIRE")
+								.getResultList();
+						
+						if (altPicklistDist != null && !altPicklistDist.isEmpty()) {
+							logger.info("Found PicklistHeader via material and OPEN status");
+							return altPicklistDist.get(0).getPicklistHeader();
+						}
+					}
+			
+					logger.warning("Could not find PicklistHeader for reservation: " + input.getReservationNumber());
+					return null;
 		}
 		catch (Exception e)
 		{	
 			
-			logger.info("PICKLIST NOT FOUND");
+			logger.severe("Error finding PicklistHeader: " + e.getMessage());
+        e.printStackTrace();
+        return null;
 		}
-		return null;
+		
 	}
 	
 	private PicklistHeader getPicklistHeaderTaskCard(WoTaskCard woTaskCard, MaterialMovementMaster m) {

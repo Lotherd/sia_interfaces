@@ -31,6 +31,8 @@
         <class>trax.aero.model.PicklistHeader</class>
 		<class>trax.aero.model.PnInventoryDetail</class>
         <class>trax.aero.model.WoTaskCard</class>
+        <class>trax.aero.model.Wo</class>
+        <class>trax.aero.model.InterfaceLockMaster</class>
         <class>trax.aero.model.WoTaskCardPK</class>
         <class>trax.aero.model.PnInventoryHistory</class>
         <class>trax.aero.model.PnInventoryHistoryPK</class>
