@@ -2089,7 +2089,7 @@ public class ModelData {
 						//em.clear();
 						
 						
-						
+						logger.info("FINAL VALUES: AC=" + taskCard.getId().getAc() + ", PN=" + taskCard.getId().getPn() + ", PN_SN=" + taskCard.getId().getPnSn());
 						
 						//em.clear();
 						
@@ -2301,16 +2301,19 @@ public class ModelData {
 				//ITEM
 				if(card.getTaskCardItems() != null && !card.getTaskCardItems().isEmpty()) {
 					for(TaskCardItem item :card.getTaskCardItems()) {
-						if(item.getId().getTaskCardItem() != 1 && item.getOpsNo() != null && !item.getOpsNo().isEmpty() && item.getOpsNo().equalsIgnoreCase(ops)) {
-							
+						if(item.getId().getTaskCardItem() > 0) {
+
+							logger.info("Processing TaskCardItem: " + item.getId().getTaskCardItem() + 
+							", TaskCard: " + woTaskCard.getId().getTaskCard() + 
+							", OpsNo: " + (item.getOpsNo() != null ? item.getOpsNo() : "null") + 
+							", Expected OpsNo: " + ops);	
 							WoTaskCardItem	i = null;
 							
 							try{
-								i = (WoTaskCardItem) this.em.createQuery("select t from WoTaskCardItem t where t.id.wo = :woo and t.id.taskCard = :card and t.id.taskCardItem = :item and t.opsNo = :ops ")
+								i = (WoTaskCardItem) this.em.createQuery("select t from WoTaskCardItem t where t.id.wo = :woo and t.id.taskCard = :card and t.id.taskCardItem = :item ")
 										.setParameter("woo", woTaskCard.getId().getWo())
 										.setParameter("card", woTaskCard.getId().getTaskCard())
 										.setParameter("item", item.getId().getTaskCardItem())
-										.setParameter("ops", ops)
 										.getSingleResult();
 								
 							}catch(Exception e)
