@@ -64,10 +64,32 @@ public class MaterialData implements IMaterialData {
 	{
 		Calendar cal = null;
 		//List<DTTRAXI414066> results = new ArrayList<>();
-		 cal = Calendar.getInstance();
 		
-		//cal.add(Calendar.SECOND, (int) (-(Integer.parseInt(System.getProperty("CM_interval"))) *1.5));
-		cal.add(Calendar.SECOND, -Integer.parseInt(System.getProperty("CM_interval")));
+		cal = Calendar.getInstance();
+
+		
+		int interval = 0;
+		try {
+		    interval = Integer.parseInt(System.getProperty("CM_interval"));
+		    logger.info("Configured CM_interval: " + interval + " seconds");
+		    
+		    
+		    if (interval < 300) {
+		    	logger.warning("CM_interval configured below recommended value (300s). Current value: " + interval);
+		    }
+		    
+		    
+		    int intervalWithSafety = (int)(interval * 1.5);
+		    logger.info("Applying safety factor. Effective interval: " + intervalWithSafety + " seconds");
+		    
+		    cal.add(Calendar.SECOND, -intervalWithSafety);
+		} catch (Exception e) {
+		    
+			logger.severe("Error processing CM_interval: " + e.getMessage());
+		    cal.add(Calendar.SECOND, -600); 
+		}
+
+		logger.info("Processing records created/modified after: " + cal.getTime());
 		
 		List<PicklistDistribution> updates = null;
 		
@@ -154,6 +176,8 @@ public class MaterialData implements IMaterialData {
 				
 				
 				if(ord.getOrderNumber() == null ) {
+					logger.warning("Skipping header with null OrderNumber for WO: " + header.getWo() + 
+			                  ", TaskCard: " + header.getTaskCard());
 					continue;
 				}
 				logger.info("CREATED DATE " + header.getCreatedDate() + " >=  CAL DATE " + cal.getTime());
@@ -166,6 +190,10 @@ public class MaterialData implements IMaterialData {
 						
 					
 						if(detail.getInterfaceSyncFlag() != null &&  detail.getInterfaceSyncFlag().equalsIgnoreCase("S")) {
+							logger.info("Skipping component with PN: " + detail.getPn() + 
+					                ", Picklist: " + detail.getId().getPicklist() + 
+					                ", Line: " + detail.getId().getPicklistLine() + 
+					                " - Already synced");
 							continue;
 						}
 						Component c = new Component();
@@ -212,6 +240,10 @@ public class MaterialData implements IMaterialData {
 						c.setReservationItem(detail.getExternalCustResItem());
 						if(c.getReservationNumber() != null && !c.getReservationNumber().isEmpty() &&
 						   c.getReservationItem() != null && !c.getReservationItem().isEmpty()) {
+							logger.info("Skipping component with PN: " + detail.getPn() + 
+					                ", Picklist: " + detail.getId().getPicklist() + 
+					                ", Line: " + detail.getId().getPicklistLine() + 
+					                " - Already has reservation: " + c.getReservationNumber());
 							
 							continue;
 						}
@@ -223,10 +255,15 @@ public class MaterialData implements IMaterialData {
 								if(o.getOrderNumber().equalsIgnoreCase(ord.getOrderNumber())) {
 									o.getComponent().add(c);
 									
+									logger.info("Added component to existing order: " + o.getOrderNumber() + 
+						                       ", PN: " + c.getMaterialNumber());
+									
 									match = true;
+									break;
 								}
 								
 							}
+							if(match) break;
 						}
 						if(match) {
 							
@@ -276,6 +313,10 @@ public class MaterialData implements IMaterialData {
 					
 					
 					if(detail.getInterfaceSyncFlag() != null &&  detail.getInterfaceSyncFlag().equalsIgnoreCase("S")) {
+						logger.info("Skipping component with PN: " + detail.getPn() + 
+				                ", Picklist: " + detail.getId().getPicklist() + 
+				                ", Line: " + detail.getId().getPicklistLine() + 
+				                " - Already synced");
 						continue;
 					}
 					
@@ -404,10 +445,15 @@ public class MaterialData implements IMaterialData {
 						for(Order o: r.getOrder()) {
 							if(o.getOrderNumber().equalsIgnoreCase(ord.getOrderNumber())) {
 								o.getComponent().add(c);
+								
+								logger.info("Added component to existing order: " + o.getOrderNumber() + 
+					                       ", PN: " + c.getMaterialNumber());
 								match = true;
+								break;
 							}
 							
 						}
+						if(match) break;
 					}
 					if(match) {
 						continue;
@@ -484,6 +530,7 @@ public class MaterialData implements IMaterialData {
 							.setParameter("tra", "REQUIRE")
 							.getSingleResult();
 					require.setInterfaceSyncFlag("S");
+					require.setInterfaceSyncDate(new Date());
 					insertData(require);
 					
 					try {
@@ -494,6 +541,7 @@ public class MaterialData implements IMaterialData {
 								.getSingleResult();
 						
 						req.setInterfaceSyncFlag("S");
+						require.setInterfaceSyncDate(new Date());
 						insertData(req);
 						
 					}catch(Exception e) {
