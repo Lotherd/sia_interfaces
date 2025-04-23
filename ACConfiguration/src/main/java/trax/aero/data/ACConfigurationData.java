@@ -3,6 +3,8 @@ package trax.aero.data;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -16,6 +18,7 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
@@ -346,49 +349,116 @@ public class ACConfigurationData {
 			
 
 			if(input.getDescription() != null && !input.getDescription().isEmpty()) 
-			{
-				
-					try 
-					{
-						notepad = em.createQuery("Select n from NotePad n where n.id.notes = :not and n.notesText = :text", NotePad.class)
-								.setParameter("not", pnindet.getNotes().longValue())
-								.setParameter("text", input.getDescription())
-								.getSingleResult();
-					}
-					catch(Exception e)
-					{
-						NotePadPK pk = new NotePadPK();
-						notepad = new NotePad();
-						notepad.setCreatedDate(new Date());
-						notepad.setCreatedBy("TRAX_IFACE");
-						notepad.setId(pk);
-						
-						
-						notepad.setPrintNotes("YES");
-						
-						try {
-							notepad.getId().setNotes(((getTransactionNo("NOTES").longValue())));
-						} catch (Exception e1) {
-							
-							e1.printStackTrace();
-						}
-						notepad.getId().setNotesLine(getLine(new BigDecimal( notepad.getId().getNotes())
-								, "notes_line", "NOTE_PAD", "NOTES"));
-						pnindet.setNotes(new BigDecimal(notepad.getId().getNotes()));
-						
-						//EMRO fields to create basic object
-					}
-					notepad.setModifiedBy("TRAX_IFACE");
-					notepad.setModifiedDate(new Date());
-					notepad.setNotesText(input.getDescription());
-					
-					
-					logger.info("INSERTING NOTE: " + notepad.getId().getNotes());
-					
-					insertData(notepad);
-					
-				
-			}
+	        {
+	            try {
+	                
+	                notepad = null;
+	                try {
+	                    if (pnindet.getNotes() != null) {
+	                        Query query = em.createQuery("SELECT n FROM NotePad n WHERE n.id.notes = :notes");
+	                        query.setParameter("notes", pnindet.getNotes().longValue());
+	                        List<NotePad> notepads = query.getResultList();
+	                        if (!notepads.isEmpty()) {
+	                            notepad = notepads.get(0);
+	                        }
+	                    }
+	                } catch (Exception e) {
+	                    logger.info("No existing note found, creating new one");
+	                }
+	                
+	              
+	                if (notepad == null) {
+	                    NotePadPK pk = new NotePadPK();
+	                    notepad = new NotePad();
+	                    notepad.setCreatedDate(new Date());
+	                    notepad.setCreatedBy("TRAX_IFACE");
+	                    notepad.setId(pk);
+	                    notepad.setPrintNotes("YES");
+	                    
+	                    try {
+	                        notepad.getId().setNotes(getTransactionNo("NOTES").longValue());
+	                    } catch (Exception e1) {
+	                        logger.severe("Error getting transaction number: " + e1.toString());
+	                        e1.printStackTrace();
+	                    }
+	                    notepad.getId().setNotesLine(getLine(new BigDecimal(notepad.getId().getNotes()), "notes_line", "NOTE_PAD", "NOTES"));
+	                    pnindet.setNotes(new BigDecimal(notepad.getId().getNotes()));
+	                }
+	                
+	                notepad.setModifiedBy("TRAX_IFACE");
+	                notepad.setModifiedDate(new Date());
+	                
+	               
+	                EntityTransaction tx = null;
+	                Connection conn = null;
+	                PreparedStatement ps = null;
+	                
+	                try {
+	                    tx = em.getTransaction();
+	                    if (!tx.isActive()) {
+	                        tx.begin();
+	                    }
+	                    
+	                   
+	                    if (notepad.getNotesText() == null) {
+	                        Query insertQuery = em.createNativeQuery(
+	                            "INSERT INTO NOTE_PAD (NOTES, NOTES_LINE, CREATED_BY, CREATED_DATE, " +
+	                            "MODIFIED_BY, MODIFIED_DATE, PRINT_NOTES) " +
+	                            "VALUES (?, ?, ?, ?, ?, ?, ?)"
+	                        );
+	                        insertQuery.setParameter(1, notepad.getId().getNotes());
+	                        insertQuery.setParameter(2, notepad.getId().getNotesLine());
+	                        insertQuery.setParameter(3, notepad.getCreatedBy());
+	                        insertQuery.setParameter(4, new java.sql.Date(notepad.getCreatedDate().getTime()));
+	                        insertQuery.setParameter(5, notepad.getModifiedBy());
+	                        insertQuery.setParameter(6, new java.sql.Date(notepad.getModifiedDate().getTime()));
+	                        insertQuery.setParameter(7, notepad.getPrintNotes());
+	                        
+	                        insertQuery.executeUpdate();
+	                    }
+	                    
+	                  
+	                    conn = em.unwrap(Connection.class);
+	                    ps = conn.prepareStatement(
+	                        "UPDATE NOTE_PAD SET NOTES_TEXT = ? WHERE NOTES = ? AND NOTES_LINE = ?"
+	                    );
+	                    
+	                    
+	                    ps.setString(1, input.getDescription());
+	                    ps.setLong(2, notepad.getId().getNotes());
+	                    ps.setLong(3, notepad.getId().getNotesLine());
+	                    
+	                    ps.executeUpdate();
+	                    
+	                    if (!tx.getRollbackOnly()) {
+	                        tx.commit();
+	                    }
+	                    
+	                    logger.info("INSERTING NOTE: " + notepad.getId().getNotes());
+	                } catch (Exception e) {
+	                    if (tx != null && tx.isActive()) {
+	                        tx.rollback();
+	                    }
+	                    logger.severe("Error inserting/updating note: " + e.toString());
+	                    e.printStackTrace();
+	                    result = "Error inserting note: " + e.toString();
+	                    ACConfigurationController.addError(result);
+	                } finally {
+	                    if (ps != null) {
+	                        try {
+	                            ps.close();
+	                        } catch (Exception e) {
+	                            // Ignore
+	                        }
+	                    }
+	                }
+	            } catch (Exception e) {
+	                logger.severe("Error processing note: " + e.toString());
+	                e.printStackTrace();
+	                result = "Error processing note: " + e.toString();
+	                ACConfigurationController.addError(result);
+	            }
+	        }
 			
 			if(!existPnInventoryDetail) {
 				try {
@@ -399,6 +469,8 @@ public class ACConfigurationData {
 					pnindet.setGoodsRcvdBatch(new BigDecimal(batch));
 					lastBatch = batch;
 				} catch (Exception e1) {
+					logger.severe("Error getting batch number: " + e1.toString());
+	                e1.printStackTrace();
 					
 				}
 			}
