@@ -2307,13 +2307,17 @@ public class ModelData {
 							", TaskCard: " + woTaskCard.getId().getTaskCard() + 
 							", OpsNo: " + (item.getOpsNo() != null ? item.getOpsNo() : "null") + 
 							", Expected OpsNo: " + ops);	
+							
 							WoTaskCardItem	i = null;
 							
 							try{
-								i = (WoTaskCardItem) this.em.createQuery("select t from WoTaskCardItem t where t.id.wo = :woo and t.id.taskCard = :card and t.id.taskCardItem = :item ")
+								i = (WoTaskCardItem) this.em.createQuery("select t from WoTaskCardItem t where t.id.wo = :woo and t.id.taskCard = :card and t.id.taskCardItem = :item and t.id.taskCardPn = :pn and t.id.taskCardPnSn = :pnsn and t.id.ac = :ac")
 										.setParameter("woo", woTaskCard.getId().getWo())
 										.setParameter("card", woTaskCard.getId().getTaskCard())
 										.setParameter("item", item.getId().getTaskCardItem())
+										.setParameter("pn",   woTaskCard.getId().getPn())
+										.setParameter("pnsn", woTaskCard.getId().getPnSn())
+										.setParameter("ac", woTaskCard.getId().getAc())
 										.getSingleResult();
 								
 							}catch(Exception e)

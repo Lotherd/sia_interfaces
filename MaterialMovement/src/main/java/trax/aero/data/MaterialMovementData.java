@@ -1223,6 +1223,8 @@ public class MaterialMovementData implements IMaterialMovementData {
 			pnInventoryHistory.setWo(new BigDecimal(woTaskCard.getId().getWo()));
 			pnInventoryHistory.setTaskCard(woTaskCard.getId().getTaskCard());
 			pnInventoryHistory.setAc(woTaskCard.getId().getAc());
+			pnInventoryHistory.setTaskCardPn(woTaskCard.getId().getPn());
+			pnInventoryHistory.setTaskCardSn(woTaskCard.getId().getPnSn());
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
