@@ -1762,7 +1762,7 @@ public class ModelData {
 					taskCard.getId().setAc(parentTaskCard.getId().getAc());
 					taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 					
-					String pn = filterADDATTR(attributes, "COMP");
+					String pn = filterADDATTR(attributes, "PART_NO2");
 					
 					if(pn == null || pn.length() == 0)
 					{
