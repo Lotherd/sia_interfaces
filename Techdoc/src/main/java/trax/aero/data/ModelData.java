@@ -165,7 +165,7 @@ public class ModelData {
 				taskCard.setId(new WoTaskCardPK());
 			
 			taskCard.getId().setAc("          ");
-			String pn = filterADDATTR(attributes, "PART_NO2");
+			String pn = filterADDATTR(attributes, "COMP");
 			if(pn == null || pn.length() == 0)
 			{
 				taskCard.getId().setPn("                                   ");
@@ -1762,7 +1762,7 @@ public class ModelData {
 					taskCard.getId().setAc(parentTaskCard.getId().getAc());
 					taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 					
-					String pn = filterADDATTR(attributes, "PART_NO2");
+					String pn = filterADDATTR(attributes, "COMP");
 					
 					if(pn == null || pn.length() == 0)
 					{
@@ -2264,7 +2264,6 @@ public class ModelData {
 				TaskCard card = null;
 				boolean shopWo = false;
 				String cardId = woTaskCard.getId().getTaskCard();
-				//ESD TODO
 				
 				if(getWoShop(new BigDecimal( woTaskCard.getId().getWo()).toString())){
 					shopWo = true;
@@ -2392,12 +2391,6 @@ public class ModelData {
 							
 							i.setTaskCardText(item.getTaskCardText());
 							
-							//TODO ESD
-							//MAN_HOURS
-							//SKILL
-							//if(shopWo) {
-								
-							//}
 							
 							logger.info("INSERTING WoTaskCardItem: " + i.getId().getTaskCardItem() );
 							
@@ -2570,8 +2563,7 @@ public class ModelData {
 						}
 					}
 				}
-				//TASK_CARD TODO ESD
-				//SUB_PHASE, BILLABLE_HOURS ,GATE, PHASE
+
 				if(shopWo) {
 					
 					woTaskCard.setPhase(card.getPhase());
