@@ -217,7 +217,7 @@ public class JobConfirmationData {
 			"             WOA.TASK_CARD_PN = WTC.PN AND WOA.TASK_CARD_SN = WTC.PN_SN  AND WTC.PN = WTCI.TASK_CARD_PN AND \r\n" + 
 			"            WTC.PN_SN = WTCI.TASK_CARD_PN_SN AND WTC.AC = WTCI.AC AND \r\n" + 
 			"			WOA.EMPLOYEE = RM.RELATION_CODE AND WOA.WO = W.WO AND RM.RELATION_TRANSACTION = 'EMPLOYEE' AND\r\n" + 
-			"			WOA.INTERFACE_MODIFIED_DATE IS NULL AND WOA.trasaction_category = 'LABOR' AND (WTC.REFERENCE_TASK_CARD IS NOT NULL\r\n" + 
+			"			WOA.INTERFACE_MODIFIED_DATE IS NULL AND WOA.INTERFACE_MODIFIED_FLAG IS NULL AND WOA.trasaction_category = 'LABOR' AND (WTC.REFERENCE_TASK_CARD IS NOT NULL\r\n" + 
 			"			OR 1=( SELECT count(*) FROM WO W WHERE W.WO = WTC.WO AND W.MODULE = 'SHOP' AND W.refurbishment_order is not null \r\n" + 
 			"			AND (WTC.non_routine = 'N' OR WTC.non_routine IS NULL)))		";
 
@@ -259,6 +259,7 @@ public class JobConfirmationData {
 					"    AND woa.wo = w.wo\r\n" + 
 					"    AND rm.relation_transaction = 'EMPLOYEE'\r\n" + 
 					"    AND woa.interface_modified_date IS NULL\r\n" + 
+					"    AND woa.interface_modified_flag IS NULL\r\n" + 
 					"    AND woa.task_card_pn = wtc.pn\r\n" + 
 					"    AND woa.task_card_sn = wtc.pn_sn\r\n" + 
 					"    AND woa.trasaction_category = 'LABOR'\r\n" + 
@@ -819,6 +820,28 @@ public class JobConfirmationData {
 		    MasterInbounds = new ArrayList<MasterInbound>();
 		    MasterInbounds.addAll(s);     
 		   // logger.info("size After "  + MasterInbounds.size());
+		    
+		    String updateSentSql = "UPDATE WO_ACTUALS SET INTERFACE_MODIFIED_FLAG = 'S' WHERE WO_ACTUAL_TRANSACTION = ?";
+		    PreparedStatement pstmtUpdate = null;
+
+		    try {
+		        pstmtUpdate = con.prepareStatement(updateSentSql);
+		        
+		        for(MasterInbound masterInbound : MasterInbounds) {
+		            pstmtUpdate.setString(1, masterInbound.getJobConfirmationInbounds().getWO_ActualTransaction());
+		            pstmtUpdate.executeUpdate();
+		        }
+		        
+		        logger.info("Marked " + MasterInbounds.size() + " records as sent (S)");
+		        
+		    } catch (Exception e) {
+		        logger.severe("Error updating INTERFACE_MODIFIED_FLAG: " + e.toString());
+		        JobConfirmationController.addError(e.toString());
+		    } finally {
+		        if(pstmtUpdate != null && !pstmtUpdate.isClosed())
+		            pstmtUpdate.close();
+		    }
+		    
 			return MasterInbounds;
 		}
 		
@@ -989,9 +1012,9 @@ public class JobConfirmationData {
 			"UPDATE \r\n" + 
 			"WO_ACTUALS      \r\n" + 
 			"SET   \r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = sysdate\r\n" + 
-			"WHERE\r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_DATE IS NULL AND\r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = sysdate, \r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_FLAG = 'D' \r\n" + 
+			"WHERE\r\n" +  
 			"WO_ACTUALS.WO_ACTUAL_TRANSACTION = ?";
 			
 			PreparedStatement pstmt2 = null; 
@@ -999,7 +1022,7 @@ public class JobConfirmationData {
 			try 
 			{
 						pstmt2.setString(1, Inbound.getJobConfirmationInbounds().getWO_ActualTransaction());
-						pstmt2.executeQuery();		
+						pstmt2.executeUpdate();		
 			}
 			catch (Exception e) 
 	        {
@@ -1025,9 +1048,9 @@ public class JobConfirmationData {
 			"UPDATE \r\n" + 
 			"WO_ACTUALS      \r\n" + 
 			"SET   \r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = null\r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = null, \r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_FLAG = null \r\n" + 
 			"WHERE\r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_DATE IS NOT NULL AND\r\n" + 
 			"WO_ACTUALS.WO_ACTUAL_TRANSACTION = ?";
 			
 			PreparedStatement pstmt2 = null; 
@@ -1037,7 +1060,7 @@ public class JobConfirmationData {
 				for(Outbound outbound : Outbound.getJobConfirmationOutbounds()) 
 				{
 						pstmt2.setString(1, outbound.getWO_ActualTransaction());
-						pstmt2.executeQuery();	
+						pstmt2.executeUpdate();	
 				}
 			}
 			catch (Exception e) 
