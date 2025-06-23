@@ -832,7 +832,7 @@ public class JobConfirmationData {
 		            pstmtUpdate.executeUpdate();
 		        }
 		        
-		        logger.info("Marked " + MasterInbounds.size() + " records as sent (S)");
+		       // logger.info("Marked " + MasterInbounds.size() + " records as sent (S)");
 		        
 		    } catch (Exception e) {
 		        logger.severe("Error updating INTERFACE_MODIFIED_FLAG: " + e.toString());
@@ -1049,7 +1049,7 @@ public class JobConfirmationData {
 			"WO_ACTUALS      \r\n" + 
 			"SET   \r\n" + 
 			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = null, \r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_FLAG = null \r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_FLAG = 'F' \r\n" + 
 			"WHERE\r\n" + 
 			"WO_ACTUALS.WO_ACTUAL_TRANSACTION = ?";
 			
@@ -1074,5 +1074,95 @@ public class JobConfirmationData {
 					pstmt2.close();
 			}
 		}
+		
+		private static final int MAX_LOOP_ATTEMPTS = 3;
+	    private static java.util.Map<String, Integer> loopAttempts = new java.util.concurrent.ConcurrentHashMap<>();
+	    
+	    public boolean loopMarkTransaction(MasterOutbound Outbound) throws Exception {
+	        //setting up variables
+	        exceuted = "OK";
+	        boolean canRetry = true;
+	        
+	        try {
+	            for(Outbound outbound : Outbound.getJobConfirmationOutbounds()) {
+	                String transactionId = outbound.getWO_ActualTransaction();
+	                
+	                
+	                int currentAttempts = loopAttempts.getOrDefault(transactionId, 0);
+	                currentAttempts++;
+	                
+	                logger.info("Transaction " + transactionId + " - Loop attempt: " + currentAttempts + "/" + MAX_LOOP_ATTEMPTS);
+	                
+	                if (currentAttempts >= MAX_LOOP_ATTEMPTS) {
+	                    
+	                    String sqlFailed = 
+	                    "UPDATE WO_ACTUALS \r\n" + 
+	                    "SET INTERFACE_MODIFIED_DATE = sysdate, \r\n" + 
+	                    "    INTERFACE_MODIFIED_FLAG = 'F' \r\n" + 
+	                    "WHERE WO_ACTUAL_TRANSACTION = ?";
+	                    
+	                    try (PreparedStatement pstmtFailed = con.prepareStatement(sqlFailed)) {
+	                        pstmtFailed.setString(1, transactionId);
+	                        pstmtFailed.executeUpdate();
+	                    }
+	                    
+	                   
+	                    loopAttempts.remove(transactionId);
+	                    canRetry = false;
+	                    
+	                    logger.warning("Transaction " + transactionId + 
+	                                  " exceeded max loop attempts (" + MAX_LOOP_ATTEMPTS + "), marked as FAILED (F)");
+	                } else {
+	                
+	                    String sqlRetry = 
+	                    "UPDATE WO_ACTUALS \r\n" + 
+	                    "SET INTERFACE_MODIFIED_DATE = null, \r\n" + 
+	                    "    INTERFACE_MODIFIED_FLAG = null \r\n" + 
+	                    "WHERE WO_ACTUAL_TRANSACTION = ?";
+	                    
+	                    try (PreparedStatement pstmtRetry = con.prepareStatement(sqlRetry)) {
+	                        pstmtRetry.setString(1, transactionId);
+	                        pstmtRetry.executeUpdate();
+	                    }
+	                    
+	                   
+	                    loopAttempts.put(transactionId, currentAttempts);
+	                    
+	                    logger.info("Transaction " + transactionId + 
+	                               " set to retry (attempt " + currentAttempts + "/" + MAX_LOOP_ATTEMPTS + ")");
+	                }
+	            }
+	        }
+	        catch (Exception e) {
+	            exceuted = e.toString();
+	            JobConfirmationController.addError(exceuted);
+	            logger.severe(exceuted);
+	            throw new Exception("Issue found in loopMarkTransaction");
+	        }
+	        
+	        return canRetry;
+	    }
+	    
+	    
+	    public void cleanupOldAttempts() {
+	        if (loopAttempts.size() > 1000) {
+	            logger.info("Cleaning up old loop attempts map - size: " + loopAttempts.size());
+	            loopAttempts.clear();
+	        }
+	    }
+	    
+	    
+	    public String getLoopAttemptsStatus() {
+	        StringBuilder status = new StringBuilder();
+	        status.append("Current loop attempts: ").append(loopAttempts.size()).append(" transactions\n");
+	        
+	        for (java.util.Map.Entry<String, Integer> entry : loopAttempts.entrySet()) {
+	            status.append("Transaction: ").append(entry.getKey())
+	                  .append(" - Attempts: ").append(entry.getValue())
+	                  .append("/").append(MAX_LOOP_ATTEMPTS).append("\n");
+	        }
+	        
+	        return status.toString();
+	    }
 		
 }

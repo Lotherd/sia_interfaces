@@ -36,48 +36,73 @@ public class Service {
 	public Response markTransaction(MasterOutbound request)
 	{
 		JobConfirmationData data = new JobConfirmationData("mark");
-		try 
-        {   
-			JAXBContext jc = JAXBContext.newInstance(MasterOutbound.class);
-			Marshaller marshaller = jc.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-			StringWriter sw = new StringWriter();
-			marshaller.marshal(request, sw);
-			
-			logger.info("Input: " + sw.toString());
-			
-			boolean condition = request.getSuccess_errorLog().getIDOC_Status().equalsIgnoreCase("51") 
-					&& (request.getSuccess_errorLog().getStatusMessage().toLowerCase().contains("already being processed") 
-					|| request.getSuccess_errorLog().getStatusMessage().toLowerCase()
-					.contains("is locked by")) ;
-			
-			if(request.getSuccess_errorLog().getIDOC_Status().equalsIgnoreCase("53")
-					|| (condition)) {
-				data.markTransaction(request);
-			}else {
-				data.unMarkTransaction(request);
-				JobConfirmationController.sendEmailACK("Received acknowledgement with IDOC Status: " + request.getSuccess_errorLog().getIDOC_Status() +", IDOC Number: "+request.getSuccess_errorLog().getIDOC_Number()+", Status Error Code: "+request.getSuccess_errorLog().getStatus_ErrorCode() + ", Status Message: " + request.getSuccess_errorLog().getStatusMessage() ) ;
-			}
-		}
-		catch(Exception e)
-		{
-			logger.severe(e.toString());
-		}
-       finally 
-       {
-    	   try 
-			{
-				if(data.getCon() != null && !data.getCon().isClosed())
-					data.getCon().close();
-			} 
-			catch (SQLException e) 
-			{ 
-				logger.severe(e.toString());
-			}
-    	   logger.info("finishing");
-       }
-		return Response.ok("OK",MediaType.APPLICATION_XML + ";charset=UTF-8").build();
-	}
+        try {
+            JAXBContext jc = JAXBContext.newInstance(MasterOutbound.class);
+            Marshaller marshaller = jc.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            StringWriter sw = new StringWriter();
+            marshaller.marshal(request, sw);
+            
+            logger.info("Input: " + sw.toString());
+            
+            String status = request.getSuccess_errorLog().getIDOC_Status();
+            String message = request.getSuccess_errorLog().getStatusMessage().toLowerCase();
+            
+           
+            boolean condition = status.equalsIgnoreCase("51") 
+                    && (message.contains("already being processed") 
+                    || message.contains("is locked by"));
+            
+           
+            if (status.equalsIgnoreCase("53")) {
+                data.markTransaction(request);
+                logger.info("SUCCESS: Transaction processed successfully");
+            }
+            
+            else if (condition) {
+                boolean canRetry = data.loopMarkTransaction(request);
+                
+                if (canRetry) {
+                    logger.info("TEMPORARY ERROR: Transaction set for retry - " + message);
+                } else {
+                    
+                    String emailMessage = "Transaction exceeded retry limit - IDOC Status: " + status +
+                                         ", IDOC Number: " + request.getSuccess_errorLog().getIDOC_Number() +
+                                         ", Status Error Code: " + request.getSuccess_errorLog().getStatus_ErrorCode() + 
+                                         ", Status Message: " + request.getSuccess_errorLog().getStatusMessage();
+                    
+                    JobConfirmationController.sendEmailACK(emailMessage);
+                    logger.warning("TEMPORARY ERROR: Max attempts reached, transaction marked as failed");
+                }
+            }
+         
+            else {
+                data.unMarkTransaction(request);
+                
+                String emailMessage = "Received acknowledgement with IDOC Status: " + status +
+                                     ", IDOC Number: " + request.getSuccess_errorLog().getIDOC_Number() +
+                                     ", Status Error Code: " + request.getSuccess_errorLog().getStatus_ErrorCode() + 
+                                     ", Status Message: " + request.getSuccess_errorLog().getStatusMessage();
+                
+                JobConfirmationController.sendEmailACK(emailMessage);
+                logger.warning("PERMANENT ERROR: Transaction marked as failed (F)");
+            }
+        }
+        catch(Exception e) {
+            logger.severe(e.toString());
+        }
+        finally {
+            try {
+                if(data.getCon() != null && !data.getCon().isClosed())
+                    data.getCon().close();
+            }
+            catch (SQLException e) {
+                logger.severe(e.toString());
+            }
+            logger.info("finishing");
+        }
+        return Response.ok("OK", MediaType.APPLICATION_XML + ";charset=UTF-8").build();
+    }
 	
 	@GET
     @Path("/healthCheck")
