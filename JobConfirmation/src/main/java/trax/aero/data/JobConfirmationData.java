@@ -1075,7 +1075,7 @@ public class JobConfirmationData {
 			}
 		}
 		
-		private static final int MAX_LOOP_ATTEMPTS = 3;
+		/*private static final int MAX_LOOP_ATTEMPTS = 3;
 	    private static java.util.Map<String, Integer> loopAttempts = new java.util.concurrent.ConcurrentHashMap<>();
 	    
 	    public boolean loopMarkTransaction(MasterOutbound Outbound) throws Exception {
@@ -1163,6 +1163,6 @@ public class JobConfirmationData {
 	        }
 	        
 	        return status.toString();
-	    }
+	    }*/
 		
 }

@@ -49,9 +49,9 @@ public class Service {
             String message = request.getSuccess_errorLog().getStatusMessage().toLowerCase();
             
            
-            boolean condition = status.equalsIgnoreCase("51") 
+           /* boolean condition = status.equalsIgnoreCase("51") 
                     && (message.contains("already being processed") 
-                    || message.contains("is locked by"));
+                    || message.contains("is locked by"));*/
             
            
             if (status.equalsIgnoreCase("53")) {
@@ -59,7 +59,7 @@ public class Service {
                 logger.info("SUCCESS: Transaction processed successfully");
             }
             
-            else if (condition) {
+           /* else if (condition) {
                 boolean canRetry = data.loopMarkTransaction(request);
                 
                 if (canRetry) {
@@ -74,7 +74,7 @@ public class Service {
                     JobConfirmationController.sendEmailACK(emailMessage);
                     logger.warning("TEMPORARY ERROR: Max attempts reached, transaction marked as failed");
                 }
-            }
+            }*/
          
             else {
                 data.unMarkTransaction(request);

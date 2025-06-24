@@ -107,6 +107,8 @@ public class JobConfirmationController {
 					+ "Issues found at:\n"  
 					+message);
 			email.send();
+			
+			logger.info("Email sent");
 		}
 		catch(Exception e)
 		{
