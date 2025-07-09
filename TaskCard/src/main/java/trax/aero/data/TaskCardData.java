@@ -208,10 +208,10 @@ public class TaskCardData {
 		String taskCardString = null,  DeletionIndicatorString = null;
 		String size = "";
 		
-		if((taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI"))
+		/*if((taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI"))
 			&& 	!taskCards.getTaskCard().startsWith("S_")) {
 			taskCards.setTaskCard("S_"+taskCards.getTaskCard());
-		}
+		}*/
 		
 		
 		if(taskCards.getTaskCard() != null && taskCards.getGroupNo() != null && !(taskCards.getTaskCard().isEmpty() && taskCards.getGroupNo().isEmpty())) {
@@ -260,11 +260,12 @@ public class TaskCardData {
 				//EMRO fields to create basic object
 				taskCard.setTcSub(taskCardString);
 				taskCard.setTcAcType("ALL");
-				if(taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI") ) {
+				taskCard.setControlArea("E/C");
+				/*if(taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI") ) {
 					taskCard.setControlArea("SHOP");
 				}else {	
 					taskCard.setControlArea("E/C");
-				}
+				}*/
 				try
 				{
 					String company = System.getProperty("profile_company");

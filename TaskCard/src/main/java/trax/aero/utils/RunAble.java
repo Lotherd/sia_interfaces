@@ -91,6 +91,35 @@ public class RunAble implements Runnable {
 		return output.getName();
 	}
 	
+	// Method to clone TaskCards
+	private TaskCards cloneTaskCard(TaskCards original) {
+		TaskCards clone = new TaskCards();
+		
+		// Copy all basic properties
+		clone.setTaskCard(original.getTaskCard());
+		clone.setCategory(original.getCategory());
+		clone.setDescription(original.getDescription());
+		clone.setRevision(original.getRevision());
+		clone.setPlanningPlant(original.getPlanningPlant());
+		clone.setGroupNo(original.getGroupNo());
+		clone.setDeletionIndicator(original.getDeletionIndicator());
+		clone.setArea(original.getArea());
+		clone.setZone(original.getZone());
+		
+		
+		// Clone lists if they exist
+		if (original.getItemList() != null) {
+			clone.setItemList(new ArrayList<>(original.getItemList()));
+		}
+		
+		if (original.getPanelList() != null) {
+			clone.setPanelList(new ArrayList<>(original.getPanelList()));
+		}
+		
+		
+		return clone;
+	}
+
 	
 	private void process() {
 		try 
@@ -130,15 +159,14 @@ public class RunAble implements Runnable {
 				    marshaller.marshal(taskCardMaster,sw);
 				    //logger.info("Input: " +sw.toString() );
 				    
-				    
-				    
 				    TaskCardMaster taskCardMasterFailure = new TaskCardMaster();
 					taskCardsArrayFailure = Collections.synchronizedList(new ArrayList<TaskCards>());
-					
-				    
 					tasklist = Collections.synchronizedList(new ArrayList<String>()); 
 					
-				    
+					//List to clone MCS/SI task cards with S_ prefix 
+					List<TaskCards> s_taskCardMaster = new ArrayList<>();
+					
+					
 				    int scheduledPoolSize = 4;
 					if(System.getProperty("Thread_Count") != null && !System.getProperty("Thread_Count").isEmpty()) {
 						scheduledPoolSize = Integer.parseInt(System.getProperty("Thread_Count"));
@@ -147,12 +175,37 @@ public class RunAble implements Runnable {
 					ScheduledExecutorService scheduledServ = Executors.newScheduledThreadPool(scheduledPoolSize);
 					
 				    logger.info("SIZE " + taskCardMaster.getTaskCards().size());
+				    
+				    //First loop - Process original task cards and create clones 
 				    for(TaskCards taskCards : taskCardMaster.getTaskCards()) {
-				    	   exectued = "OK";
-				    	   Worker worker = new Worker(factory);
-				    	   worker.setInput(taskCards);
-				    	   scheduledServ.execute(worker);
+				    	
+				    	// Create clone for MCS/SI without S_ prefix
+				    	if((taskCards.getCategory().equalsIgnoreCase("MCS") || taskCards.getCategory().equalsIgnoreCase("SI"))
+				    		&& !taskCards.getTaskCard().startsWith("S_")) {
+				    		
+				    		// Clone the task card
+				    		TaskCards s_taskCards = cloneTaskCard(taskCards);
+				    		s_taskCards.setTaskCard("S_" + taskCards.getTaskCard());
+				    		s_taskCardMaster.add(s_taskCards);
+				    		
+				    		logger.info("Cloned task card: " + taskCards.getTaskCard() + " -> " + s_taskCards.getTaskCard());
+				    	}
+				    	
+				    	// Process original task card
+				    	exectued = "OK";
+				    	Worker worker = new Worker(factory);
+				    	worker.setInput(taskCards);
+				    	scheduledServ.execute(worker);
 				    }
+				    
+				    //Second loop - Process cloned task cards with S_ prefix 
+				    for(TaskCards s_taskCards : s_taskCardMaster) {
+				    	exectued = "OK";
+				    	Worker worker = new Worker(factory);
+				    	worker.setInput(s_taskCards);
+				    	scheduledServ.execute(worker);
+				    }
+				 
 					
 				   scheduledServ.shutdown();
 				   scheduledServ.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);	  
@@ -198,7 +251,6 @@ public class RunAble implements Runnable {
 			logger.severe(e.toString());
 		}
 	}
-	
 	
 	public void run() 
 	{
