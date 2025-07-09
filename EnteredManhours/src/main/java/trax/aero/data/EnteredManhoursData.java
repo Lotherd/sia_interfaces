@@ -654,6 +654,8 @@ public class EnteredManhoursData {
 			{
 				while (rs5.next()) // LOOP EACH LINE
 				{
+					String transactionId = rs5.getString(2); 
+					try { 
 					MT_TRAX_SND_I84_4071_REQ req = new MT_TRAX_SND_I84_4071_REQ();
 					orlist = new ArrayList<OrderREQ>();
 					req.setOrder(orlist);
@@ -840,8 +842,19 @@ public class EnteredManhoursData {
 					req.getOrder().add(Inbound);
 					list.add(req);
 					
-				}
-			}	
+				} catch (Exception e) { 
+					logger.severe("Error processing transaction " + transactionId + ": " + e.getMessage());
+					
+					try {
+						pstmt6.setString(1, transactionId);
+						pstmt6.executeQuery();
+					} catch (SQLException sqle) {
+						logger.severe("Error executing pstmt6 for transaction " + transactionId);
+					}
+					continue; 
+				} 
+			}
+		}		
 			
 			
 			
