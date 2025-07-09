@@ -207,7 +207,17 @@ public class MaterialMovementData implements IMaterialMovementData {
 								
 								picklistDistributionREQ.setStatus("ISSUED");
 								picklistDistributionDIS.setStatus("ISSUED");
-								picklistHeader.setStatus("CLOSED");
+								
+								boolean hasOpenDistributions = false;
+								for(PicklistDistribution pd : picklistHeader.getPicklistDistributions()) {
+								    if(pd.getStatus().equalsIgnoreCase("OPEN")) {
+								        hasOpenDistributions = true;
+								        break;
+								    }
+								}
+								if(!hasOpenDistributions) {
+								    picklistHeader.setStatus("CLOSED");
+								}
 							
 							}else if(picklistDistributionDIS.getQtyPicked().add(getPnInevtoryHistoryIssue(pnInventoryDetail,input,woTaskCard, "ISSUED",picklistDistributionDIS))
 									.compareTo(
@@ -223,7 +233,17 @@ public class MaterialMovementData implements IMaterialMovementData {
 								
 								picklistDistributionREQ.setStatus("ISSUED");
 								picklistDistributionDIS.setStatus("ISSUED");
-								picklistHeader.setStatus("CLOSED");
+								
+								boolean hasOpenDistributions = false;
+								for(PicklistDistribution pd : picklistHeader.getPicklistDistributions()) {
+								    if(pd.getStatus().equalsIgnoreCase("OPEN")) {
+								        hasOpenDistributions = true;
+								        break;
+								    }
+								}
+								if(!hasOpenDistributions) {
+								    picklistHeader.setStatus("CLOSED");
+								}
 							}
 							if(woTaskCard != null) {
 								setPnInevtoryHistory(pnInventoryDetail,input,woTaskCard, "ISSUED",picklistDistributionDIS );
@@ -273,7 +293,17 @@ public class MaterialMovementData implements IMaterialMovementData {
 							
 							picklistDistributionREQ.setStatus("ISSUED");
 							picklistDistributionDIS.setStatus("ISSUED");
-							picklistHeader.setStatus("CLOSED");
+							
+							boolean hasOpenDistributions = false;
+							for(PicklistDistribution pd : picklistHeader.getPicklistDistributions()) {
+							    if(pd.getStatus().equalsIgnoreCase("OPEN")) {
+							        hasOpenDistributions = true;
+							        break;
+							    }
+							}
+							if(!hasOpenDistributions) {
+							    picklistHeader.setStatus("CLOSED");
+							}
 							
 							}else if(picklistDistributionDIS.getQtyPicked().add(getPnInevtoryHistoryIssue(pnInventoryDetail,input,woTaskCard, "ISSUED",picklistDistributionDIS))
 									.compareTo(
@@ -290,7 +320,17 @@ public class MaterialMovementData implements IMaterialMovementData {
 								
 								picklistDistributionREQ.setStatus("ISSUED");
 								picklistDistributionDIS.setStatus("ISSUED");
-								picklistHeader.setStatus("CLOSED");
+								
+								boolean hasOpenDistributions = false;
+								for(PicklistDistribution pd : picklistHeader.getPicklistDistributions()) {
+								    if(pd.getStatus().equalsIgnoreCase("OPEN")) {
+								        hasOpenDistributions = true;
+								        break;
+								    }
+								}
+								if(!hasOpenDistributions) {
+								    picklistHeader.setStatus("CLOSED");
+								}
 							}
 							
 							if(woTaskCard != null) {
