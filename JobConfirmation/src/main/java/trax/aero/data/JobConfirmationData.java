@@ -537,10 +537,8 @@ public class JobConfirmationData {
 						
 					}
 				}
-				if(rs1 != null && !rs1.isClosed())
-					rs1.close();
-				if(pstmt1 != null && !pstmt1.isClosed())
-					pstmt1.close();
+				try { if(rs1 != null) rs1.close(); } catch(Exception e) {}
+				try { if(pstmt1 != null) pstmt1.close(); } catch(Exception e) {}
 				
 				
 				
@@ -785,8 +783,7 @@ public class JobConfirmationData {
 							}
 						}	
 						
-						if(rs2 != null && !rs2.isClosed())
-							rs2.close();
+						try { if(rs2 != null) rs2.close(); } catch(Exception e) {}
 						for(Inbound i: Inbounds) {
 							MasterInbound = new MasterInbound();
 							MasterInbound.setJobConfirmationInbounds(i);
@@ -795,12 +792,10 @@ public class JobConfirmationData {
 					}
 					
 				}
-				if(rs1 != null && !rs1.isClosed())
-					rs1.close();
-				if(pstmt1 != null && !pstmt1.isClosed())
-					pstmt1.close();
-				if(pstmt2 != null && !pstmt2.isClosed())
-					pstmt2.close();
+				try { if(rs1 != null) rs1.close(); } catch(Exception e) {}
+				try { if(rs2 != null) rs2.close(); } catch(Exception e) {}
+				try { if(pstmt1 != null) pstmt1.close(); } catch(Exception e) {}
+				try { if(pstmt2 != null) pstmt2.close(); } catch(Exception e) {}
 				
 			}
 			catch (Exception e) 
@@ -810,6 +805,11 @@ public class JobConfirmationData {
 				JobConfirmationController.addError(exceuted);
 				logger.severe(exceuted);
 	            
+				try { if(rs1 != null) rs1.close(); } catch(Exception ex) {}
+			    try { if(rs2 != null) rs2.close(); } catch(Exception ex) {}
+			    try { if(pstmt1 != null) pstmt1.close(); } catch(Exception ex) {}
+			    try { if(pstmt2 != null) pstmt2.close(); } catch(Exception ex) {}
+				
 	            throw new Exception("Issue found");
 			}
 						
@@ -838,8 +838,7 @@ public class JobConfirmationData {
 		        logger.severe("Error updating INTERFACE_MODIFIED_FLAG: " + e.toString());
 		        JobConfirmationController.addError(e.toString());
 		    } finally {
-		        if(pstmtUpdate != null && !pstmtUpdate.isClosed())
-		            pstmtUpdate.close();
+		        try { if(pstmtUpdate != null) pstmtUpdate.close(); } catch(Exception e) {}
 		    }
 		    
 			return MasterInbounds;
@@ -921,9 +920,7 @@ public class JobConfirmationData {
 							jobs.add(job);
 							
 					}
-					if(rs1 != null && !rs1.isClosed()) {
-						rs1.close();
-					}
+						try { if(rs1 != null) rs1.close(); } catch(Exception e) {}
 				}
 			}catch (Exception e){
 				JobConfirmationController.addError(e.toString());
