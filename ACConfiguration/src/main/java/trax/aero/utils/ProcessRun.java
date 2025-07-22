@@ -60,6 +60,7 @@ public class ProcessRun implements Runnable {
 				sentToDatabase =  Collections.synchronizedList(new ArrayList<Equipment>());
 					
 				for(Equipment e: input.getTopFunctionalLocation().getEquipment()) {
+					Thread.sleep(1000);
 					Worker worker = new Worker(factory);
 			    	worker.setInput(e);
 			    	worker.setTop(input.getTopFunctionalLocation().getTopFunctionalLocation());

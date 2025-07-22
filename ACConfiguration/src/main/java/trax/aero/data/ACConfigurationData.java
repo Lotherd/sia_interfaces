@@ -70,7 +70,8 @@ public class ACConfigurationData {
 		try
 		{
 			//TODO
-			wos = (List<Wo>) em.createQuery("select w from Wo w where TO_CHAR(w.scheduleStartDate, 'DD-MON-YYYY') = TO_CHAR(:date, 'DD-MON-YYYY') and w.ac is not null")
+			wos = (List<Wo>) em.createQuery("select w from Wo w where TO_CHAR(w.scheduleStartDate, 'DD-MON-YYYY') = TO_CHAR(:date, 'DD-MON-YYYY') and w.ac is not null "
+					+ "and w.previousInterfaceTransaction is null")
 					.setParameter("date", date,TemporalType.DATE)
 					.getResultList();
 			
@@ -80,11 +81,22 @@ public class ACConfigurationData {
 			logger.severe(e.getMessage() );
 		}
 		for(Wo w : wos) {
+			em.refresh(w);
 			if(w.getAc() != null && !w.getAc().isEmpty() && !w.getAc().equalsIgnoreCase("          ") && !w.getModule().equalsIgnoreCase("SHOP")) {
 				MT_TRAX_SND_I51_4072 out = new MT_TRAX_SND_I51_4072();
 				logger.info("WO: " + String.valueOf(w.getWo()) +" AC: "+ w.getAc() +" i:"+i);
 				out.setAircraftTailNumber(w.getAc());
 				SND.add(out);  
+				
+				try {
+				    w.setPreviousInterfaceTransaction(new BigDecimal(51));
+				    insertData(w);
+				    logger.info("Marked WO " + w.getWo() + " as processed");
+				}
+				catch(Exception e) {
+				    logger.severe("Failed to mark WO " + w.getWo() + ": " + e.getMessage());
+				}
+				
 				i++;
 			}
 		}
