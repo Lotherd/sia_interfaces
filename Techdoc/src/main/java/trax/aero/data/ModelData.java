@@ -1762,7 +1762,10 @@ public class ModelData {
 					taskCard.getId().setAc(parentTaskCard.getId().getAc());
 					taskCard.getWoTaskCardItems().get(0).getId().setAc(taskCard.getId().getAc());
 					
-					String pn = filterADDATTR(attributes, "COMP");
+					
+					taskCard.getId().setPn(parentTaskCard.getId().getPn());
+					
+					/*String pn = filterADDATTR(attributes, "COMP");
 					
 					if(pn == null || pn.length() == 0)
 					{
@@ -1773,7 +1776,7 @@ public class ModelData {
 						taskCard.getId().setPn(pn);
 						
 						
-					}
+					}*/
 					
 					taskCard.getWoTaskCardItems().get(0).getId().setTaskCardPn(taskCard.getId().getPn());
 					
