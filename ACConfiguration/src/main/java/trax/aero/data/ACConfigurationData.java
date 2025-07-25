@@ -402,8 +402,6 @@ public class ACConfigurationData {
 	                
 	               
 	                EntityTransaction tx = null;
-	                Connection conn = null;
-	                PreparedStatement ps = null;
 	                
 	                try {
 	                    tx = em.getTransaction();
@@ -430,17 +428,16 @@ public class ACConfigurationData {
 	                    }
 	                    
 	                  
-	                    conn = em.unwrap(Connection.class);
-	                    ps = conn.prepareStatement(
+	                    Query updateQuery = em.createNativeQuery(
 	                        "UPDATE NOTE_PAD SET NOTES_TEXT = ? WHERE NOTES = ? AND NOTES_LINE = ?"
 	                    );
 	                    
 	                    
-	                    ps.setString(1, input.getDescription());
-	                    ps.setLong(2, notepad.getId().getNotes());
-	                    ps.setLong(3, notepad.getId().getNotesLine());
+	                    updateQuery.setParameter(1, input.getDescription());
+	                    updateQuery.setParameter(2, notepad.getId().getNotes());
+	                    updateQuery.setParameter(3, notepad.getId().getNotesLine());
 	                    
-	                    ps.executeUpdate();
+	                    updateQuery.executeUpdate();
 	                    
 	                    if (!tx.getRollbackOnly()) {
 	                        tx.commit();
@@ -455,14 +452,6 @@ public class ACConfigurationData {
 	                    e.printStackTrace();
 	                    result = "Error inserting note: " + e.toString();
 	                    ACConfigurationController.addError(result);
-	                } finally {
-	                    if (ps != null) {
-	                        try {
-	                            ps.close();
-	                        } catch (Exception e) {
-	                            // Ignore
-	                        }
-	                    }
 	                }
 	            } catch (Exception e) {
 	                logger.severe("Error processing note: " + e.toString());
