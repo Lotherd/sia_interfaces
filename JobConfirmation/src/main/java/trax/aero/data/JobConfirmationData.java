@@ -815,7 +815,7 @@ public class JobConfirmationData {
 						
 			//logger.info("size "  + MasterInbounds.size());
 			
-			Set<MasterInbound> s= new HashSet<MasterInbound>();
+			/*Set<MasterInbound> s= new HashSet<MasterInbound>();
 		    s.addAll(MasterInbounds);         
 		    MasterInbounds = new ArrayList<MasterInbound>();
 		    MasterInbounds.addAll(s);     
@@ -839,7 +839,7 @@ public class JobConfirmationData {
 		        JobConfirmationController.addError(e.toString());
 		    } finally {
 		        try { if(pstmtUpdate != null) pstmtUpdate.close(); } catch(Exception e) {}
-		    }
+		    }*/
 		    
 			return MasterInbounds;
 		}
@@ -854,9 +854,9 @@ public class JobConfirmationData {
 			"UPDATE \r\n" + 
 			"WO_ACTUALS      \r\n" + 
 			"SET   \r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = sysdate\r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = sysdate, \r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_FLAG = 'D' \r\n" + 
 			"WHERE\r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_DATE IS NULL AND\r\n" + 
 			"WO_ACTUALS.WO_ACTUAL_TRANSACTION = ?";
 			
 			PreparedStatement pstmt2 = null; 
@@ -1010,7 +1010,7 @@ public class JobConfirmationData {
 			"WO_ACTUALS      \r\n" + 
 			"SET   \r\n" + 
 			"WO_ACTUALS.INTERFACE_MODIFIED_DATE = sysdate, \r\n" + 
-			"WO_ACTUALS.INTERFACE_MODIFIED_FLAG = 'D' \r\n" + 
+			"WO_ACTUALS.INTERFACE_MODIFIED_FLAG = 'S' \r\n" + 
 			"WHERE\r\n" +  
 			"WO_ACTUALS.WO_ACTUAL_TRANSACTION = ?";
 			
