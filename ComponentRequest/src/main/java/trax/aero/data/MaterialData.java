@@ -706,7 +706,7 @@ try {
 				&& ( reqs.getSuccessErrorLog().getStatusMessage().toLowerCase().contains("already being processed") 
 				|| reqs.getSuccessErrorLog().getStatusMessage().toLowerCase().contains("is locked by")) ;
 		
-			if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53")  ) )
+			if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53")  )  || condition )
 			{
 				logger.info("IDOCStatus 53");
 				for(Orders o : reqs.getOrders()) {
@@ -727,7 +727,7 @@ try {
 						
 					}
 				}
-			}else if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("51")  ) || condition){
+			}else if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("51")  )){
 				logger.info("IDOCStatus 51");
 				String orders = "";
 				for(Orders o : reqs.getOrders()) {
