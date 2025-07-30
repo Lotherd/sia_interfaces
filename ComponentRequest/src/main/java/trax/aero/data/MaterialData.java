@@ -41,7 +41,7 @@ public class MaterialData implements IMaterialData {
 	
 	Logger logger = LogManager.getLogger("ComponentRequest_I41");
 	
-	@PersistenceContext(unitName = "TraxESD") private EntityManager em;
+	@PersistenceContext(unitName = "TraxStandaloneDS") private EntityManager em;
 	
 	EmailSender emailer = null;
 	String error = "";
