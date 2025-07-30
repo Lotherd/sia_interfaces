@@ -306,576 +306,573 @@ public class EnteredManhoursData {
 		
 		String sqlAudit = "UPDATE INTERFACE_AUDIT SET MESSAGE_WAS_SENT = 'Y' WHERE TRANSACTION = ?";
 		
-		PreparedStatement pstmt1 = null;
-		ResultSet rs1 = null;
-
-		PreparedStatement pstmt2 = null;
-		ResultSet rs2 = null;
 		
-		PreparedStatement pstmt3 = null;
-		ResultSet rs3 = null;
-		
-		PreparedStatement pstmt4 = null;
-		ResultSet rs4 = null;
-		
-		PreparedStatement pstmt5 = null;
-		ResultSet rs5 = null;
-		
-		PreparedStatement pstmt6 = null; 
-		
-		try 
-		{
-			pstmt1 = con.prepareStatement(sqlTaskCard);
-			pstmt2 = con.prepareStatement(sqlItem);
-			pstmt3 = con.prepareStatement(sqlWork);
-			pstmt4 = con.prepareStatement(sqlItemAudit);
-			pstmt5 = con.prepareStatement(sqlTaskAudit);
-			pstmt6 = con.prepareStatement(sqlAudit);
-			
-			
-			if(MaxRecord != null && !MaxRecord.isEmpty()) {
-				pstmt1.setString(1, MaxRecord);
-			}
-			
-			
-			rs1 = pstmt1.executeQuery();
-
-			if (rs1 != null) 
+		try(PreparedStatement pstmt1 = con.prepareStatement(sqlTaskCard);
+				PreparedStatement pstmt2 = con.prepareStatement(sqlItem);
+				PreparedStatement pstmt3 = con.prepareStatement(sqlWork);
+				PreparedStatement pstmt4 = con.prepareStatement(sqlItemAudit);
+				PreparedStatement pstmt5 = con.prepareStatement(sqlTaskAudit);
+				PreparedStatement pstmt6 = con.prepareStatement(sqlAudit);)
 			{
-				while (rs1.next()) // LOOP EACH LINE
-				{
-					logger.info("Processing WO Task Card: " + rs1.getString(5) +" , WO:" + rs1.getString(4));
-					MT_TRAX_SND_I84_4071_REQ req = new MT_TRAX_SND_I84_4071_REQ();
-					orlist = new ArrayList<OrderREQ>();
-					req.setOrder(orlist);
-					OrderREQ Inbound = new OrderREQ();
-					oplist = new ArrayList<OperationsREQ>();
-					Inbound.setOperations(oplist);
-						
-					if(rs1.getString(1) != null && !rs1.getNString(1).isEmpty()) {
-						Inbound.setSAPOrderNumber(rs1.getString(1));
-					}
-					else {
-						Inbound.setSAPOrderNumber("");
-					}
-					
-					if(rs1.getString(2) != null && !rs1.getNString(2).isEmpty()) {
-						Inbound.setDescription(rs1.getString(2));
-					}
-					else {
-						Inbound.setDescription("");
-					}
-					if(rs1.getString(3) != null && !rs1.getNString(3).isEmpty()) {
-						Inbound.setPriority(rs1.getString(3));
-					}
-					else {
-						Inbound.setPriority("");
-					}
-					
-					
-					
-					Inbound.setWO(rs1.getString(4));
-					Inbound.setTaskCard(rs1.getString(5));
-					
-					if(rs1.getString(7) != null && !rs1.getNString(7).isEmpty()) {
-						logger.info("Using RFO: " + rs1.getString(7) + " ,WO Task Card: " + rs1.getString(5) +" , WO:" + rs1.getString(4));
-						
-						Inbound.setSAPOrderNumber(rs1.getString(7));
-					}
-					
-					pstmt2.setString(1, Inbound.getWO());
-					pstmt2.setString(2, Inbound.getTaskCard());
-					pstmt2.setString(3, rs1.getString(8));
-					pstmt2.setString(4, rs1.getString(9));
-					pstmt2.setString(5, rs1.getString(10));
-					
-					rs2 = pstmt2.executeQuery();
-
-					if (rs2 != null) 
-					{
-						while (rs2.next()) // LOOP EACH LINE
-						{
-							logger.info("Processing WO Task Card Item: " + rs2.getString(5));
-							OperationsREQ InboundItem = new OperationsREQ();
-					
-							if(rs2.getString(1) != null && !rs2.getNString(1).isEmpty()) {
-								InboundItem.setOperationNumber(rs2.getString(1));
-							}
-							else {
-								InboundItem.setOperationNumber("");
-							}
-							
-							if(rs2.getString(2) != null && !rs2.getNString(2).isEmpty()) {
-								String text = extractPlainText(rs2.getNString(2));								
-								InboundItem.setOperationDescription(text);
-							}
-							else {
-								InboundItem.setOperationDescription("");
-							}
-							
-							Integer work = 0;
-							
-							if(rs2.getString(4) != null && !rs2.getNString(4).isEmpty()) {
-								work = work + new BigDecimal(rs2.getString(4)).intValue();
-							}
-							if(rs2.getString(6) != null && !rs2.getNString(6).isEmpty()) {
-								work = work + new BigDecimal(rs2.getString(6)).intValue();
-							}							
-							if(rs2.getString(7) != null && !rs2.getNString(7).isEmpty()) {
-								work = work + new BigDecimal(rs2.getString(7)).intValue();
-							}
-							if(!work.equals(0)) {						
-								InboundItem.setWork(work.toString());
-							}else {
-								InboundItem.setWork("");
-							}
-							
-							
-							InboundItem.setDeletionFlag("");
-							
-							
-							
-							
-							if(rs2.getString(5) != null && !rs2.getString(5).isEmpty()) {
-								InboundItem.setTRAXItemNumber(rs2.getString(5));
-							}
-							else {
-								InboundItem.setTRAXItemNumber("");
-							}
-							
-							Integer hours = 0;
-							Integer min = 0;
-							
-							pstmt3.setString(1, Inbound.getTaskCard());
-							pstmt3.setString(2, Inbound.getWO());
-							
-							rs3 = pstmt3.executeQuery();
-
-							if (rs3 != null) 
-							{
-								while (rs3.next()) // LOOP EACH LINE
-								{
-									if(rs3.getString(1) != null && !rs3.getString(1).isEmpty()) {
-										hours = hours + new BigDecimal(rs3.getString(1)).intValue();
-									}
-									if(rs3.getString(2) != null && !rs3.getString(2).isEmpty()) {
-										min = min +  new BigDecimal(rs3.getString(2)).intValue();
-									}								
-								}
-							}
-							if(rs3 != null && !rs3.isClosed())
-								rs3.close();
-							
-							String manHours = "hh.mm";
-							String hour = "00";
-							String minute = "0";
-							
-							if(hours.intValue() != 0 ) {
-								hour= hours.toString();
-							}
-							if(min.intValue() !=0) {
-								minute = min.toString();
-							}
-							manHours=manHours.replaceAll("hh", hour);
-							manHours=manHours.replaceAll("mm", minute);
-							if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
-								InboundItem.setEnteredManHours(manHours);
-							}else {
-								InboundItem.setEnteredManHours("");
-							}
-							
-							
-							boolean match = false;
-							for (OperationsREQ item : Inbound.getOperations()) {
-								if(item.getOperationNumber() != null && !item.getOperationNumber().isEmpty()
-									&& InboundItem.getOperationNumber() != null && !InboundItem.getOperationNumber().isEmpty()
-									&& item.getOperationNumber().equalsIgnoreCase(InboundItem.getOperationNumber())) {
-									
-									//BigDecimal man = new BigDecimal(InboundItem.getEnteredManHours());
-									//BigDecimal newMan = new BigDecimal( item.getEnteredManHours()).add(man);
-									//item.setEnteredManHours(newMan.toString());
-									
-									if(InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty() && (item.getWork() != null &&  !item.getWork().isEmpty())) {
-										BigDecimal newWork = new BigDecimal(item.getWork()).add(new BigDecimal(InboundItem.getWork()));
-										item.setWork(newWork.toString());
-									}else if((InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty()) && (item.getWork() == null ||  item.getWork().isEmpty())){
-										item.setWork(InboundItem.getWork());
-									}
-									
-									match= true;									
-								}							
-							}
-							if(match) {
-								continue;
-							}else {
-								Inbound.getOperations().add(InboundItem);
-							}
-						}
-					}
-					if(rs2 != null && !rs2.isClosed())
-						rs2.close();
-					
-					
-					pstmt4.setString(1, Inbound.getWO());
-					pstmt4.setString(2, Inbound.getTaskCard());
-					
-					rs4 = pstmt4.executeQuery();
-
-					if (rs4 != null) 
-					{
-						while (rs4.next()) // LOOP EACH LINE
-						{
-							logger.info("Processing WO Task Card Item audit delete transaction: " + rs4.getString(2));
-							OperationsREQ InboundItem = new OperationsREQ();
-							OperationsAudit InboundItemAudit = new OperationsAudit();
-							
-							String xml = null;
-							
-							if(rs4.getSQLXML(1) != null) {
-								xml = rs4.getSQLXML(1).getString();
-								xml = xml.replaceAll("\u200B", "").trim();
-								xml = xml.replaceAll("[\\p{Cf}]", "");
-								
-							}
-							if(xml == null) {
-								continue;
-							}else {
-								StringReader sr = new StringReader(xml);				
-								JAXBContext jc = JAXBContext.newInstance(OperationsAudit.class);
-						        Unmarshaller unmarshaller = jc.createUnmarshaller();
-						        InboundItemAudit = (OperationsAudit) unmarshaller.unmarshal(sr);
-						        
-
-							}
-							
-							pstmt6.setString(1, rs4.getString(2));
-							
-							pstmt6.executeQuery();
-							
-							if(InboundItemAudit.getOperationNumber() != null && !InboundItemAudit.getOperationNumber().isEmpty()) {
-								InboundItem.setOperationNumber(InboundItemAudit.getOperationNumber());
-							}
-							else {
-								InboundItem.setOperationNumber("");
-							}
-							
-							if(InboundItemAudit.getOperationDescription() != null && !InboundItemAudit.getOperationDescription().isEmpty()) {
-								
-								String text = extractPlainText(InboundItemAudit.getOperationDescription());	
-								InboundItem.setOperationDescription(text);
-							}
-							else {
-								InboundItem.setOperationDescription("");
-							}
-													
-							if(InboundItemAudit.getWork() != null && !InboundItemAudit.getWork().isEmpty() ) {						
-								InboundItem.setWork(InboundItemAudit.getWork());
-							}else {
-								InboundItem.setWork("");
-							}
-							
-							InboundItem.setDeletionFlag("X");
-							
-							if(InboundItemAudit.getTRAXItemNumber() != null && !InboundItemAudit.getTRAXItemNumber().isEmpty()) {
-								InboundItem.setTRAXItemNumber(InboundItemAudit.getTRAXItemNumber());
-							}
-							else {
-								InboundItem.setTRAXItemNumber("");
-							}
-							
-							Integer hours = 0;
-							Integer min = 0;
-							
-							pstmt3.setString(1, Inbound.getTaskCard());
-							pstmt3.setString(2, Inbound.getWO());
-							
-							rs3 = pstmt3.executeQuery();
-
-							if (rs3 != null) 
-							{
-								while (rs3.next()) // LOOP EACH LINE
-								{
-									if(rs3.getString(1) != null && !rs3.getString(1).isEmpty()) {
-										hours = hours + new BigDecimal(rs3.getString(1)).intValue();
-									}
-									if(rs3.getString(2) != null && !rs3.getString(2).isEmpty()) {
-										min = min +  + new BigDecimal(rs3.getString(2)).intValue();
-									}								
-								}
-							}
-							if(rs3 != null && !rs3.isClosed())
-								rs3.close();
-							
-							String manHours = "hh.mm";
-							String hour = "00";
-							String minute = "0";
-							
-							if(hours.intValue() != 0 ) {
-								hour= hours.toString();
-							}
-							if(min.intValue() !=0) {
-								minute = min.toString();
-							}
-							manHours=manHours.replaceAll("hh", hour);
-							manHours=manHours.replaceAll("mm", minute);
-							
-							if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
-								InboundItem.setEnteredManHours(manHours);
-							}else {
-								InboundItem.setEnteredManHours("");
-							}							
-							Inbound.getOperations().add(InboundItem);
-						}
-					}
-					if(rs4 != null && !rs4.isClosed())
-						rs4.close();
-					
-					Collections.sort(Inbound.getOperations());
-					
-					req.getOrder().add(Inbound);
-					list.add(req);
-						
-					
+			
+				
+				
+				if(MaxRecord != null && !MaxRecord.isEmpty()) {
+					pstmt1.setString(1, MaxRecord);
 				}
-			}
-			
-			rs5 = pstmt5.executeQuery();
-
-			if (rs5 != null) 
-			{
-				while (rs5.next()) // LOOP EACH LINE
-				{
-					String transactionId = rs5.getString(2); 
-					try { 
-					MT_TRAX_SND_I84_4071_REQ req = new MT_TRAX_SND_I84_4071_REQ();
-					orlist = new ArrayList<OrderREQ>();
-					req.setOrder(orlist);
-					OrderREQ Inbound = new OrderREQ();
-					OrderAudit orAudit = new OrderAudit();
-					
-					
-					oplist = new ArrayList<OperationsREQ>();
-					Inbound.setOperations(oplist);
-					
-					
-					
-					String xml = null;
-					
-					if(rs5.getSQLXML(1) != null) {
-						xml = rs5.getSQLXML(1).getString();
-						xml = xml.replaceAll("\u200B", "").trim();
-						xml = xml.replaceAll("[\\p{Cf}]", "");
-						
-					}
-					if(xml == null) {
-						continue;
-					}else {
-						StringReader sr = new StringReader(xml);				
-						JAXBContext jc = JAXBContext.newInstance(OrderAudit.class);
-				        Unmarshaller unmarshaller = jc.createUnmarshaller();
-				        orAudit = (OrderAudit) unmarshaller.unmarshal(sr);
-
-
-					}
-					
-					
-					if(orAudit.getDescription() != null && !orAudit.getDescription().isEmpty()) {
-						Inbound.setDescription(orAudit.getDescription());
-					}
-					else {
-						Inbound.setDescription("");
-					}
-					if(orAudit.getPriority() != null && !orAudit.getPriority().isEmpty()) {
-						Inbound.setPriority(orAudit.getPriority());
-					}
-					else {
-						Inbound.setPriority("");
-					}
-					
-					
-					
-					Inbound.setWO(orAudit.getWO());
-					Inbound.setTaskCard(orAudit.getTaskCard());
-					
-					if(orAudit.getSAPOrderNumber() != null && !orAudit.getSAPOrderNumber().isEmpty()) {
-						
-						Inbound.setSAPOrderNumber(orAudit.getSAPOrderNumber());
-					}else {
-						continue;
-					}
-					logger.info("Processing AUDIT WO Task Card: " + orAudit.getTaskCard() +" , WO:" + orAudit.getWO());
-					
-					
-					pstmt4.setString(1, Inbound.getWO());
-					pstmt4.setString(2, Inbound.getTaskCard());
-					
-					rs4 = pstmt4.executeQuery();
-
-					if (rs4 != null) 
+				
+				try(ResultSet rs1 = pstmt1.executeQuery()){
+				
+					if (rs1 != null) 
 					{
-						while (rs4.next()) // LOOP EACH LINE
+						while (rs1.next()) // LOOP EACH LINE
 						{
-							logger.info("Processing WO Task Card Item audit delete transaction: " + rs4.getString(2));
-							OperationsREQ InboundItem = new OperationsREQ();
-							OperationsAudit InboundItemAudit = new OperationsAudit();
-							
-							xml = null;
-							
-							if(rs4.getSQLXML(1) != null) {
-								xml = rs4.getSQLXML(1).getString();
-								xml = xml.replaceAll("\u200B", "").trim();
-								xml = xml.replaceAll("[\\p{Cf}]", "");
-								
-							}
-							if(xml == null) {
-								continue;
-							}else {
-								StringReader sr = new StringReader(xml);				
-								JAXBContext jc = JAXBContext.newInstance(OperationsAudit.class);
-						        Unmarshaller unmarshaller = jc.createUnmarshaller();
-						        InboundItemAudit = (OperationsAudit) unmarshaller.unmarshal(sr);
-						        
-
-							}
-							
-							pstmt6.setString(1, rs4.getString(2));
-							
-							pstmt6.executeQuery();
-							
-							if(InboundItemAudit.getOperationNumber() != null && !InboundItemAudit.getOperationNumber().isEmpty()) {
-								InboundItem.setOperationNumber(InboundItemAudit.getOperationNumber());
-							}
-							else {
-								InboundItem.setOperationNumber("");
-							}
-							
-							if(InboundItemAudit.getOperationDescription() != null && !InboundItemAudit.getOperationDescription().isEmpty()) {
-								
-								String text = extractPlainText(InboundItemAudit.getOperationDescription());	
-								InboundItem.setOperationDescription(text);
-							}
-							else {
-								InboundItem.setOperationDescription("");
-							}
-													
-							if(InboundItemAudit.getWork() != null && !InboundItemAudit.getWork().isEmpty() ) {						
-								InboundItem.setWork(InboundItemAudit.getWork());
-							}else {
-								InboundItem.setWork("");
-							}
-							
-							InboundItem.setDeletionFlag("X");
-							
-							if(InboundItemAudit.getTRAXItemNumber() != null && !InboundItemAudit.getTRAXItemNumber().isEmpty()) {
-								InboundItem.setTRAXItemNumber(InboundItemAudit.getTRAXItemNumber());
-							}
-							else {
-								InboundItem.setTRAXItemNumber("");
-							}
-							
-							Integer hours = 0;
-							Integer min = 0;
-							
-							pstmt3.setString(1, Inbound.getTaskCard());
-							pstmt3.setString(2, Inbound.getWO());
-							
-							rs3 = pstmt3.executeQuery();
-
-							if (rs3 != null) 
-							{
-								while (rs3.next()) // LOOP EACH LINE
-								{
-									if(rs3.getString(1) != null && !rs3.getString(1).isEmpty()) {
-										hours = hours + new BigDecimal(rs3.getString(1)).intValue();
-									}
-									if(rs3.getString(2) != null && !rs3.getString(2).isEmpty()) {
-										min = min +  + new BigDecimal(rs3.getString(2)).intValue();
-									}								
+							try {
+								logger.info("Processing WO Task Card: " + rs1.getString(5) +" , WO:" + rs1.getString(4));
+								MT_TRAX_SND_I84_4071_REQ req = new MT_TRAX_SND_I84_4071_REQ();
+								orlist = new ArrayList<OrderREQ>();
+								req.setOrder(orlist);
+								OrderREQ Inbound = new OrderREQ();
+								oplist = new ArrayList<OperationsREQ>();
+								Inbound.setOperations(oplist);
+									
+								if(rs1.getString(1) != null && !rs1.getNString(1).isEmpty()) {
+									Inbound.setSAPOrderNumber(rs1.getString(1));
 								}
+								else {
+									Inbound.setSAPOrderNumber("");
+								}
+								
+								if(rs1.getString(2) != null && !rs1.getNString(2).isEmpty()) {
+									Inbound.setDescription(rs1.getString(2));
+								}
+								else {
+									Inbound.setDescription("");
+								}
+								if(rs1.getString(3) != null && !rs1.getNString(3).isEmpty()) {
+									Inbound.setPriority(rs1.getString(3));
+								}
+								else {
+									Inbound.setPriority("");
+								}
+								
+								
+								
+								Inbound.setWO(rs1.getString(4));
+								Inbound.setTaskCard(rs1.getString(5));
+								
+								if(rs1.getString(7) != null && !rs1.getNString(7).isEmpty()) {
+									logger.info("Using RFO: " + rs1.getString(7) + " ,WO Task Card: " + rs1.getString(5) +" , WO:" + rs1.getString(4));
+									
+									Inbound.setSAPOrderNumber(rs1.getString(7));
+								}
+								
+								pstmt2.setString(1, Inbound.getWO());
+								pstmt2.setString(2, Inbound.getTaskCard());
+								pstmt2.setString(3, rs1.getString(8));
+								pstmt2.setString(4, rs1.getString(9));
+								pstmt2.setString(5, rs1.getString(10));
+								try (ResultSet rs2 = pstmt2.executeQuery()){
+								
+									if (rs2 != null) 
+									{
+										while (rs2.next()) // LOOP EACH LINE
+										{
+											try {
+												logger.info("Processing WO Task Card Item: " + rs2.getString(5));
+												OperationsREQ InboundItem = new OperationsREQ();
+										
+												if(rs2.getString(1) != null && !rs2.getNString(1).isEmpty()) {
+													InboundItem.setOperationNumber(rs2.getString(1));
+												}
+												else {
+													InboundItem.setOperationNumber("");
+												}
+												
+												if(rs2.getString(2) != null && !rs2.getNString(2).isEmpty()) {
+													String text = extractPlainText(rs2.getNString(2));
+													
+													
+													InboundItem.setOperationDescription(text);
+												}
+												else {
+													InboundItem.setOperationDescription("");
+												}
+												
+												Integer work = 0;
+												
+												if(rs2.getString(4) != null && !rs2.getNString(4).isEmpty()) {
+													work = work + new BigDecimal(rs2.getString(4)).intValue();
+												}
+												if(rs2.getString(6) != null && !rs2.getNString(6).isEmpty()) {
+													work = work + new BigDecimal(rs2.getString(6)).intValue();
+												}							
+												if(rs2.getString(7) != null && !rs2.getNString(7).isEmpty()) {
+													work = work + new BigDecimal(rs2.getString(7)).intValue();
+												}
+												if(!work.equals(0)) {						
+													InboundItem.setWork(work.toString());
+												}else {
+													InboundItem.setWork("");
+												}
+												
+												
+												InboundItem.setDeletionFlag("");
+												
+												
+												
+												
+												if(rs2.getString(5) != null && !rs2.getString(5).isEmpty()) {
+													InboundItem.setTRAXItemNumber(rs2.getString(5));
+												}
+												else {
+													InboundItem.setTRAXItemNumber("");
+												}
+												
+												Integer hours = 0;
+												Integer min = 0;
+												
+												pstmt3.setString(1, Inbound.getTaskCard());
+												pstmt3.setString(2, Inbound.getWO());
+												
+												
+												try (ResultSet rs3 = pstmt3.executeQuery()){
+													if (rs3 != null) 
+													{
+														while (rs3.next()) // LOOP EACH LINE
+														{
+															try {
+																if(rs3.getString(1) != null && !rs3.getString(1).isEmpty()) {
+																	hours = hours + new BigDecimal(rs3.getString(1)).intValue();
+																}
+																if(rs3.getString(2) != null && !rs3.getString(2).isEmpty()) {
+																	min = min +  new BigDecimal(rs3.getString(2)).intValue();
+																}
+															}catch (Exception e) {
+																EnteredManhoursController.addError(e.getMessage());
+															}
+														}
+													}
+												}catch (Exception e) {
+													EnteredManhoursController.addError(e.getMessage());
+												}
+												
+												
+												String manHours = "hh.mm";
+												String hour = "00";
+												String minute = "0";
+												
+												if(hours.intValue() != 0 ) {
+													hour= hours.toString();
+												}
+												if(min.intValue() !=0) {
+													minute = min.toString();
+												}
+												manHours=manHours.replaceAll("hh", hour);
+												manHours=manHours.replaceAll("mm", minute);
+												if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
+													InboundItem.setEnteredManHours(manHours);
+												}else {
+													InboundItem.setEnteredManHours("");
+												}
+												
+												
+												boolean match = false;
+												for (OperationsREQ item : Inbound.getOperations()) {
+													if(item.getOperationNumber() != null && !item.getOperationNumber().isEmpty()
+														&& InboundItem.getOperationNumber() != null && !InboundItem.getOperationNumber().isEmpty()
+														&& item.getOperationNumber().equalsIgnoreCase(InboundItem.getOperationNumber())) {
+														
+														//BigDecimal man = new BigDecimal(InboundItem.getEnteredManHours());
+														//BigDecimal newMan = new BigDecimal( item.getEnteredManHours()).add(man);
+														//item.setEnteredManHours(newMan.toString());
+														
+														if(InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty() && (item.getWork() != null &&  !item.getWork().isEmpty())) {
+															BigDecimal newWork = new BigDecimal(item.getWork()).add(new BigDecimal(InboundItem.getWork()));
+															item.setWork(newWork.toString());
+														}else if((InboundItem.getWork() != null &&  !InboundItem.getWork().isEmpty()) && (item.getWork() == null ||  item.getWork().isEmpty())){
+															item.setWork(InboundItem.getWork());
+														}
+														
+														match= true;									
+													}							
+												}
+												if(match) {
+													continue;
+												}else {
+													Inbound.getOperations().add(InboundItem);
+												}
+											}catch (Exception e) {
+												EnteredManhoursController.addError(e.getMessage());
+											}
+										}
+									}
+								}catch (Exception e) {
+									EnteredManhoursController.addError(e.getMessage());
+								}
+								
+								
+								pstmt4.setString(1, Inbound.getWO());
+								pstmt4.setString(2, Inbound.getTaskCard());
+								
+								try (ResultSet rs4 = pstmt4.executeQuery()){
+			
+									if (rs4 != null) 
+									{
+										while (rs4.next()) // LOOP EACH LINE
+										{
+											try {
+												logger.info("Processing WO Task Card Item audit delete transaction: " + rs4.getString(2));
+												OperationsREQ InboundItem = new OperationsREQ();
+												OperationsAudit InboundItemAudit = new OperationsAudit();
+												
+												String xml = null;
+												
+												if(rs4.getSQLXML(1) != null) {
+													xml = rs4.getSQLXML(1).getString();
+													xml = xml.replaceAll("\u200B", "").trim();
+													xml = xml.replaceAll("[\\p{Cf}]", "");
+													
+												}
+												if(xml == null) {
+													continue;
+												}else {
+													StringReader sr = new StringReader(xml);				
+													JAXBContext jc = JAXBContext.newInstance(OperationsAudit.class);
+											        Unmarshaller unmarshaller = jc.createUnmarshaller();
+											        InboundItemAudit = (OperationsAudit) unmarshaller.unmarshal(sr);
+											        
+					
+												}
+												
+												pstmt6.setString(1, rs4.getString(2));
+												
+												pstmt6.executeQuery();
+												
+												if(InboundItemAudit.getOperationNumber() != null && !InboundItemAudit.getOperationNumber().isEmpty()) {
+													InboundItem.setOperationNumber(InboundItemAudit.getOperationNumber());
+												}
+												else {
+													InboundItem.setOperationNumber("");
+												}
+												
+												if(InboundItemAudit.getOperationDescription() != null && !InboundItemAudit.getOperationDescription().isEmpty()) {
+													String text = extractPlainText(InboundItemAudit.getOperationDescription());
+													
+													InboundItem.setOperationDescription(text);
+												}
+												else {
+													InboundItem.setOperationDescription("");
+												}
+																		
+												if(InboundItemAudit.getWork() != null && !InboundItemAudit.getWork().isEmpty() ) {						
+													InboundItem.setWork(InboundItemAudit.getWork());
+												}else {
+													InboundItem.setWork("");
+												}
+												
+												InboundItem.setDeletionFlag("X");
+												
+												if(InboundItemAudit.getTRAXItemNumber() != null && !InboundItemAudit.getTRAXItemNumber().isEmpty()) {
+													InboundItem.setTRAXItemNumber(InboundItemAudit.getTRAXItemNumber());
+												}
+												else {
+													InboundItem.setTRAXItemNumber("");
+												}
+												
+												Integer hours = 0;
+												Integer min = 0;
+												
+												pstmt3.setString(1, Inbound.getTaskCard());
+												pstmt3.setString(2, Inbound.getWO());
+												
+												try(ResultSet rs3 = pstmt3.executeQuery()){
+													if (rs3 != null) 
+													{
+														while (rs3.next()) // LOOP EACH LINE
+														{
+															try {
+																if(rs3.getString(1) != null && !rs3.getString(1).isEmpty()) {
+																	hours = hours + new BigDecimal(rs3.getString(1)).intValue();
+																}
+																if(rs3.getString(2) != null && !rs3.getString(2).isEmpty()) {
+																	min = min +  + new BigDecimal(rs3.getString(2)).intValue();
+																}		
+															}catch (Exception e) {
+																EnteredManhoursController.addError(e.getMessage());
+															}
+														}
+													}
+												}catch (Exception e) {
+													EnteredManhoursController.addError(e.getMessage());
+												}
+												
+												
+												String manHours = "hh.mm";
+												String hour = "00";
+												String minute = "0";
+												
+												if(hours.intValue() != 0 ) {
+													hour= hours.toString();
+												}
+												if(min.intValue() !=0) {
+													minute = min.toString();
+												}
+												manHours=manHours.replaceAll("hh", hour);
+												manHours=manHours.replaceAll("mm", minute);
+												
+												if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
+													InboundItem.setEnteredManHours(manHours);
+												}else {
+													InboundItem.setEnteredManHours("");
+												}							
+												Inbound.getOperations().add(InboundItem);
+											}catch (Exception e) {
+												EnteredManhoursController.addError(e.getMessage());
+											}
+										}
+									}
+									Collections.sort(Inbound.getOperations());
+									
+									req.getOrder().add(Inbound);
+									list.add(req);
+								}catch (Exception e) {
+									EnteredManhoursController.addError(e.getMessage());
+								}
+							}catch (Exception e) {
+								EnteredManhoursController.addError(e.getMessage());
 							}
-							if(rs3 != null && !rs3.isClosed())
-								rs3.close();
-							
-							String manHours = "hh.mm";
-							String hour = "00";
-							String minute = "0";
-							
-							if(hours.intValue() != 0 ) {
-								hour= hours.toString();
-							}
-							if(min.intValue() !=0) {
-								minute = min.toString();
-							}
-							manHours=manHours.replaceAll("hh", hour);
-							manHours=manHours.replaceAll("mm", minute);
-							
-							if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
-								InboundItem.setEnteredManHours(manHours);
-							}else {
-								InboundItem.setEnteredManHours("");
-							}							
-							Inbound.getOperations().add(InboundItem);
 						}
 					}
-					if(rs4 != null && !rs4.isClosed())
-						rs4.close();
-					
-					
-					pstmt6.setString(1, rs5.getString(2));
-					
-					pstmt6.executeQuery();
-					Collections.sort(Inbound.getOperations());
-					
-					req.getOrder().add(Inbound);
-					list.add(req);
-					
-				} catch (Exception e) { 
-					logger.severe("Error processing transaction " + transactionId + ": " + e.getMessage());
-					
-					try {
-						pstmt6.setString(1, transactionId);
-						pstmt6.executeQuery();
-					} catch (SQLException sqle) {
-						logger.severe("Error executing pstmt6 for transaction " + transactionId);
-					}
-					continue; 
-				} 
+				}catch (Exception e) {
+					EnteredManhoursController.addError(e.getMessage());
+				}
+				
+				try(ResultSet rs5 = pstmt5.executeQuery()){
+		
+					if (rs5 != null) 
+						{
+							while (rs5.next()) // LOOP EACH LINE
+							{
+								String transactionId = "0";
+								try { 
+									transactionId = rs5.getString(2); 
+									MT_TRAX_SND_I84_4071_REQ req = new MT_TRAX_SND_I84_4071_REQ();
+									orlist = new ArrayList<OrderREQ>();
+									req.setOrder(orlist);
+									OrderREQ Inbound = new OrderREQ();
+									OrderAudit orAudit = new OrderAudit();
+									
+									
+									oplist = new ArrayList<OperationsREQ>();
+									Inbound.setOperations(oplist);
+									
+									
+									
+									String xml = null;
+									
+									if(rs5.getSQLXML(1) != null) {
+										xml = rs5.getSQLXML(1).getString();
+										xml = xml.replaceAll("\u200B", "").trim();
+										xml = xml.replaceAll("[\\p{Cf}]", "");
+										
+									}
+									if(xml == null) {
+										continue;
+									}else {
+										StringReader sr = new StringReader(xml);				
+										JAXBContext jc = JAXBContext.newInstance(OrderAudit.class);
+								        Unmarshaller unmarshaller = jc.createUnmarshaller();
+								        orAudit = (OrderAudit) unmarshaller.unmarshal(sr);
+				
+				
+									}
+									
+									
+									if(orAudit.getDescription() != null && !orAudit.getDescription().isEmpty()) {
+										Inbound.setDescription(orAudit.getDescription());
+									}
+									else {
+										Inbound.setDescription("");
+									}
+									if(orAudit.getPriority() != null && !orAudit.getPriority().isEmpty()) {
+										Inbound.setPriority(orAudit.getPriority());
+									}
+									else {
+										Inbound.setPriority("");
+									}
+									
+									
+									
+									Inbound.setWO(orAudit.getWO());
+									Inbound.setTaskCard(orAudit.getTaskCard());
+									
+									if(orAudit.getSAPOrderNumber() != null && !orAudit.getSAPOrderNumber().isEmpty()) {
+										
+										Inbound.setSAPOrderNumber(orAudit.getSAPOrderNumber());
+									}else {
+										continue;
+									}
+									logger.info("Processing AUDIT WO Task Card: " + orAudit.getTaskCard() +" , WO:" + orAudit.getWO());
+									
+									
+									pstmt4.setString(1, Inbound.getWO());
+									pstmt4.setString(2, Inbound.getTaskCard());
+									
+									
+									try(ResultSet rs4 = pstmt4.executeQuery()){
+										if (rs4 != null) 
+										{
+											while (rs4.next()) // LOOP EACH LINE
+											{
+												try {
+													logger.info("Processing WO Task Card Item audit delete transaction: " + rs4.getString(2));
+													OperationsREQ InboundItem = new OperationsREQ();
+													OperationsAudit InboundItemAudit = new OperationsAudit();
+													
+													xml = null;
+													
+													if(rs4.getSQLXML(1) != null) {
+														xml = rs4.getSQLXML(1).getString();
+														xml = xml.replaceAll("\u200B", "").trim();
+														xml = xml.replaceAll("[\\p{Cf}]", "");
+														
+													}
+													if(xml == null) {
+														continue;
+													}else {
+														StringReader sr = new StringReader(xml);				
+														JAXBContext jc = JAXBContext.newInstance(OperationsAudit.class);
+												        Unmarshaller unmarshaller = jc.createUnmarshaller();
+												        InboundItemAudit = (OperationsAudit) unmarshaller.unmarshal(sr);
+												        
+						
+													}
+													
+													pstmt6.setString(1, rs4.getString(2));
+													
+													pstmt6.executeQuery();
+													
+													if(InboundItemAudit.getOperationNumber() != null && !InboundItemAudit.getOperationNumber().isEmpty()) {
+														InboundItem.setOperationNumber(InboundItemAudit.getOperationNumber());
+													}
+													else {
+														InboundItem.setOperationNumber("");
+													}
+													
+													if(InboundItemAudit.getOperationDescription() != null && !InboundItemAudit.getOperationDescription().isEmpty()) {
+														String text = extractPlainText(InboundItemAudit.getOperationDescription());
+														
+														
+														InboundItem.setOperationDescription(text);
+													}
+													else {
+														InboundItem.setOperationDescription("");
+													}
+																			
+													if(InboundItemAudit.getWork() != null && !InboundItemAudit.getWork().isEmpty() ) {						
+														InboundItem.setWork(InboundItemAudit.getWork());
+													}else {
+														InboundItem.setWork("");
+													}
+													
+													InboundItem.setDeletionFlag("X");
+													
+													if(InboundItemAudit.getTRAXItemNumber() != null && !InboundItemAudit.getTRAXItemNumber().isEmpty()) {
+														InboundItem.setTRAXItemNumber(InboundItemAudit.getTRAXItemNumber());
+													}
+													else {
+														InboundItem.setTRAXItemNumber("");
+													}
+													
+													Integer hours = 0;
+													Integer min = 0;
+													
+													pstmt3.setString(1, Inbound.getTaskCard());
+													pstmt3.setString(2, Inbound.getWO());
+													
+													
+													try(ResultSet rs3 = pstmt3.executeQuery()){
+														if (rs3 != null) 
+														{
+															while (rs3.next()) // LOOP EACH LINE
+															{
+																try {
+																	if(rs3.getString(1) != null && !rs3.getString(1).isEmpty()) {
+																		hours = hours + new BigDecimal(rs3.getString(1)).intValue();
+																	}
+																	if(rs3.getString(2) != null && !rs3.getString(2).isEmpty()) {
+																		min = min +  + new BigDecimal(rs3.getString(2)).intValue();
+																	}
+																}catch (Exception e) {
+																	EnteredManhoursController.addError(e.getMessage());
+																}
+															}
+														}
+													}catch (Exception e) {
+														EnteredManhoursController.addError(e.getMessage());
+													}
+													
+													String manHours = "hh.mm";
+													String hour = "00";
+													String minute = "0";
+													
+													if(hours.intValue() != 0 ) {
+														hour= hours.toString();
+													}
+													if(min.intValue() !=0) {
+														minute = min.toString();
+													}
+													manHours=manHours.replaceAll("hh", hour);
+													manHours=manHours.replaceAll("mm", minute);
+													
+													if(InboundItem.getTRAXItemNumber().equalsIgnoreCase("1")) {
+														InboundItem.setEnteredManHours(manHours);
+													}else {
+														InboundItem.setEnteredManHours("");
+													}							
+													Inbound.getOperations().add(InboundItem);
+												}catch (Exception e) {
+													EnteredManhoursController.addError(e.getMessage());
+												}
+											}
+										}
+									}catch (Exception e) {
+										EnteredManhoursController.addError(e.getMessage());
+									}
+									
+									
+									pstmt6.setString(1, rs5.getString(2));
+									
+									pstmt6.executeQuery();
+									Collections.sort(Inbound.getOperations());
+									
+									req.getOrder().add(Inbound);
+									list.add(req);
+							} catch (Exception e) { 
+								logger.severe("Error processing transaction " + transactionId + ": " + e.getMessage());
+								try {
+									pstmt6.setString(1, transactionId);
+									pstmt6.executeQuery();
+								} catch (SQLException sqle) {
+									logger.severe("Error executing pstmt6 for transaction " + transactionId);
+								}
+								continue; 
+							} 
+						}
+					}		
+				}catch (Exception e) {
+					EnteredManhoursController.addError(e.toString());
+				}
+			}catch (Exception e){
+				e.printStackTrace();
+				exceuted = e.toString();
+				EnteredManhoursController.addError(e.toString());
+	            logger.severe(exceuted);
+	            throw new Exception("Issue found");
 			}
-		}		
-			
-			
-			
+			return list;
 		}
-		catch (Exception e) 
-        {
-			e.printStackTrace();
-			exceuted = e.toString();
-			EnteredManhoursController.addError(e.toString());
-            
-            
-            logger.severe(exceuted);
-            
-            throw new Exception("Issue found");
-		}finally {
-			if(rs1 != null && !rs1.isClosed())
-				rs1.close();
-			if(pstmt1 != null && !pstmt1.isClosed())
-				pstmt1.close();
-			if(pstmt2 != null && !pstmt2.isClosed())
-				pstmt2.close();
-			if(pstmt3 != null && !pstmt3.isClosed())
-				pstmt3.close();
-			if(pstmt4 != null && !pstmt4.isClosed())
-				pstmt4.close();
-			if(pstmt5 != null && !pstmt5.isClosed())
-				pstmt5.close();
-			if(rs5 != null && !rs5.isClosed())
-				rs5.close();
-			if(pstmt6 != null && !pstmt6.isClosed())
-				pstmt6.close();
-		}
-		return list;
-	}
 	
 	
 	
