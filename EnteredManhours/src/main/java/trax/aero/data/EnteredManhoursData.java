@@ -406,12 +406,7 @@ public class EnteredManhoursData {
 							}
 							
 							if(rs2.getString(2) != null && !rs2.getNString(2).isEmpty()) {
-								RTFEditorKit rtfParser = new RTFEditorKit();
-								Document document = rtfParser.createDefaultDocument();
-								rtfParser.read(new ByteArrayInputStream(rs2.getNString(2).getBytes()), document, 0);
-								String text = document.getText(0, document.getLength());
-								
-								
+								String text = extractPlainText(rs2.getNString(2));								
 								InboundItem.setOperationDescription(text);
 							}
 							else {
@@ -1324,6 +1319,37 @@ public class EnteredManhoursData {
 		em.merge(lock);
 		em.getTransaction().commit();
 	}
+	
+	public String extractPlainText(String rtfInput) {
+        try {
+            // Optional: Simplify or sanitize the RTF if needed
+            String sanitized = sanitizeRTF(rtfInput);
+
+            RTFEditorKit rtfKit = new RTFEditorKit();
+            Document doc = rtfKit.createDefaultDocument();
+
+            // Read the sanitized RTF
+            rtfKit.read(new ByteArrayInputStream(sanitized.getBytes("UTF-8")), doc, 0);
+
+            return doc.getText(0, doc.getLength());
+
+        } catch (Exception e) {
+        	logger.severe("Error parsing RTF: " + e.getMessage());
+            return "";
+        }
+    }
+
+    // Basic cleaner to avoid nested RTF issues
+    private static String sanitizeRTF(String rtf) {
+        // Remove inner nested {\rtf... blocks if any
+        int firstIndex = rtf.indexOf("{\\rtf");
+        int lastIndex = rtf.lastIndexOf('}');
+        if (firstIndex != -1 && lastIndex != -1) {
+            return rtf.substring(firstIndex, lastIndex + 1);
+        }
+        return rtf;
+    }
+
 
 
 }
