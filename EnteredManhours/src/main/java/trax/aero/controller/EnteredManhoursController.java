@@ -22,10 +22,8 @@ import trax.aero.pojo.OrderRES;
 
 
 public class EnteredManhoursController {
-	EntityManagerFactory factory;
-	private EntityManager em;
-	static String errors = "";
 	
+	static String errors = "";
 	static Logger logger = LogManager.getLogger("EnteredManhours_I84");
 	
 	static String fromEmail = System.getProperty("fromEmail");
@@ -35,11 +33,11 @@ public class EnteredManhoursController {
 	
 	public EnteredManhoursController()
 	{
-		factory = Persistence.createEntityManagerFactory("TraxStandaloneDS");
-		em = factory.createEntityManager();
+		
 	}
 	
 	public static void addError(String error) {
+		logger.severe(error);
 		errors=errors.concat(error + System.lineSeparator()+ System.lineSeparator());
 	}
 	
