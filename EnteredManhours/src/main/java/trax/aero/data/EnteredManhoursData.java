@@ -560,12 +560,8 @@ public class EnteredManhoursData {
 							}
 							
 							if(InboundItemAudit.getOperationDescription() != null && !InboundItemAudit.getOperationDescription().isEmpty()) {
-								RTFEditorKit rtfParser = new RTFEditorKit();
-								Document document = rtfParser.createDefaultDocument();
-								rtfParser.read(new ByteArrayInputStream(InboundItemAudit.getOperationDescription().getBytes()), document, 0);
-								String text = document.getText(0, document.getLength());
 								
-								
+								String text = extractPlainText(InboundItemAudit.getOperationDescription());	
 								InboundItem.setOperationDescription(text);
 							}
 							else {
@@ -754,12 +750,8 @@ public class EnteredManhoursData {
 							}
 							
 							if(InboundItemAudit.getOperationDescription() != null && !InboundItemAudit.getOperationDescription().isEmpty()) {
-								RTFEditorKit rtfParser = new RTFEditorKit();
-								Document document = rtfParser.createDefaultDocument();
-								rtfParser.read(new ByteArrayInputStream(InboundItemAudit.getOperationDescription().getBytes()), document, 0);
-								String text = document.getText(0, document.getLength());
 								
-								
+								String text = extractPlainText(InboundItemAudit.getOperationDescription());	
 								InboundItem.setOperationDescription(text);
 							}
 							else {
