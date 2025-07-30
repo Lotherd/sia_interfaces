@@ -464,7 +464,7 @@ public class EnteredManhoursData {
 										hours = hours + new BigDecimal(rs3.getString(1)).intValue();
 									}
 									if(rs3.getString(2) != null && !rs3.getString(2).isEmpty()) {
-										min = min +  + new BigDecimal(rs3.getString(2)).intValue();
+										min = min +  new BigDecimal(rs3.getString(2)).intValue();
 									}								
 								}
 							}
