@@ -41,7 +41,7 @@ public class MaterialData implements IMaterialData {
 	
 	Logger logger = LogManager.getLogger("ComponentRequest_I41");
 	
-	@PersistenceContext(unitName = "TraxStandaloneDS") private EntityManager em;
+	@PersistenceContext(unitName = "TraxESD") private EntityManager em;
 	
 	EmailSender emailer = null;
 	String error = "";
@@ -522,32 +522,18 @@ public class MaterialData implements IMaterialData {
 			
 			for(Order o : data.getOrder()) {
 				for(Component c: o.getComponent()) {
+	
 					
+					int updateRecords = em.createNativeQuery("UPDATE PICKLIST_DISTRIBUTION SET INTERFACE_SYNC_FLAG = 'S', INTERFACE_SYNC_DATE = SYSDATE " +
+                            "WHERE PICKLIST = ? AND PICKLIST_LINE = ? ")
+							
+							.setParameter(1, Long.valueOf(c.getRequistionNumber()))
+							.setParameter(2, Long.valueOf(c.getRequistionLine()))
+							.executeUpdate();
 					
-					PicklistDistribution require = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-							.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-							.setParameter("line", Long.valueOf(c.getRequistionLine()))
-							.setParameter("tra", "REQUIRE")
-							.getSingleResult();
-					require.setInterfaceSyncFlag("S");
-					require.setInterfaceSyncDate(new Date());
-					insertData(require);
-					
-					try {
-						PicklistDistribution req = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-								.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-								.setParameter("line", Long.valueOf(c.getRequistionLine()))
-								.setParameter("tra", "DISTRIBU")
-								.getSingleResult();
-						
-						req.setInterfaceSyncFlag("S");
-						require.setInterfaceSyncDate(new Date());
-						insertData(req);
-						
-					}catch(Exception e) {
-						logger.info(e.getMessage());
-					}	
-				}
+					logger.info("Marked send  " + updateRecords + " rows for picklist: " + c.getRequistionNumber() + 
+	                           ", line: " + c.getRequistionLine());
+				}		
 			}	
 			
 		}catch(Exception e) {
@@ -563,36 +549,24 @@ try {
 				for(Component c: o.getComponent()) {
 					
 					
-					PicklistDistribution require = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-							.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-							.setParameter("line", Long.valueOf(c.getRequistionLine()))
-							.setParameter("tra", "REQUIRE")
-							.getSingleResult();
-					require.setInterfaceSyncDate(new Date());
-					require.setInterfaceSyncFlag("Y");
-					insertData(require);
+					int updateRecords = em.createNativeQuery("UPDATE PICKLIST_DISTRIBUTION SET INTERFACE_SYNC_FLAG = 'Y', INTERFACE_SYNC_DATE = SYSDATE " +
+                            "WHERE PICKLIST = ? AND PICKLIST_LINE = ? ")
+							
+							.setParameter(1, Long.valueOf(c.getRequistionNumber()))
+							.setParameter(2, Long.valueOf(c.getRequistionLine()))
+							.executeUpdate();
 					
-					try {
-						PicklistDistribution req = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-								.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-								.setParameter("line", Long.valueOf(c.getRequistionLine()))
-								.setParameter("tra", "DISTRIBU")
-								.getSingleResult();
-						
-						require.setInterfaceSyncDate(new Date());
-						require.setInterfaceSyncFlag("Y");
-						insertData(req);
-						
-					}catch(Exception e) {
-						logger.info(e.getMessage());
-					}	
-				}
+					logger.info("Marked send fail " + updateRecords + " rows for picklist: " + c.getRequistionNumber() + 
+	                           ", line: " + c.getRequistionLine());
+					
+				}		
 			}	
 			
 		}catch(Exception e) {
 			logger.info(e.getMessage());
-		}				
+		}		
 	}
+	
 	
 	
 	private String getRecepient(String site) {
@@ -732,71 +706,44 @@ try {
 				&& ( reqs.getSuccessErrorLog().getStatusMessage().toLowerCase().contains("already being processed") 
 				|| reqs.getSuccessErrorLog().getStatusMessage().toLowerCase().contains("is locked by")) ;
 		
-			if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53") || (condition) ) )
+			if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53")  ) )
 			{
 				logger.info("IDOCStatus 53");
 				for(Orders o : reqs.getOrders()) {
 					for(trax.aero.outbound.Component c: o.getComponent()) {
 						
 						
-						PicklistDistribution require = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-								.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-								.setParameter("line", Long.valueOf(c.getRequistioLine()))
-								.setParameter("tra", "REQUIRE")
-								.getSingleResult();
-						//require.setInterfaceSyncFlag(null);
-						require.setInterfaceSyncDate(null);
-						require.setExternalCustRes(c.getReservationNumber());
-						require.setExternalCustResItem(c.getReservationItem());
-						insertData(require);
+						int updateRecords = em.createNativeQuery("UPDATE PICKLIST_DISTRIBUTION SET EXTERNAL_CUST_RES = ?, EXTERNAL_CUST_RES_ITEM= ?, INTERFACE_SYNC_FLAG = 'S', INTERFACE_SYNC_DATE = null " +
+	                            "WHERE PICKLIST = ? AND PICKLIST_LINE = ? ")
+								
+								.setParameter(1, c.getReservationNumber())
+								.setParameter(2, c.getReservationItem())
+								.setParameter(3, Long.valueOf(c.getRequistionNumber()))
+								.setParameter(4, Long.valueOf(c.getRequistioLine()))
+								.executeUpdate();
 						
-						try {
-							PicklistDistribution req = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-									.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-									.setParameter("line", Long.valueOf(c.getRequistioLine()))
-									.setParameter("tra", "DISTRIBU")
-									.getSingleResult();
-							req.setExternalCustRes(c.getReservationNumber());
-							req.setExternalCustResItem(c.getReservationItem());
-							
-							insertData(require);
+						logger.info("Marked send success " + updateRecords + " rows for picklist: " + c.getRequistionNumber() + 
+		                           ", line: " + c.getRequistioLine());
 						
-						}catch(Exception e) {
-							logger.severe(e.toString());
-						}
 					}
 				}
-			}else if(reqs.getSuccessErrorLog() != null){
+			}else if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53")  ) || condition){
 				logger.info("IDOCStatus 51");
 				String orders = "";
 				for(Orders o : reqs.getOrders()) {
 					for(trax.aero.outbound.Component c : o.getComponent()) {
 						
-						PicklistDistribution require = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-								.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-								.setParameter("line", Long.valueOf(c.getRequistioLine()))
-								.setParameter("tra", "REQUIRE")
-								.getSingleResult();
+						int updateRecords = em.createNativeQuery("UPDATE PICKLIST_DISTRIBUTION SET EXTERNAL_CUST_RES = ?, EXTERNAL_CUST_RES_ITEM= ?, INTERFACE_SYNC_FLAG = 'Y', INTERFACE_SYNC_DATE = null " +
+	                            "WHERE PICKLIST = ? AND PICKLIST_LINE = ? ")
+								
+								.setParameter(1, c.getReservationNumber())
+								.setParameter(2, c.getReservationItem())
+								.setParameter(3, Long.valueOf(c.getRequistionNumber()))
+								.setParameter(4, Long.valueOf(c.getRequistioLine()))
+								.executeUpdate();
 						
-						require.setInterfaceSyncDate(null);
-						require.setInterfaceSyncFlag("Y");
-						require.setExternalCustRes(c.getReservationNumber());
-						require.setExternalCustResItem(c.getReservationItem());
-						insertData(require);
-						orders = orders + "( RequistionNumber: "+ c.getRequistionNumber() + " Requistionline: "+ c.getRequistioLine() + "),";
-						
-						try {
-							PicklistDistribution req = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-									.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-									.setParameter("line", Long.valueOf(c.getRequistioLine()))
-									.setParameter("tra", "DISTRIBU")
-									.getSingleResult();
-							req.setExternalCustRes(c.getReservationNumber());
-							req.setExternalCustResItem(c.getReservationItem());
-							insertData(require);
-						}catch(Exception e) {
-							logger.severe(e.toString());
-						}
+						logger.info("Marked failure  " + updateRecords + " rows for picklist: " + c.getRequistionNumber() + 
+		                           ", line: " + c.getRequistioLine());
 					}
 				}	
 				emailer.sendEmail("Received acknowledgement with IDOC Status: " + reqs.getSuccessErrorLog().getIDOCStatus() +", IDOC Number: "+reqs.getSuccessErrorLog().getIDOCNumber()+", Status Error Code: "+reqs.getSuccessErrorLog().getStatusErrorCode() + ", Status Message: " + reqs.getSuccessErrorLog().getStatusMessage() +"\n"+ orders) ;
@@ -806,34 +753,23 @@ try {
 				for(Orders o : reqs.getOrders()) {
 					for(trax.aero.outbound.Component c : o.getComponent()) {
 						
-						PicklistDistribution require = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-								.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-								.setParameter("line", Long.valueOf(c.getRequistioLine()))
-								.setParameter("tra", "REQUIRE")
-								.getSingleResult();
+						int updateRecords = em.createNativeQuery("UPDATE PICKLIST_DISTRIBUTION SET EXTERNAL_CUST_RES = ?, EXTERNAL_CUST_RES_ITEM= ?, INTERFACE_SYNC_FLAG = 'Y', INTERFACE_SYNC_DATE = null " +
+	                            "WHERE PICKLIST = ? AND PICKLIST_LINE = ? ")
+								
+								.setParameter(1, c.getReservationNumber())
+								.setParameter(2, c.getReservationItem())
+								.setParameter(3, Long.valueOf(c.getRequistionNumber()))
+								.setParameter(4, Long.valueOf(c.getRequistioLine()))
+								.executeUpdate();
 						
-						require.setInterfaceSyncFlag("Y");
-						require.setInterfaceSyncDate(null);
-						require.setExternalCustRes(c.getReservationNumber());
-						require.setExternalCustResItem(c.getReservationItem());
+						logger.info("Marked failure  " + updateRecords + " rows for picklist: " + c.getRequistionNumber() + 
+		                           ", line: " + c.getRequistioLine());
 						
-						insertData(require);
+
 						
 						orders = orders + "( RequistionNumber: "+ c.getRequistionNumber() + " Requistionline: "+ c.getRequistioLine() + "),";
 						
-						
-						try {
-							PicklistDistribution req = (PicklistDistribution) em.createQuery("SELECT p FROM PicklistDistribution p where p.id.picklist =:pick AND p.id.picklistLine =:line AND p.id.transaction =:tra")
-									.setParameter("pick", Long.valueOf(c.getRequistionNumber()))
-									.setParameter("line", Long.valueOf(c.getRequistioLine()))
-									.setParameter("tra", "DISTRIBU")
-									.getSingleResult();
-							req.setExternalCustRes(c.getReservationNumber());
-							req.setExternalCustResItem(c.getReservationItem());
-							insertData(require);
-						}catch(Exception e) {
-							logger.severe(e.toString());
-						}
+
 					}
 				}
 				emailer.sendEmail("Received acknowledgement with NULL Success Error Log\n" +orders ) ;
