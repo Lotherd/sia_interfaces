@@ -727,7 +727,7 @@ try {
 						
 					}
 				}
-			}else if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("53")  ) || condition){
+			}else if(reqs.getSuccessErrorLog() != null && (reqs.getSuccessErrorLog().getIDOCStatus().equalsIgnoreCase("51")  ) || condition){
 				logger.info("IDOCStatus 51");
 				String orders = "";
 				for(Orders o : reqs.getOrders()) {
