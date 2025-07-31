@@ -137,20 +137,31 @@ public class UpdateTaskcardStatusData {
 		//setting up variables
 		exceuted = "OK";
 		
-		String sqlDate =
-		"UPDATE WO_TASK_CARD SET WO_TASK_CARD.INTERFACE_MODIFIED_DATE = NULL WHERE WO_TASK_CARD.INTERFACE_MODIFIED_DATE IS NOT NULL AND WO_TASK_CARD.REFERENCE_TASK_CARD = ?";
+		String SQLcode53 =
+		"UPDATE WO_TASK_CARD SET WO_TASK_CARD.INTERFACE_MODIFIED_DATE = NULL, WO_TASK_CARD.INTERFACE_STEP = 'D' WHERE WO_TASK_CARD.INTERFACE_MODIFIED_DATE IS NOT NULL AND WO_TASK_CARD.REFERENCE_TASK_CARD = ?";
 		
-		PreparedStatement pstmt2 = null; 
+		String SQLcode51 =
+				"UPDATE WO_TASK_CARD SET WO_TASK_CARD.INTERFACE_MODIFIED_DATE = NULL, WO_TASK_CARD.INTERFACE_STEP = 'F' WHERE WO_TASK_CARD.INTERFACE_MODIFIED_DATE IS NOT NULL AND WO_TASK_CARD.REFERENCE_TASK_CARD = ?";
+				
+		
+		
+		PreparedStatement pstmt1 = null;  
 
 		try 
 		{
+			String errorCode = request.getErrorCode();
 			
-				pstmt2 = con.prepareStatement(sqlDate);
-				
-				pstmt2.setString(1, request.getOrderNumber());
-				
-				pstmt2.executeQuery();
-				
+			if (errorCode != null && errorCode.equalsIgnoreCase("53")) {
+				pstmt1 = con.prepareStatement(SQLcode53);
+
+			}else {
+				pstmt1 = con.prepareStatement(SQLcode51);
+
+			}
+			
+			
+			pstmt1.setString(1, request.getOrderNumber());
+			pstmt1.executeUpdate();
 				
 			
 		}
@@ -163,8 +174,9 @@ public class UpdateTaskcardStatusData {
             logger.severe(exceuted);
             
 		}finally {
-			if(pstmt2 != null && !pstmt2.isClosed())
-				pstmt2.close();
+			if(pstmt1 != null && !pstmt1.isClosed())
+				pstmt1.close();
+
 		}
 		
 		return exceuted;
@@ -189,7 +201,7 @@ public class UpdateTaskcardStatusData {
 		String sql =
 		"SELECT WTC.REFERENCE_TASK_CARD as Order_number,WTC.COMPLETED_ON as CompletedDate,PKG_INTERFACE.GETXMLNUMBERSTRING(wtc.completed_on_hour) as completedHour,"
 		+ "PKG_INTERFACE.GETXMLNUMBERSTRING(wtc.completed_on_minute) as completedMinute, WTC.STATUS as TRAXStatus,WTC.STATUS_CATEGORY  TRAXStatusCategory,WTC.REMARKS ReasonForTECO_reversal,"
-		+ "WTC.TASK_CARD TaskCard,WTC.WO,WTC.modified_by,WTC.modified_date FROM WO_TASK_CARD WTC WHERE WTC.INTERFACE_MODIFIED_DATE IS NOT NULL AND WTC.INTERFACE_TRANSFERRED_DATE IS NOT NULL AND WTC.REFERENCE_TASK_CARD IS NOT NULL  AND WTC.STATUS IN ('OPEN','CLOSED' , 'CANCEL') AND (WTC.non_routine = 'N' OR WTC.non_routine = 'Y' OR WTC.non_routine IS NULL)";
+		+ "WTC.TASK_CARD TaskCard,WTC.WO,WTC.modified_by,WTC.modified_date FROM WO_TASK_CARD WTC WHERE WTC.INTERFACE_MODIFIED_DATE IS NOT NULL AND WTC.INTERFACE_TRANSFERRED_DATE IS NOT NULL AND WTC.INTERFACE_STEP IS NULL AND WTC.REFERENCE_TASK_CARD IS NOT NULL  AND WTC.STATUS IN ('OPEN','CLOSED' , 'CANCEL') AND (WTC.non_routine = 'N' OR WTC.non_routine = 'Y' OR WTC.non_routine IS NULL)";
 		
 		if(MaxRecord != null && !MaxRecord.isEmpty()) {
 			sql=  "SELECT *	FROM ( " + sql;
