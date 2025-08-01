@@ -24,7 +24,7 @@ public class UpdateTaskcardStatusController {
 	
 	public UpdateTaskcardStatusController()
 	{
-		factory = Persistence.createEntityManagerFactory("TraxStandaloneDS");
+		factory = Persistence.createEntityManagerFactory("TraxESD");
 		em = factory.createEntityManager();
 	}
 	
